@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Site navigation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<header style="width: 100%; box-sizing: border-box; background: {{t.bg}}; color: {{t.ink}}; font-family: {{t.sans}}; border-bottom: 1px solid {{t.rule}}">
+<nav aria-label="Main" style="max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap">
+<a href="Main.dc.html" style="display: flex; align-items: baseline; gap: 10px; color: {{t.ink}}; text-decoration: none; min-height: 44px; align-items: center">
+<span style="font-family: {{t.serif}}; font-size: 24px; letter-spacing: -0.01em">Aswin</span>
+<span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">platform pm · builds for agents</span>
+</a>
+<div style="display: flex; align-items: center; gap: 4px 18px; flex-wrap: wrap">
+<sc-for list="{{links}}" as="l" hint-placeholder-count="3">
+<a href="{{l.href}}" aria-current="{{l.current}}" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; color: {{l.color}}; text-decoration: none; border-bottom: {{l.underline}}">{{l.label}}</a>
+</sc-for>
+<button type="button" onClick="{{toggle}}" aria-pressed="{{xray}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border-radius: 999px; border: 1px solid {{t.rule}}; background: {{t.paper}}; color: {{t.ink}}; font-family: {{t.mono}}; font-size: 13px; cursor: pointer">
+<span style="display: inline-block; width: 30px; height: 18px; border-radius: 999px; background: {{trackBg}}; position: relative"><span style="position: absolute; top: 2px; left: {{knobLeft}}; width: 14px; height: 14px; border-radius: 999px; background: {{knobBg}}"></span></span>
+X-ray
+<sc-if value="{{showNew}}" hint-placeholder-val="{{ false }}"><span style="padding: 1px 6px; border-radius: 999px; background: {{t.accent}}; color: {{t.paper}}; font-size: 10px; letter-spacing: 0.06em">NEW</span></sc-if>
+</button>
+<button type="button" onClick="{{ask}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 14px; border-radius: 10px; border: 0; background: {{t.btnBg}}; color: {{t.btnInk}}; font-family: {{t.sans}}; font-size: 14px; font-weight: 600; cursor: pointer">Ask my work <span style="font-family: {{t.mono}}; font-size: 12px; font-weight: 400; opacity: 0.75">⌘K</span></button>
+</div>
+</nav>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"current":{"editor":"enum","options":["home","work","log","about"],"default":"home"},"xray":{"editor":"boolean","default":false},"isNew":{"editor":"boolean","default":false},"onToggleXray":{"editor":null},"onAsk":{"editor":null},"$preview":{"width":1280,"height":96}}'>
+var NAV_FONTS = { serif: "'Newsreader', Georgia, serif", sans: "'IBM Plex Sans', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, Menlo, monospace" };
+function navTokens(x) {
+  var c = x
+    ? { bg: '#101214', paper: '#171A1D', ink: '#E9E6DF', muted: '#A3A9B0', rule: '#2B3036', accent: '#8DBBF2', btnBg: '#E9E6DF', btnInk: '#101214' }
+    : { bg: '#F6F3EC', paper: '#FFFDF8', ink: '#1B1A17', muted: '#5C574E', rule: '#E2DCD0', accent: '#1F4C86', btnBg: '#1B1A17', btnInk: '#FFFDF8' };
+  c.serif = NAV_FONTS.serif; c.sans = NAV_FONTS.sans; c.mono = NAV_FONTS.mono;
+  return c;
+}
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { localX: false }; }
+  renderVals() {
+    var controlled = typeof this.props.onToggleXray === 'function';
+    var x = controlled ? !!this.props.xray : (this.state.localX || !!this.props.xray);
+    var t = navTokens(x);
+    var cur = this.props.current || 'home';
+    var items = [
+      { id: 'work', label: 'Work', href: 'Work.dc.html' },
+      { id: 'log', label: 'Build log', href: 'BuildLog.dc.html' },
+      { id: 'about', label: 'About', href: 'About.dc.html' }
+    ];
+    return {
+      t: t, xray: x,
+      showNew: !!this.props.isNew && !x,
+      links: items.map((l) => ({
+        label: l.label, href: l.href,
+        current: l.id === cur ? 'page' : undefined,
+        color: l.id === cur ? t.ink : t.muted,
+        underline: l.id === cur ? '2px solid ' + t.ink : '2px solid transparent'
+      })),
+      trackBg: x ? t.accent : t.rule,
+      knobBg: x ? t.bg : t.paper,
+      knobLeft: x ? '14px' : '2px',
+      toggle: () => { if (controlled) this.props.onToggleXray(); else this.setState({ localX: !this.state.localX }); },
+      ask: () => { if (this.props.onAsk) this.props.onAsk(); }
+    };
+  }
+}
+</script>
+</body>
+</html>

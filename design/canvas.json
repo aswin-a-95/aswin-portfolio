@@ -1,0 +1,18 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "About.dc.html": { "expand": "fill", "h": 2900, "is_interactive": true, "title": "About — career as a dependency graph", "w": 1440, "x": 4560, "y": 0 },
+    "Ask.dc.html": { "h": 760, "is_interactive": true, "title": "Component · Ask my work (⌘K)", "w": 1280, "x": 5600, "y": 8236 },
+    "BuildLog.dc.html": { "expand": "fill", "h": 1800, "is_interactive": true, "title": "Build log", "w": 1440, "x": 3040, "y": 0 },
+    "Hero.dc.html": { "h": 1000, "is_interactive": true, "title": "Component · Fit-check hero", "w": 1280, "x": 4240, "y": 8020 },
+    "HeroStates.dc.html": { "h": 5900, "title": "Fit-check hero — all seven states", "w": 4160, "x": 0, "y": 8020 },
+    "Main.dc.html": { "expand": "fill", "h": 5600, "is_interactive": true, "title": "Home — fit-check hero, proof, contact", "w": 1440, "x": 0, "y": 0 },
+    "Mobile.dc.html": { "h": 3900, "is_interactive": true, "title": "Mobile — recruiter from LinkedIn", "w": 390, "x": 6080, "y": 0 },
+    "MobileAsk.dc.html": { "h": 844, "is_interactive": true, "title": "Mobile — Ask my work bottom sheet", "w": 390, "x": 6550, "y": 0 },
+    "Nav.dc.html": { "h": 96, "is_interactive": true, "title": "Component · Nav with X-ray toggle", "w": 1280, "x": 5600, "y": 8020 },
+    "Work.dc.html": { "expand": "fill", "h": 7600, "is_interactive": true, "title": "Case study — CloudEagle.ai concept (PRD template)", "w": 1440, "x": 1520, "y": 0 }
+  },
+  "order": ["Main.dc.html", "Work.dc.html", "BuildLog.dc.html", "About.dc.html", "Mobile.dc.html", "MobileAsk.dc.html", "HeroStates.dc.html", "Hero.dc.html", "Nav.dc.html", "Ask.dc.html"],
+  "title": "Aswin — Portfolio Website Design & Prototype"
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fit-check hero — all states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 4160px; min-height: 5900px; box-sizing: border-box; padding: 80px; background: #EDE9E0; color: #1B1A17; font-family: 'IBM Plex Sans', system-ui, sans-serif; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 96px 80px; align-items: start">
+<sc-for list="{{states}}" as="s" hint-placeholder-count="7">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 16px; color: #5C574E">{{s.num}} · STATE</p>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 44px">{{s.name}}</h2>
+<p style="margin: 0; max-width: 900px; font-size: 20px; line-height: 1.45; color: #5C574E">{{s.note}}</p>
+</div>
+<div style="width: 1280px; border: 1px solid #D6D0C3; border-radius: 16px; overflow: hidden; background: #F6F3EC">
+<dc-import name="Hero" initial="{{s.id}}" still="{{ true }}" hint-size="1280px,900px"></dc-import>
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":4160,"height":5900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      states: [
+        { id: 'empty', num: '01', name: 'Empty', note: 'A prompt, not a page. The input is usable within five seconds; sample roles cover visitors without a JD, including a bad fit on purpose.' },
+        { id: 'running', num: '02', name: 'Running', note: 'Each step streams from the real run with its tool name. Pasted text skips fetch_url; a pasted link calls it. X-ray swaps in the full call.' },
+        { id: 'result', num: '03', name: 'Result', note: 'Led by evidence, not a score. Gap cards say how the gap would close and hand it to Ask my work. The eval and cost line shows without X-ray.' },
+        { id: 'badfit', num: '04', name: 'Bad fit', note: 'The honesty guardrail in one click. "Not something Aswin has done" is stated plainly, and contact stays available.' },
+        { id: 'break', num: '05', name: 'Break my AI', note: 'Red-team mode, beside the fit check. Each attack type gets a plain reply and a label; X-ray names the guardrail that fired. The cases ship with the public eval set.' },
+        { id: 'error', num: '06', name: 'Error', note: 'A calm message, a retry and precomputed matches from the same knowledge base, so the hero still works with no AI.' },
+        { id: 'limited', num: '07', name: 'Rate-limited', note: 'Daily cap reached: explains why in one line and falls back to the same precomputed matches plus a direct message.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

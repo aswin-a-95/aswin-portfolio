@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>About Aswin</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+a:hover{opacity:0.82}
+a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: {{t.bg}}; color: {{t.ink}}; font-family: {{t.sans}}">
+<dc-import name="Nav" current="about" xray="{{xray}}" on-toggle-xray="{{toggleXray}}" on-ask="{{openAsk}}" hint-size="100%,73px"></dc-import>
+
+<main style="max-width: 1040px; margin: 0 auto; padding: 72px 24px 96px; display: flex; flex-direction: column; gap: 72px">
+
+<header style="display: flex; flex-wrap: wrap; gap: 32px 56px; align-items: flex-start">
+<div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.08em; color: {{t.muted}}">ABOUT</p>
+<h1 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: clamp(44px, 6vw, 68px); line-height: 1.04; letter-spacing: -0.02em">From platform plumbing to agents.</h1>
+<div style="display: flex; flex-direction: column; gap: 16px; font-family: {{t.serif}}; font-size: 21px; line-height: 1.55">
+<p style="margin: 0">I've spent <span style="font-family: {{t.mono}}; font-size: 16px; color: {{t.muted}}">[N]</span> years as a product manager on platforms, APIs and integrations, including in healthcare. Platforms taught me that the hard part of software is the seams between systems.</p>
+<p style="margin: 0">Now I build AI agents: a job-search agent, an Instagram competitor agent for Dhee's, the fresh dog-food brand I run, and this site. Agents live at those same seams.</p>
+<p style="margin: 0; color: {{t.muted}}">I don't claim years of professional LLM experience. I claim built and shipped, and every project here can be checked.</p>
+</div>
+</div>
+<aside style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 12px; padding: 22px; background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 14px">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">RESUME</p>
+<a href="#" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 18px; border-radius: 10px; background: {{t.btnBg}}; color: {{t.btnInk}}; font-size: 16px; font-weight: 600; text-decoration: none">Download resume (PDF)</a>
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; line-height: 1.6; color: {{t.muted}}">Built from the same master resume as the fit check, so the two never disagree. Updated [date].</p>
+<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; padding-top: 10px; border-top: 1px dashed {{t.rule}}; font-family: {{t.mono}}; font-size: 12px; line-height: 1.6; color: {{t.muted}}">knowledge base: [N] roles · [N] projects · [N] not-done entries · synced [date]</p>
+</sc-if>
+</aside>
+</header>
+
+<section aria-labelledby="graph-h" style="display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.08em; color: {{t.muted}}">CAREER AS A DEPENDENCY GRAPH</p>
+<h2 id="graph-h" style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 40px; line-height: 1.1">Integrations experience is agent experience.</h2>
+<p style="margin: 0; font-size: 16px; color: {{t.muted}}">Pick a project to see which earlier work it depends on.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: stretch">
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">BEFORE AI · DEPENDENCIES</p>
+<sc-for list="{{deps}}" as="d" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 10px; background: {{d.bg}}; border: {{d.border}}; opacity: {{d.opacity}}">
+<span style="font-size: 16px; font-weight: 600">{{d.label}}</span>
+<span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">{{d.meta}}</span>
+</div>
+</sc-for>
+</div>
+<div style="flex: 0 1 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">
+<span aria-hidden="true" style="font-size: 28px; color: {{t.accent}}">→</span>
+<span>feeds into</span>
+</div>
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">AGENT PROJECTS</p>
+<sc-for list="{{projects}}" as="p" hint-placeholder-count="4">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px; border-radius: 10px; background: {{p.bg}}; border: {{p.border}}; color: {{t.ink}}; font-family: {{t.sans}}; text-align: left; cursor: pointer">
+<span style="font-size: 16px; font-weight: 600">{{p.label}}</span>
+<span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">{{p.meta}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+<div role="status" aria-live="polite" style="display: flex; flex-direction: column; gap: 8px; padding: 18px 20px; border: 1px dashed {{t.rule}}; border-radius: 12px; background: {{t.paper}}">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; color: {{t.accent}}">{{selectedLabel}} DEPENDS ON</p>
+<sc-for list="{{edges}}" as="e" hint-placeholder-count="2">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 13px; line-height: 1.6"><span style="color: {{t.muted}}">← {{e.from}}: </span>{{e.why}}</p>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="roles-h" style="display: flex; flex-direction: column; gap: 14px">
+<h2 id="roles-h" style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 34px">Roles</h2>
+<div style="display: flex; flex-direction: column; border-top: 1px solid {{t.rule}}">
+<sc-for list="{{roles}}" as="r" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; padding: 18px 0; border-bottom: 1px solid {{t.rule}}">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 600">{{r.title}}</span><span style="font-family: {{t.mono}}; font-size: 13px; color: {{t.muted}}">{{r.hint}}</span></div>
+<span style="font-family: {{t.mono}}; font-size: 13px; color: {{t.muted}}">[years]</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="cert-h" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="cert-h" style="margin: 0; font-family: {{t.mono}}; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; color: {{t.muted}}">CERTIFICATES</h2>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<a href="#" style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border: 1px solid {{t.rule}}; border-radius: 8px; background: {{t.paper}}; text-decoration: none; font-size: 14px">[Professional AI certificate · once earned] <span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.accent}}">verify ↗</span></a>
+<a href="#" style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border: 1px solid {{t.rule}}; border-radius: 8px; background: {{t.paper}}; text-decoration: none; font-size: 14px">[Existing certificate that matters for senior PM roles] <span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.accent}}">verify ↗</span></a>
+</div>
+</section>
+</main>
+
+<footer style="border-top: 1px solid {{t.rule}}; padding: 28px 24px">
+<div style="max-width: 1040px; margin: 0 auto; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">
+<span>This site is an AI product. Turn on X-ray to see how it works.</span>
+<span>© 2026 Aswin · [domain]</span>
+</div>
+</footer>
+
+<dc-import name="Ask" open="{{askOpen}}" xray="{{xray}}" page="about" on-close="{{closeAsk}}" hint-size="0px,0px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startInXray":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":2900}}'>
+var ABOUT_FONTS = { serif: "'Newsreader', Georgia, serif", sans: "'IBM Plex Sans', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, Menlo, monospace" };
+function aboutTokens(x) {
+  var c = x
+    ? { bg: '#101214', paper: '#171A1D', ink: '#E9E6DF', muted: '#A3A9B0', rule: '#2B3036', accent: '#8DBBF2', accentTint: '#17283D', btnBg: '#E9E6DF', btnInk: '#101214' }
+    : { bg: '#F6F3EC', paper: '#FFFDF8', ink: '#1B1A17', muted: '#5C574E', rule: '#E2DCD0', accent: '#1F4C86', accentTint: '#E8EEF6', btnBg: '#1B1A17', btnInk: '#FFFDF8' };
+  c.serif = ABOUT_FONTS.serif; c.sans = ABOUT_FONTS.sans; c.mono = ABOUT_FONTS.mono;
+  return c;
+}
+var ABOUT_DEPS = [
+  { id: 'api', label: 'APIs & integrations platform', meta: '[Role] · [Company]' },
+  { id: 'health', label: 'Healthcare integrations', meta: '[Role] · [Company]' },
+  { id: 'stake', label: 'Platform stakeholder work', meta: 'engineering, partners, business teams' },
+  { id: 'dhees', label: "Running Dhee's", meta: 'fresh dog-food brand, direct to consumer' }
+];
+var ABOUT_PROJECTS = [
+  { id: 'ce', label: 'AI integration builder', meta: 'CloudEagle.ai take-home concept', edges: [['api', 'connectors, auth and scopes are the whole job'], ['health', 'safety-first design where mistakes are costly']] },
+  { id: 'js', label: 'Job-search agent', meta: 'multi-step, approval before applying', edges: [['api', 'workflows that span several tools'], ['stake', 'an approval gate before anything irreversible']] },
+  { id: 'ig', label: "Dhee's Instagram competitor agent", meta: 'research agent for a business I run', edges: [['dhees', 'a real business question to answer'], ['api', 'pulling structured data out of a platform']] },
+  { id: 'site', label: "This site's fit check", meta: 'one endpoint, one knowledge base', edges: [['api', 'one shared endpoint behind two features'], ['health', 'guardrails for claims that must be true'], ['stake', 'stating trade-offs and gaps plainly']] }
+];
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { xray: !!props.startInXray, askOpen: false, sel: 'ce' }; }
+  componentDidUpdate(prev) {
+    if (prev.startInXray !== this.props.startInXray) this.setState({ xray: !!this.props.startInXray });
+  }
+  renderVals() {
+    var s = this.state, x = s.xray, t = aboutTokens(x);
+    var proj = ABOUT_PROJECTS.find((p) => p.id === s.sel) || ABOUT_PROJECTS[0];
+    var used = proj.edges.map((e) => e[0]);
+    var depLabel = (id) => (ABOUT_DEPS.find((d) => d.id === id) || {}).label;
+    return {
+      t: t, xray: x, askOpen: s.askOpen,
+      deps: ABOUT_DEPS.map((d) => {
+        var on = used.indexOf(d.id) >= 0;
+        return { label: d.label, meta: d.meta, bg: on ? t.accentTint : t.paper, border: on ? '1px solid ' + t.accent : '1px solid ' + t.rule, opacity: on ? 1 : 0.55 };
+      }),
+      projects: ABOUT_PROJECTS.map((p) => {
+        var on = p.id === s.sel;
+        return { label: p.label, meta: p.meta, on: on, bg: on ? t.paper : 'transparent', border: on ? '1.5px solid ' + t.ink : '1px solid ' + t.rule, pick: () => this.setState({ sel: p.id }) };
+      }),
+      selectedLabel: proj.label.toUpperCase(),
+      edges: proj.edges.map((e) => ({ from: depLabel(e[0]), why: e[1] })),
+      roles: [
+        { title: '[Role] · [Company]', hint: '[What you owned, one line: platform, APIs, integrations]' },
+        { title: '[Role] · [Company]', hint: '[Healthcare integrations: systems and outcome]' },
+        { title: "[Your title] · Dhee's", hint: 'Runs a fresh dog-food brand, direct to consumer' }
+      ],
+      toggleXray: () => this.setState({ xray: !this.state.xray }),
+      openAsk: () => this.setState({ askOpen: true }),
+      closeAsk: () => this.setState({ askOpen: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

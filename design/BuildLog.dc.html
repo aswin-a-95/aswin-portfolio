@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Build log</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+a:hover{opacity:0.82}
+a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: {{t.bg}}; color: {{t.ink}}; font-family: {{t.sans}}">
+<dc-import name="Nav" current="log" xray="{{xray}}" on-toggle-xray="{{toggleXray}}" on-ask="{{openAsk}}" hint-size="100%,73px"></dc-import>
+
+<main style="max-width: 880px; margin: 0 auto; padding: 72px 24px 96px; display: flex; flex-direction: column; gap: 36px">
+<header style="display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.08em; color: {{t.muted}}">BUILD LOG</p>
+<h1 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: clamp(44px, 6vw, 68px); line-height: 1.04; letter-spacing: -0.02em">Notes from building AI products in public.</h1>
+<p style="margin: 0; font-family: {{t.serif}}; font-size: 21px; line-height: 1.45; color: {{t.muted}}">Build notes from my own projects first. Teardowns, essays and short TILs around them. A new post every [2–3] weeks, also on LinkedIn.</p>
+</header>
+
+<div role="group" aria-label="Filter posts" style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+<button type="button" onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid {{f.border}}; background: {{f.bg}}; color: {{f.ink}}; font-family: {{t.sans}}; font-size: 14px; cursor: pointer">{{f.label}} <span style="font-family: {{t.mono}}; font-size: 12px; opacity: 0.7">{{f.count}}</span></button>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{posts}}" as="p" hint-placeholder-count="3">
+<article style="display: flex; flex-direction: column; gap: 10px; padding: 28px 0; border-top: 1px solid {{t.rule}}">
+<div style="display: flex; gap: 8px 16px; flex-wrap: wrap; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}"><span>{{p.tag}}</span><span>[date]</span><span>[read time]</span></div>
+<h2 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 32px; line-height: 1.2"><a href="BuildLog.dc.html" style="text-decoration: none">{{p.title}}</a></h2>
+<p style="margin: 0; padding: 10px 12px; border: 1px dotted {{t.muted}}; border-radius: 8px; font-family: {{t.mono}}; font-size: 13px; line-height: 1.55; color: {{t.muted}}">{{p.hint}}</p>
+<a href="Work.dc.html" style="align-self: flex-start; padding: 6px 10px; border-radius: 6px; background: {{t.accentTint}}; color: {{t.accent}}; font-family: {{t.mono}}; font-size: 12px; text-decoration: none">{{p.study}} →</a>
+<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">written by Aswin · AI used for editing only · cross-posted to LinkedIn</p>
+</sc-if>
+</article>
+</sc-for>
+<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 36px 0; border-top: 1px solid {{t.rule}}; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: {{t.serif}}; font-size: 24px">{{emptyTitle}}</p>
+<p style="margin: 0; font-size: 15px; color: {{t.muted}}">Build notes come first. Until then, the case studies go deeper.</p>
+<a href="Work.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; color: {{t.accent}}">Read a case study →</a>
+</div>
+</sc-if>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 22px; background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 14px">
+<p style="margin: 0; font-family: {{t.serif}}; font-size: 20px">Get the next post on LinkedIn.</p>
+<a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border-radius: 10px; background: {{t.btnBg}}; color: {{t.btnInk}}; font-size: 15px; font-weight: 600; text-decoration: none">Follow Aswin [link]</a>
+</div>
+</main>
+
+<footer style="border-top: 1px solid {{t.rule}}; padding: 28px 24px">
+<div style="max-width: 880px; margin: 0 auto; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">
+<span>This site is an AI product. Turn on X-ray to see how it works.</span>
+<span>© 2026 Aswin · [domain]</span>
+</div>
+</footer>
+
+<dc-import name="Ask" open="{{askOpen}}" xray="{{xray}}" page="log" on-close="{{closeAsk}}" hint-size="0px,0px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startInXray":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1800}}'>
+var LOG_FONTS = { serif: "'Newsreader', Georgia, serif", sans: "'IBM Plex Sans', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, Menlo, monospace" };
+function logTokens(x) {
+  var c = x
+    ? { bg: '#101214', paper: '#171A1D', ink: '#E9E6DF', muted: '#A3A9B0', rule: '#2B3036', accent: '#8DBBF2', accentTint: '#17283D', btnBg: '#E9E6DF', btnInk: '#101214' }
+    : { bg: '#F6F3EC', paper: '#FFFDF8', ink: '#1B1A17', muted: '#5C574E', rule: '#E2DCD0', accent: '#1F4C86', accentTint: '#E8EEF6', btnBg: '#1B1A17', btnInk: '#FFFDF8' };
+  c.serif = LOG_FONTS.serif; c.sans = LOG_FONTS.sans; c.mono = LOG_FONTS.mono;
+  return c;
+}
+var LOG_POSTS = [
+  { cat: 'build', tag: 'Build notes', title: 'Why my job-search agent asks before it applies', hint: '[Two-line summary: the approval step, what it costs, why it stays]', study: 'Case study · Job-search agent' },
+  { cat: 'build', tag: 'Build notes', title: 'Designing safeguards for an AI that writes integrations', hint: '[Two-line summary: the safeguard you would defend in any interview]', study: 'Case study · CloudEagle concept' },
+  { cat: 'essay', tag: 'Essay', title: 'Integrations experience is agent experience', hint: '[Two-line summary: what platform PMs already know about agents]', study: 'Case study · Platform & API work' }
+];
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { xray: !!props.startInXray, askOpen: false, filter: 'all' }; }
+  componentDidUpdate(prev) {
+    if (prev.startInXray !== this.props.startInXray) this.setState({ xray: !!this.props.startInXray });
+  }
+  renderVals() {
+    var s = this.state, x = s.xray, t = logTokens(x);
+    var cats = [['all', 'All'], ['build', 'Build notes'], ['teardown', 'Teardowns'], ['essay', 'Essays'], ['til', 'TIL']];
+    var posts = LOG_POSTS.filter((p) => s.filter === 'all' || p.cat === s.filter);
+    var label = (cats.find((c) => c[0] === s.filter) || cats[0])[1];
+    return {
+      t: t, xray: x, askOpen: s.askOpen,
+      filters: cats.map((c) => {
+        var on = s.filter === c[0];
+        var n = c[0] === 'all' ? LOG_POSTS.length : LOG_POSTS.filter((p) => p.cat === c[0]).length;
+        return { label: c[1], count: n, on: on, bg: on ? t.btnBg : 'transparent', ink: on ? t.btnInk : t.ink, border: on ? t.btnBg : t.rule, pick: () => this.setState({ filter: c[0] }) };
+      }),
+      posts: posts, empty: posts.length === 0,
+      emptyTitle: 'No ' + label.toLowerCase() + ' yet. The first one is in the works.',
+      toggleXray: () => this.setState({ xray: !this.state.xray }),
+      openAsk: () => this.setState({ askOpen: true }),
+      closeAsk: () => this.setState({ askOpen: false })
+    };
+  }
+}
+</script>
+</body>
+</html>
