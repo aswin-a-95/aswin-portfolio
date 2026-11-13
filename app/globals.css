@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* Design tokens, SPEC.md §3. Light is the default; X-ray is the dark theme. */
+:root {
+  --bg: #f6f3ec;
+  --paper: #fffdf8;
+  --ink: #1b1a17;
+  --muted: #5c574e;
+  --rule: #e2dcd0;
+  --accent: #1f4c86;
+  --accent-tint: #e8eef6;
+  --amber-text: #8a5510;
+  --amber-border: #c08a2e;
+  --amber-bg: #fbf2e2;
+  --btn-bg: #1b1a17;
+  --btn-ink: #fffdf8;
+  --focus: #4f7fc0;
+  --scrim: rgba(27, 26, 23, 0.38);
+  --ask-shadow: 0 24px 60px rgba(20, 18, 15, 0.22);
+}
+
+:root[data-theme="xray"] {
+  --bg: #101214;
+  --paper: #171a1d;
+  --ink: #e9e6df;
+  --muted: #a3a9b0;
+  --rule: #2b3036;
+  --accent: #8dbbf2;
+  --accent-tint: #17283d;
+  --amber-text: #edb65e;
+  --amber-border: #b8862f;
+  --amber-bg: #241c10;
+  --btn-bg: #e9e6df;
+  --btn-ink: #101214;
+  --scrim: rgba(0, 0, 0, 0.6);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-tint: var(--accent-tint);
+  --color-amber-text: var(--amber-text);
+  --color-amber-border: var(--amber-border);
+  --color-amber-bg: var(--amber-bg);
+  --color-btn-bg: var(--btn-bg);
+  --color-btn-ink: var(--btn-ink);
+  --color-scrim: var(--scrim);
+  --shadow-ask: var(--ask-shadow);
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, Menlo, monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Global rules seen in every artboard. */
+a {
+  color: inherit;
+}
+a:hover {
+  opacity: 0.82;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Blocks that only show with X-ray on. Server-renderable: no client JS needed. */
+.xray-only {
+  display: none;
+}
+:root[data-theme="xray"] .xray-only {
+  display: revert;
+}
