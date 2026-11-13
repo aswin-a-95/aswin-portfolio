@@ -1,50 +1,160 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BreakPanel, resetButton, type BreakEntry } from "@/components/fit-check/break-panel";
+import { Fallback } from "@/components/fit-check/fallback";
+import { FitInput } from "@/components/fit-check/fit-input";
+import { HowBuilt, type HowIBuiltMeta } from "@/components/fit-check/how-built";
+import { Result, type ResultMeta } from "@/components/fit-check/result";
 import { useSite } from "@/components/xray-provider";
+import { sessionMemory } from "@/lib/ask/session-memory";
+import { breakAttempt, runFitCheck } from "@/lib/fit-check/client";
+import {
+  BREAK_LOG_MAX,
+  breakVerdict,
+  HERO_SAMPLES,
+  isLink,
+  isStrongFit,
+  NUDGE,
+  PASTED_ROLE,
+  SKIPPED_FETCH,
+  STEP_COPY,
+} from "@/lib/fit-check/copy";
+import { rolePrefill } from "@/lib/fit-check/role-prefill";
+import { FitEventSchema, type Drill, type FallbackEvent, type ResultEvent, type StepEvent } from "@/lib/fit-check/types";
 
-/** Labels from HERO_SAMPLES, HERO_ATTACKS and HERO_DRILLS in Hero.dc.html. */
-const SAMPLES = [
-  { label: "Senior Platform PM", bad: false },
-  { label: "AI product PM (agents)", bad: false },
-  { label: "Healthcare integrations PM", bad: false },
-  { label: "A bad fit, on purpose", bad: true },
-];
-const ATTACKS = ["prompt injection", "something he hasn't done", "conflicting info", "ambiguous ask"];
-const DRILLS = ["knowledge base offline", "hit the rate limit"];
-const PIPELINE = [
-  ["input", false],
-  ["link? fetch_url", true],
-  ["jd.parse", false],
-  ["kb.search", false],
-  ["evidence.map", false],
-  ["guardrails", false],
-  ["compose + cite", false],
-] as const;
+export type { HowIBuiltMeta };
 
-export type HowIBuiltMeta = {
-  evalCaseCount: string;
-  evalPassRate: string;
-  evalFailedFirst: string;
-  costPerRun: string;
-  liveResponseTime: string;
-  whatBreaksFirstAtScale: string;
-  next: string;
-};
+type Phase = "empty" | "running" | "result" | "badfit" | "break" | "error" | "limited";
 
-const label = "font-mono text-[12px] uppercase tracking-[0.06em] text-muted";
+const statusLabel = "m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-muted";
 
 /**
- * Fit-check hero, empty state only (Milestone 2). The run, result, break, error and limited
- * states and the sample / attack / drill actions arrive in Milestone 4.
+ * The fit-check hero (Hero.dc.html, all 7 states in HeroStates.dc.html). Every state change
+ * comes from the run's event stream (SPEC §7): `step` rows while running, then `result` or
+ * `fallback`. Nothing here is timed or scripted.
  */
-export function Hero({ meta }: { meta: HowIBuiltMeta }) {
-  const { xray } = useSite();
+export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: ResultMeta }) {
+  const { xray, setXray, openAsk } = useSite();
+
+  const [phase, setPhase] = useState<Phase>("empty");
   const [jd, setJd] = useState("");
-  const [howOpen, setHowOpen] = useState(false);
-  const noJd = jd.trim() === "";
-  const showHow = howOpen || xray;
+  const [role, setRole] = useState("");
+  const [drill, setDrill] = useState<Drill | null>(null);
+  const [runId, setRunId] = useState<string | null>(null);
+  const [steps, setSteps] = useState<StepEvent[]>([]);
+  const [result, setResult] = useState<ResultEvent | null>(null);
+  const [fallback, setFallback] = useState<FallbackEvent | null>(null);
+  const [log, setLog] = useState<BreakEntry[]>([]);
+  const [pending, setPending] = useState(0);
+
+  const abortRef = useRef<AbortController | null>(null);
+  const entryId = useRef(0);
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  // Focus target of the current state. When the control that started a change unmounts
+  // (a sample chip, "Try another role"), focus moves here instead of being lost.
+  const focusRef = useRef<HTMLElement | null>(null);
+  const setFocusTarget = useCallback((el: HTMLElement | null) => {
+    focusRef.current = el;
+  }, []);
+  useEffect(() => {
+    const active = document.activeElement;
+    if (!active || active === document.body) focusRef.current?.focus({ preventScroll: true });
+  }, [phase]);
+
+  const run = useCallback(async (text: string, runRole: string, runDrill: Drill | null = null) => {
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    setJd(text);
+    setRole(runRole);
+    setDrill(runDrill);
+    setRunId(null);
+    setSteps([]);
+    setResult(null);
+    setFallback(null);
+    setPhase("running");
+
+    const setFallbackState = (ev: FallbackEvent) => {
+      setFallback(ev);
+      setPhase(ev.reason);
+    };
+    const fail = () => setFallbackState({ type: "fallback", reason: "error" });
+    try {
+      for await (const raw of runFitCheck({ jd: text, drill: runDrill ?? undefined }, ac.signal)) {
+        if (ac.signal.aborted) return;
+        const parsed = FitEventSchema.safeParse(raw);
+        if (!parsed.success) return fail();
+        const ev = parsed.data;
+        if (ev.type === "start") setRunId(ev.runId);
+        else if (ev.type === "step") {
+          setSteps((prev) => {
+            const i = prev.findIndex((s) => s.tool === ev.tool);
+            return i === -1 ? [...prev, ev] : prev.map((s, j) => (j === i ? ev : s));
+          });
+        } else if (ev.type === "result") {
+          const finalRole = ev.role ?? runRole;
+          setRole(finalRole);
+          setResult(ev);
+          setPhase(isStrongFit(ev.matches.length, ev.gaps.length) ? "result" : "badfit");
+          // Session memory for Ask my work (SPEC §5): role, match count and gaps only.
+          sessionMemory.set({
+            role: finalRole,
+            matchCount: ev.matches.length,
+            gaps: ev.gaps.map(({ req, closest, close }) => ({ req, closest, close })),
+          });
+          return;
+        } else {
+          setFallbackState(ev);
+          return;
+        }
+      }
+      // The stream ended without a result or fallback.
+      if (!ac.signal.aborted) fail();
+    } catch {
+      if (!ac.signal.aborted) fail();
+    }
+  }, []);
+
+  const reset = () => {
+    abortRef.current?.abort();
+    setPhase("empty");
+    setJd("");
+    setDrill(null);
+    setSteps([]);
+  };
+
+  const attack = async (text: string) => {
+    abortRef.current?.abort();
+    setPhase("break");
+    setPending((n) => n + 1);
+    const r = await breakAttempt(text);
+    setPending((n) => n - 1);
+    // No design for a failed attempt yet (flagged for Milestone 5): nothing is logged.
+    if (r.status !== "ok") return;
+    const [verdict, tone] = breakVerdict(r.reply.kind);
+    const entry: BreakEntry = {
+      id: ++entryId.current,
+      text,
+      verdict,
+      tone,
+      reply: r.reply.text,
+      guard: r.reply.guard,
+      trace: r.reply.trace,
+    };
+    setLog((prev) => [entry, ...prev].slice(0, BREAK_LOG_MAX));
+  };
+
+  const talk = () => rolePrefill.send(role);
+  const isResult = (phase === "result" || phase === "badfit") && result !== null;
+  const showFallback = (phase === "error" || phase === "limited") && fallback !== null;
+  const linkRun = isLink(jd);
+
+  let nudge = "";
+  if (isResult) nudge = NUDGE.result;
+  else if (phase === "break" && log.length) nudge = NUDGE.break;
+  else if (showFallback && drill) nudge = NUDGE.drill;
 
   return (
     <section className="box-border w-full bg-bg px-6 pt-[72px] pb-16 font-sans text-ink">
@@ -59,147 +169,119 @@ export function Hero({ meta }: { meta: HowIBuiltMeta }) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-[14px] rounded-[14px] border border-rule bg-paper p-5">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <label htmlFor="jd-input" className={label}>
-              Job description
-            </label>
-            <span className="font-mono text-[12px] text-muted">text or a link · not stored</span>
-          </div>
-          <textarea
-            id="jd-input"
-            rows={5}
-            value={jd}
-            onChange={(e) => setJd(e.target.value)}
-            placeholder="Paste the role, or a link to it…"
-            className="box-border w-full resize-y border-0 bg-transparent font-sans text-[17px] leading-[1.5] text-ink outline-none"
+        {phase === "empty" && (
+          <FitInput
+            jd={jd}
+            onJd={setJd}
+            onCheck={() => {
+              if (jd.trim()) run(jd, PASTED_ROLE);
+            }}
+            onSample={(s) => run(s.jd, s.role)}
+            onAttack={attack}
+            onDrill={(d) => run(HERO_SAMPLES[0].jd, HERO_SAMPLES[0].role, d)}
+            inputRef={setFocusTarget}
           />
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-[14px]">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[14px] text-muted">No JD handy?</span>
-              {SAMPLES.map((s) => (
-                <button
-                  key={s.label}
-                  type="button"
-                  className={`min-h-11 cursor-pointer rounded-full bg-transparent px-[14px] py-2 font-sans text-[14px] ${
-                    s.bad ? "border-[1.5px] border-dashed border-amber-border text-amber-text" : "border border-rule text-ink"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              disabled={noJd}
-              className="min-h-12 cursor-pointer rounded-[10px] border-0 bg-btn-bg px-[22px] py-3 font-sans text-[16px] font-semibold text-btn-ink"
-              style={{ opacity: noJd ? 0.45 : 1 }}
-            >
-              Check fit
+        )}
+
+        {phase === "break" && (
+          <BreakPanel
+            log={log}
+            pending={pending > 0}
+            xray={xray}
+            evalSet={resultMeta.evalSet}
+            onAttack={attack}
+            onReset={reset}
+            headingRef={setFocusTarget}
+          />
+        )}
+
+        {phase !== "empty" && phase !== "break" && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-rule bg-paper px-[18px] py-[14px]">
+            <p className="m-0 text-[15px]">
+              <span className="font-mono text-[12px] uppercase tracking-[0.06em] text-muted">
+                {drill ? "Drill running against" : "Checking against"}{" "}
+              </span>
+              <b className="font-semibold">{role}</b>
+            </p>
+            <button type="button" onClick={reset} className={resetButton}>
+              {drill ? "Back to the fit check" : "Try another role"}
             </button>
           </div>
-        </div>
-        <div className="flex flex-col gap-[10px]">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`min-w-[150px] ${label}`}>Break my AI</span>
-            {ATTACKS.map((a) => (
-              <button
-                key={a}
-                type="button"
-                className="min-h-10 cursor-pointer rounded-lg border border-rule bg-transparent px-3 py-[6px] font-mono text-[13px] text-ink"
-              >
-                {a}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`min-w-[150px] ${label}`}>Failure drills</span>
-            {DRILLS.map((d) => (
-              <button
-                key={d}
-                type="button"
-                className="min-h-10 cursor-pointer rounded-lg border border-dashed border-rule bg-transparent px-3 py-[6px] font-mono text-[13px] text-ink"
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
 
-        <div className="flex flex-col gap-4 border-t border-rule pt-4">
-          <button
-            type="button"
-            onClick={() => setHowOpen(!howOpen)}
-            aria-expanded={showHow}
-            aria-controls="how-built"
-            className="min-h-11 cursor-pointer self-start border-0 bg-transparent px-0 py-2 font-mono text-[13px] text-accent"
-          >
-            {showHow ? "− How I built this" : "+ How I built this"}
-          </button>
-          {/* Always in the HTML (hidden when closed) so check:content sees its placeholders. */}
+        {phase === "running" && !drill && (
           <div
-            id="how-built"
-            hidden={!showHow}
-            className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-[18px] font-mono text-[13px] leading-[1.6] text-ink"
+            ref={setFocusTarget}
+            tabIndex={-1}
+            role="status"
+            aria-live="polite"
+            className="flex flex-col gap-3 rounded-[14px] border border-rule bg-paper px-[22px] py-5 outline-none"
           >
-            <p className="col-span-full m-0 rounded-lg border border-rule bg-paper px-[14px] py-3 font-sans text-[15px] leading-[1.55]">
-              <b className="font-semibold">Honest note:</b> the fit check is a fixed pipeline with one branch (link or text) and
-              one retry. The model doesn&apos;t choose its tools here. For model-chosen tool calls, see the{" "}
-              <Link href="/work/job-search-agent" className="text-accent">
-                job-search agent
-              </Link>
-              .
-            </p>
-            <div className="flex flex-col gap-2">
-              <p className="m-0 text-muted">ARCHITECTURE</p>
-              <div className="flex flex-wrap items-center gap-[6px]">
-                {PIPELINE.map(([p, branch], i) => (
-                  <span key={p} className="contents">
-                    <span className={`rounded-md bg-paper px-2 py-1 ${branch ? "border border-dashed border-accent" : "border border-rule"}`}>
-                      {p}
-                    </span>
-                    {i < PIPELINE.length - 1 && <span className="text-muted">›</span>}
+            <div className="flex flex-wrap justify-between gap-3">
+              <p className={statusLabel}>Agent · streaming from the live run</p>
+              {xray && <p className="m-0 font-mono text-[12px] text-muted">trace {runId ?? "[run id]"} · logged</p>}
+            </div>
+            {steps.map((st) => {
+              const done = st.status !== "running";
+              const skipped = st.status === "skipped";
+              const copy = st.tool === "fetch_url" && !linkRun ? SKIPPED_FETCH : STEP_COPY[st.tool];
+              const status = !done
+                ? "running…"
+                : xray && !skipped
+                  ? `${st.detail ?? ""} · ${st.ms !== undefined ? `${st.ms} ms` : "[ms]"}`
+                  : (st.detail ?? "");
+              const statusColor = done && !skipped ? "text-accent" : "text-muted";
+              return (
+                <div key={st.tool} className="flex flex-wrap justify-between gap-4 font-mono text-[14px] leading-[1.5]">
+                  <span className={skipped ? "text-muted" : "text-ink"}>
+                    <span className={statusColor}>{skipped ? "–" : done ? "✓" : "›"} </span>
+                    {xray ? copy.xr : `${st.tool} · ${copy.label}`}
                   </span>
-                ))}
-              </div>
-              <p className="m-0 text-muted">
-                One endpoint, one knowledge base, two prompts (fit check and Ask my work). Dashed box: the only branch.
-              </p>
-            </div>
-            <div className="flex flex-col gap-[6px]">
-              <p className="m-0 text-muted">GUARDRAILS</p>
-              <p className="m-0">› answers only from the knowledge base</p>
-              <p className="m-0">› every claim links to a source</p>
-              <p className="m-0">› gaps stated, score never inflated</p>
-              <p className="m-0">› off-topic and prompt injection refused</p>
-            </div>
-            <div className="flex flex-col gap-[6px]">
-              <p className="m-0 text-muted">EVALS · COST</p>
-              <p className="m-0">› {meta.evalCaseCount} test JDs, bad-fit and red-team cases, public on GitHub</p>
-              <p className="m-0">
-                › offline eval: pass rate {meta.evalPassRate} · failed first: {meta.evalFailedFirst}
-              </p>
-              <p className="m-0">
-                › live usage: {meta.costPerRun} · {meta.liveResponseTime}, logged
-              </p>
-              <p className="m-0">› the steps on screen stream from the real run, never a script</p>
-            </div>
-            <div className="flex flex-col gap-[6px]">
-              <p className="m-0 text-muted">MEMORY · PRODUCTION</p>
-              <p className="m-0">› session memory: role and gaps carry into Ask my work</p>
-              <p className="m-0">› held for this session only; pasted JDs aren&apos;t stored</p>
-              <p className="m-0">› per-visitor rate limit · monthly budget cap</p>
-              <p className="m-0">› precomputed fallback if the AI or knowledge base is down</p>
-              <p className="m-0">› limits: {meta.whatBreaksFirstAtScale}</p>
-            </div>
-            <div className="flex flex-col gap-[6px]">
-              <p className="m-0 text-muted">TRADE-OFFS · NEXT</p>
-              <p className="m-0">› evidence cards over a % dial: slower to skim, easier to trust</p>
-              <p className="m-0">› fixed pipeline over open tool choice: predictable and testable</p>
-              <p className="m-0">› next: {meta.next}</p>
-            </div>
+                  <span className={statusColor}>{status}</span>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
+
+        {isResult && (
+          <Result
+            result={result}
+            bad={phase === "badfit"}
+            linkBranch={linkRun}
+            xray={xray}
+            meta={resultMeta}
+            onAskGap={(i) => openAsk(i)}
+            onAsk={() => openAsk()}
+            onTalk={talk}
+            headingRef={setFocusTarget}
+          />
+        )}
+
+        {showFallback && (
+          <Fallback
+            event={fallback}
+            xray={xray}
+            onRetry={() => run(jd, role)}
+            onTalk={talk}
+            headingRef={setFocusTarget}
+          />
+        )}
+
+        {!xray && nudge && (
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-[10px] border border-dashed border-accent bg-accent-tint px-[14px] py-[10px]">
+            <span className="text-[15px]">{nudge}</span>
+            <button
+              type="button"
+              onClick={() => setXray(true)}
+              className="min-h-10 cursor-pointer rounded-lg border border-accent bg-transparent px-3 py-[6px] font-mono text-[13px] text-accent"
+            >
+              Turn on X-ray →
+            </button>
+          </div>
+        )}
+
+        <HowBuilt meta={meta} xray={xray} />
       </div>
     </section>
   );

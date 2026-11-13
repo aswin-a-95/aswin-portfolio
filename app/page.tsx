@@ -8,6 +8,7 @@ import { WorkSection } from "@/components/home/work-section";
 import { IntroBanner } from "@/components/intro-banner";
 import { Nav } from "@/components/nav";
 import { siteMeta } from "@/content/site-meta";
+import { hrefOf, isTodo } from "@/lib/content";
 import { caseStudies } from "@/lib/case-studies";
 import { posts } from "@/lib/posts";
 
@@ -28,6 +29,14 @@ export default async function Home() {
             liveResponseTime: siteMeta.liveResponseTime,
             whatBreaksFirstAtScale: siteMeta.whatBreaksFirstAtScale,
             next: siteMeta.next,
+          }}
+          resultMeta={{
+            evalPassRate: siteMeta.evalPassRate,
+            evalLastRun: siteMeta.evalLastRun,
+            evalRedTeamHeld: siteMeta.evalRedTeamHeld,
+            evalCaseCount: siteMeta.evalCaseCount,
+            // Placeholder links render as "#" with the design's " [link]" after the label.
+            evalSet: { href: hrefOf(siteMeta.evalSetLink), todo: isTodo(siteMeta.evalSetLink) ? " [link]" : "" },
           }}
         />
         <UnderTheHood />

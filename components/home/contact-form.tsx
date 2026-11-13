@@ -1,18 +1,28 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { rolePrefill } from "@/lib/fit-check/role-prefill";
 
 const field =
   "min-h-11 rounded-lg border px-3 py-2 font-sans text-[16px] text-ink";
 
 /**
  * Contact form from Main.dc.html. Sending is wired to /api/contact in Milestone 6; until then
- * submit does nothing (no fake "sent"). Role pre-fill from the fit check arrives in Milestone 4.
+ * submit does nothing (no fake "sent"). "Talk to Aswin about this role" in the hero pre-fills Role.
  */
 export function ContactForm({ responseTime, prefilledRole }: { responseTime: string; prefilledRole?: string }) {
   const [form, setForm] = useState({ name: "", email: "", role: prefilledRole ?? "", msg: "" });
   const [prefilled, setPrefilled] = useState(!!prefilledRole);
   const sent = false;
+  // Main.dc.html `setRole`: the fit check's role fills the field and marks it pre-filled.
+  useEffect(
+    () =>
+      rolePrefill.subscribe((role) => {
+        setForm((f) => ({ ...f, role }));
+        setPrefilled(true);
+      }),
+    [],
+  );
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
 
   const onSubmit = (e: FormEvent) => {

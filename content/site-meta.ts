@@ -13,6 +13,7 @@ export const siteMeta = {
   next: todo("[what you'll improve]"), // TODO(aswin)
   costPerRun: todo("[cost per run]"), // TODO(aswin): measured, never invented
   ninetyDayPlan: todo("[Your 90-day ramp-up plan.]"), // TODO(aswin)
+  evalToolingPlan: todo("[How you would adopt the team’s eval tooling.]"), // TODO(aswin): fit-check gap "Running evals at team scale"
   resumeUpdated: todo("[date]"), // TODO(aswin): date of the resume in public/resume.pdf
   kbSynced: todo("[date]"), // Filled by the KB snapshot in Milestone 5.
   liveResponseTime: todo("[response time]"), // TODO(aswin): measured median, live usage
@@ -20,4 +21,6 @@ export const siteMeta = {
   evalCaseCount: todo("[N]"),
   evalPassRate: todo("[measured]"),
   evalFailedFirst: todo("[what broke]"),
+  evalLastRun: todo("[date]"),
+  evalRedTeamHeld: todo("[measured]"),
 } as const;
