@@ -66,31 +66,46 @@
   --font-mono: var(--font-plex-mono), ui-monospace, Menlo, monospace;
 }
 
-/* The artboards have no CSS reset, so text uses the browser's normal line height. */
-html {
-  line-height: normal;
+/*
+ * The artboards have no CSS reset, so they use the browser's defaults: content-box sizing
+ * (buttons border-box), normal line height and underlined links. Restore those over Tailwind's
+ * preflight, inside @layer base so utilities (box-border, no-underline, text-accent) still win.
+ */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: content-box;
+  }
+  button {
+    box-sizing: border-box;
+  }
+  html {
+    line-height: normal;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+
+  /* Global rules seen in every artboard. */
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+  a:hover {
+    opacity: 0.82;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
 }
 
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
-}
-
-/* Global rules seen in every artboard. */
-a {
-  color: inherit;
-}
-a:hover {
-  opacity: 0.82;
-}
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

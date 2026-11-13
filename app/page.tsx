@@ -32,8 +32,8 @@ export default async function Home() {
         />
         <UnderTheHood />
         <BeforeAfter />
-        <WorkSection studies={studies} />
-        <FromTheLog posts={logPosts} />
+        {studies.length > 0 && <WorkSection studies={studies} />}
+        {logPosts.length > 0 && <FromTheLog posts={logPosts} />}
         <Contact />
       </main>
       <Footer maxWidth={1040} />
