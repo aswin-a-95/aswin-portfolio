@@ -1,10 +1,17 @@
----
-slug: dhees-instagram-agent
-num: "03"
-status: "IN USE · RECORDED RUN"
-label: "a business I run"
-title: "Dhee's Instagram competitor agent"
----
+import { todo } from "@/lib/content";
+import { skeleton } from "./_skeleton";
 
-{/* TODO(aswin): PRD template fields (SPEC §12): what I built, time spent, users/problem, 3 decisions, 4 safeguards,
-    success metrics, before/after steps and times, v2, lessons, links, video. Wired up in Milestone 2. */}
+{/* Card copy from Main.dc.html; the page fields are TODO(aswin). */}
+
+export const meta = skeleton({
+  slug: "dhees-instagram-agent",
+  num: "03",
+  status: "IN USE · RECORDED RUN",
+  cardLabel: "a business I run",
+  cardTitle: "Dhee's Instagram competitor agent",
+  angle: "What competitors post, what performs, and what Dhee’s should make next. Shown as a recorded run with its real trace.",
+  built: "The agent’s prompts and analysis steps.",
+  tags: ["agents", "tools"],
+  xr: todo("recorded run · trace [run id] · repo [planned]"), // TODO(aswin)
+  onPhone: true,
+});

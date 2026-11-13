@@ -17,6 +17,12 @@
   --focus: #4f7fc0;
   --scrim: rgba(27, 26, 23, 0.38);
   --ask-shadow: 0 24px 60px rgba(20, 18, 15, 0.22);
+  /* The case-study video frame is dark in both themes (Work.dc.html). */
+  --video-bg: #1b1a17;
+  --video-btn: #26241f;
+  --video-btn-border: #5c574e;
+  --video-icon: #f6f3ec;
+  --video-caption: #c9c3b8;
 }
 
 :root[data-theme="xray"] {
@@ -49,10 +55,20 @@
   --color-btn-bg: var(--btn-bg);
   --color-btn-ink: var(--btn-ink);
   --color-scrim: var(--scrim);
+  --color-video-bg: var(--video-bg);
+  --color-video-btn: var(--video-btn);
+  --color-video-btn-border: var(--video-btn-border);
+  --color-video-icon: var(--video-icon);
+  --color-video-caption: var(--video-caption);
   --shadow-ask: var(--ask-shadow);
   --font-serif: var(--font-newsreader), Georgia, serif;
   --font-sans: var(--font-plex-sans), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, Menlo, monospace;
+}
+
+/* The artboards have no CSS reset, so text uses the browser's normal line height. */
+html {
+  line-height: normal;
 }
 
 body {
@@ -88,4 +104,20 @@ textarea:focus-visible {
 }
 :root[data-theme="xray"] .xray-only {
   display: revert;
+}
+
+/* Case study: smooth scroll for the rail, sticky rail from 900px (Work.dc.html). */
+html:has(.cs-page) {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.cs-page) {
+    scroll-behavior: auto;
+  }
+}
+@media (min-width: 900px) {
+  .cs-rail {
+    position: sticky;
+    top: 24px;
+  }
 }

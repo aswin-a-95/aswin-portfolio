@@ -1,10 +1,20 @@
----
-slug: platform-api-work
-num: "04"
-status: "PRE-AI · [STATUS]"
-label: "before AI"
-title: "Platform & API work"
----
+import { todo } from "@/lib/content";
+import { skeleton } from "./_skeleton";
 
-{/* TODO(aswin): PRD template fields (SPEC §12): what I built, time spent, users/problem, 3 decisions, 4 safeguards,
-    success metrics, before/after steps and times, v2, lessons, links, video. Wired up in Milestone 2. */}
+{/* Card copy from Main.dc.html; the page fields are TODO(aswin). */}
+
+export const meta = {
+  ...skeleton({
+    slug: "platform-api-work",
+    num: "04",
+    status: todo("PRE-AI · [STATUS]"), // TODO(aswin)
+    cardLabel: "before AI",
+    cardTitle: "Platform & API work",
+    angle: todo("Why integrations experience is agent experience. [Project to be chosen]"), // TODO(aswin)
+    built: todo("[Your part in the platform work]"), // TODO(aswin)
+    tags: ["integrations", "production"],
+    xr: "links to About · career graph",
+    onPhone: false,
+  }),
+  relatedPost: "integrations-experience-is-agent-experience",
+};
