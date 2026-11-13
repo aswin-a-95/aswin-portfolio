@@ -49,3 +49,44 @@ for (const [name, width, height] of SIZES) {
     }
   }
 }
+
+// Fit-check hero, for the side-by-side check against HeroStates and Mobile.
+// [state, stub mode, action]: the mock streams the same events as /api/run.
+const HERO_STATES: [string, string | null, string | null][] = [
+  ["empty", null, null],
+  ["running", "hold", "Senior Platform PM"],
+  ["result", null, "Senior Platform PM"],
+  ["badfit", null, "A bad fit, on purpose"],
+  ["break", null, "conflicting info"],
+  ["error", "error", "Senior Platform PM"],
+  ["limited", "limited", "Senior Platform PM"],
+  ["drill-kb", null, "knowledge base offline"],
+];
+for (const [name, width, height] of SIZES) {
+  for (const xray of [false, true]) {
+    for (const [state, mode, pick] of HERO_STATES) {
+      const file = `hero-${state}-${name}${xray ? "-xray" : ""}`;
+      test(`capture ${file}`, async ({ page }) => {
+        if (mode) await page.addInitScript((m) => window.sessionStorage.setItem("fit-stub", m), mode);
+        await page.setViewportSize({ width, height });
+        await page.goto(xray ? "/?xray=1" : "/");
+        const hero = page.locator("section").first();
+        if (pick) {
+          await hero.getByRole("button", { name: pick, exact: true }).click();
+          if (state === "break") {
+            await hero.getByText("FLAGGED", { exact: true }).waitFor();
+            await hero.getByRole("button", { name: "prompt injection" }).click();
+            await hero.getByText("held up of 2").waitFor();
+          } else if (state === "running") {
+            await hero.getByText("running…").waitFor();
+            await hero.getByRole("status").getByText(/evidence\.map/).waitFor();
+          } else {
+            await hero.getByRole("heading", { level: 2 }).waitFor();
+          }
+        }
+        await page.evaluate(() => document.fonts.ready);
+        await hero.screenshot({ path: `test-results/screens/${file}.png` });
+      });
+    }
+  }
+}
