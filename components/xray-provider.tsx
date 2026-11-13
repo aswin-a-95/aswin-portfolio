@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { AskDialog, type AskFocus } from "@/components/ask/ask-dialog";
 import { makeFlagStore } from "@/lib/flag-store";
 import { applyTheme, INTRO_KEY, XRAY_KEY } from "@/lib/xray";
 
@@ -15,8 +17,8 @@ type SiteState = {
   setXray: (on: boolean) => void;
   toggleXray: () => void;
   dismissIntro: () => void;
-  /** Opens "Ask my work". Wired up in Milestone 3; a no-op until then. */
-  openAsk: () => void;
+  /** Opens "Ask my work", optionally on a session-memory question (gap index, or "q"). */
+  openAsk: (focus?: AskFocus) => void;
 };
 
 const SiteContext = createContext<SiteState | null>(null);
@@ -33,13 +35,39 @@ export function XrayProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggleXray = useCallback(() => setXray(!xrayStore.get()), [setXray]);
   const dismissIntro = useCallback(() => introStore.set(true), []);
-  const openAsk = useCallback(() => {}, []);
+
+  // Ask stays open only on the page it was opened on, so navigating away closes it.
+  const pathname = usePathname();
+  const [ask, setAsk] = useState<{ path: string; focus?: AskFocus } | null>(null);
+  const askOpen = ask !== null && ask.path === pathname;
+  const openAsk = useCallback((focus?: AskFocus) => setAsk({ path: pathname, focus }), [pathname]);
+  const closeAsk = useCallback(() => setAsk(null), []);
+
+  // ⌘K / Ctrl+K opens Ask from anywhere; Esc closes it.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (!askOpen) openAsk();
+      } else if (e.key === "Escape" && askOpen) {
+        e.preventDefault();
+        closeAsk();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [askOpen, openAsk, closeAsk]);
 
   const value = useMemo(
     () => ({ xray, introSeen, setXray, toggleXray, dismissIntro, openAsk }),
     [xray, introSeen, setXray, toggleXray, dismissIntro, openAsk],
   );
-  return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;
+  return (
+    <SiteContext.Provider value={value}>
+      {children}
+      {askOpen && <AskDialog focus={ask.focus} onClose={closeAsk} />}
+    </SiteContext.Provider>
+  );
 }
 
 export function useSite(): SiteState {

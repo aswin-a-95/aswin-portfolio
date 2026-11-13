@@ -68,7 +68,7 @@ export function Nav({ current }: { current: NavCurrent }) {
           </button>
           <button
             type="button"
-            onClick={openAsk}
+            onClick={() => openAsk()}
             className="inline-flex min-h-11 cursor-pointer items-center gap-[10px] rounded-[10px] border-0 bg-btn-bg px-[14px] py-[6px] font-sans text-[14px] font-semibold text-btn-ink"
           >
             Ask my work <span className="font-mono text-[12px] font-normal opacity-75">⌘K</span>

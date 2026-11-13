@@ -1,0 +1,275 @@
+import { expect, test, type Page } from "@playwright/test";
+
+// Session memory in the shape the hero writes (Milestone 4). Uses the design's HERO_BAD sample.
+const MEMORY = {
+  role: "Head of Hardware Product · consumer electronics",
+  matchCount: 1,
+  gaps: [
+    { req: "Hardware roadmaps from prototype to mass production", closest: "Not something Aswin has done.", close: "" },
+    { req: "Retail channel P&L", closest: "Runs Dhee's, a direct-to-consumer brand. Not retail, not hardware.", close: "" },
+  ],
+};
+
+const askButton = (page: Page) => page.getByRole("navigation", { name: "Main" }).getByRole("button", { name: /^Ask my work/ });
+const dialog = (page: Page) => page.getByRole("dialog", { name: "Ask my work" });
+const input = (page: Page) => page.getByRole("textbox", { name: "Ask a question about Aswin's work" });
+const status = (page: Page) => dialog(page).getByRole("status");
+
+async function open(page: Page, path = "/") {
+  await page.goto(path);
+  await askButton(page).click();
+  await expect(dialog(page)).toBeVisible();
+}
+
+test.describe("open, close and focus", () => {
+  test("Nav button opens it with the input focused; Esc closes and focus returns", async ({ page }) => {
+    await open(page);
+    await expect(input(page)).toBeFocused();
+    await expect(input(page)).toHaveAttribute("maxlength", "1000");
+    await expect(dialog(page)).toHaveAttribute("aria-modal", "true");
+    await page.keyboard.press("Escape");
+    await expect(dialog(page)).toHaveCount(0);
+    await expect(askButton(page)).toBeFocused();
+  });
+
+  for (const combo of ["Meta+k", "Control+k"]) {
+    test(`${combo} opens it from anywhere; ✕ closes it`, async ({ page }) => {
+      await page.goto("/about");
+      await page.getByRole("link", { name: "Build log" }).first().focus();
+      await page.keyboard.press(combo);
+      await expect(dialog(page)).toBeVisible();
+      await expect(input(page)).toBeFocused();
+      await dialog(page).getByRole("button", { name: "Close" }).click();
+      await expect(dialog(page)).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "Build log" }).first()).toBeFocused();
+    });
+  }
+
+  test("clicking the scrim doesn't close it", async ({ page }) => {
+    await open(page);
+    await page.mouse.click(20, 400);
+    await expect(dialog(page)).toBeVisible();
+  });
+
+  test("page behind is inert and doesn't scroll; Tab stays in the dialog", async ({ page }) => {
+    await open(page);
+    expect(await page.locator("main").evaluate((el) => el.closest("[inert]") !== null)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe("hidden");
+    // Shift+Tab from the input wraps to the last control, Tab from there back to the first.
+    await page.keyboard.press("Shift+Tab");
+    await expect(dialog(page).getByRole("link", { name: "About · resume" })).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(input(page)).toBeFocused();
+    for (let i = 0; i < 20; i++) {
+      await page.keyboard.press("Tab");
+      expect(await page.evaluate(() => !!document.activeElement?.closest("[role=dialog]"))).toBe(true);
+    }
+    await page.keyboard.press("Escape");
+    expect(await page.locator("main").evaluate((el) => el.closest("[inert]") !== null)).toBe(false);
+    expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe("");
+  });
+
+  test("Jump to navigates and closes", async ({ page }) => {
+    await open(page);
+    await dialog(page).getByRole("link", { name: "Build log" }).click();
+    await expect(page).toHaveURL(/\/log$/);
+    await expect(dialog(page)).toHaveCount(0);
+    await expect(dialog(page).getByRole("link", { name: "CloudEagle case study" })).toHaveCount(0);
+  });
+});
+
+test.describe("before a question", () => {
+  const SUGGESTIONS: [string, string[]][] = [
+    ["/", ["Has he worked on APIs?", "What's his biggest platform win?", "Has he shipped LLM features at a company?", "Has he led a hardware launch?"]],
+    ["/work/cloudeagle", ["Why are safeguards the centrepiece?", "What failed first?", "Is this CloudEagle's product?", "Has he shipped LLM features at a company?"]],
+    ["/work", ["Why are safeguards the centrepiece?", "What failed first?", "Is this CloudEagle's product?", "Has he shipped LLM features at a company?"]],
+    ["/log/integrations-experience-is-agent-experience", ["What's he building now?", "Has he worked on APIs?", "Has he shipped LLM features at a company?"]],
+    ["/about", ["Has he worked on APIs?", "What's his healthcare experience?", "What's his biggest platform win?", "Has he led a hardware launch?"]],
+  ];
+  for (const [path, qs] of SUGGESTIONS) {
+    test(`suggestions on ${path}`, async ({ page }) => {
+      await open(page, path);
+      const section = dialog(page).locator("div", { has: page.getByText("Suggested for this page", { exact: true }) }).last();
+      await expect(section.getByRole("button")).toHaveText(qs.map((q) => `${q}ask ↵`));
+    });
+  }
+
+  test("Break my AI chips and Jump to links", async ({ page }) => {
+    await open(page);
+    for (const chip of ["prompt injection", "something he hasn't done", "conflicting info", "ambiguous ask"]) {
+      await expect(dialog(page).getByRole("button", { name: chip, exact: true })).toBeVisible();
+    }
+    await expect(dialog(page).getByRole("link", { name: "CloudEagle case study" })).toHaveAttribute("href", "/work/cloudeagle");
+    await expect(dialog(page).getByRole("link", { name: "Build log" })).toHaveAttribute("href", "/log");
+    await expect(dialog(page).getByRole("link", { name: "About · resume" })).toHaveAttribute("href", "/about");
+  });
+
+  test("no session memory box without a fit check", async ({ page }) => {
+    await open(page);
+    await expect(dialog(page).getByText("CONTINUING FROM YOUR FIT CHECK · SESSION MEMORY")).toHaveCount(0);
+    await expect(dialog(page).getByRole("button", { name: "Forget this" })).toHaveCount(0);
+  });
+});
+
+test.describe("session memory", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((m) => {
+      if (!sessionStorage.getItem("memory-set")) {
+        sessionStorage.setItem("fit-memory", JSON.stringify(m));
+        sessionStorage.setItem("memory-set", "1");
+      }
+    }, MEMORY);
+  });
+
+  test("shows the fit check's role and gaps, answers from it, and Forget this clears it", async ({ page }) => {
+    await open(page);
+    const box = dialog(page).locator("div", { has: page.getByText("CONTINUING FROM YOUR FIT CHECK · SESSION MEMORY") }).first();
+    await expect(box).toContainText("Head of Hardware Product · consumer electronics · 1 matches · 2 gaps");
+    await expect(box).toContainText("Held for this session only. Pasted job descriptions are not stored.");
+    await expect(box.getByRole("button", { name: /^About the gap: / })).toHaveCount(2);
+
+    await box.getByRole("button", { name: /About the gap: Hardware roadmaps/ }).click();
+    await expect(status(page)).toContainText("› About the gap: Hardware roadmaps from prototype to mass production");
+    await expect(status(page)).toContainText("NOT SOMETHING ASWIN HAS DONE");
+    await expect(status(page)).toContainText("Not something Aswin has done.");
+    await expect(status(page).getByRole("link", { name: "Your fit check →" })).toBeVisible();
+
+    await status(page).getByRole("button", { name: "← Ask another" }).click();
+    await dialog(page).getByRole("button", { name: /What should I ask him about these gaps\?/ }).click();
+    await expect(status(page)).toContainText(
+      "Ask how he would ramp up on: Hardware roadmaps from prototype to mass production; Retail channel P&L. Each case study also ends with questions to ask him.",
+    );
+
+    await status(page).getByRole("button", { name: "← Ask another" }).click();
+    await dialog(page).getByRole("button", { name: "Forget this" }).click();
+    await expect(dialog(page).getByText("CONTINUING FROM YOUR FIT CHECK · SESSION MEMORY")).toHaveCount(0);
+    expect(await page.evaluate(() => sessionStorage.getItem("fit-memory"))).toBeNull();
+  });
+
+  test("a non-not-done gap is PARTIAL", async ({ page }) => {
+    await open(page);
+    await dialog(page).getByRole("button", { name: /About the gap: Retail channel P&L/ }).click();
+    await expect(status(page)).toContainText("PARTIAL · STATED PLAINLY");
+  });
+});
+
+test.describe("answers", () => {
+  test("loading line, then a plain answer with sources; Ask another goes back", async ({ page }) => {
+    await open(page);
+    await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
+    await expect(status(page)).toHaveAttribute("aria-live", "polite");
+    await expect(status(page)).toContainText("› Has he worked on APIs?");
+    await expect(status(page)).toContainText("Answering from the knowledge base…");
+    await expect(dialog(page).getByRole("button", { name: "Ask", exact: true })).toBeDisabled();
+    await expect(status(page)).toContainText("Yes. His platform PM work is APIs and integrations");
+    await expect(status(page)).not.toContainText("Answering from the knowledge base…");
+    await expect(dialog(page).getByRole("button", { name: "Ask", exact: true })).toBeEnabled();
+    await expect(status(page).getByRole("link", { name: "About · career →" })).toHaveAttribute("href", "/about");
+    await expect(status(page).getByRole("link", { name: "Case study · Platform & API work →" })).toBeVisible();
+    await status(page).getByRole("button", { name: "← Ask another" }).click();
+    await expect(dialog(page).getByText("Suggested for this page")).toBeVisible();
+    await expect(input(page)).toBeFocused();
+  });
+
+  test("todo box for content Aswin still has to supply", async ({ page }) => {
+    await open(page);
+    await dialog(page).getByRole("button", { name: /What's his biggest platform win\?/ }).click();
+    const todoBox = status(page).getByText("[Biggest measured platform win, one line, with the number]");
+    await expect(todoBox).toBeVisible();
+    await expect(todoBox).toHaveCSS("border-top-style", "dotted");
+  });
+
+  const TONES: [string, string, string, string][] = [
+    ["prompt injection", "REFUSED · PROMPT INJECTION", "solid", "1px"],
+    ["something he hasn't done", "NOT SOMETHING ASWIN HAS DONE", "dashed", "1.5px"],
+    ["conflicting info", "CONFLICT FLAGGED · GOING WITH THE RECORD", "dashed", "1.5px"],
+    ["ambiguous ask", "NEEDS CLARIFYING", "solid", "1px"],
+  ];
+  for (const [chip, label, style, width] of TONES) {
+    test(`Break my AI: ${chip}`, async ({ page }) => {
+      await open(page);
+      await dialog(page).getByRole("button", { name: chip, exact: true }).click();
+      const labelEl = status(page).getByText(label, { exact: true });
+      await expect(labelEl).toBeVisible();
+      const card = labelEl.locator("..");
+      await expect(card).toHaveCSS("border-top-style", style);
+      // Chrome draws 1.5px borders as 1px at DPR 1, so check the declared width.
+      if (width === "1.5px") await expect(card).toHaveClass(/border-\[1\.5px\]/);
+      else await expect(card).toHaveCSS("border-top-width", "1px");
+    });
+  }
+
+  test("free text gets unknown with a Contact chip", async ({ page }) => {
+    await open(page);
+    await input(page).fill("Does he speak Klingon?");
+    await page.keyboard.press("Enter");
+    await expect(status(page)).toContainText("› Does he speak Klingon?");
+    await expect(status(page)).toContainText(
+      "The knowledge base doesn't cover that, so there's no answer to give. Try a suggested question, or ask Aswin directly.",
+    );
+    await expect(status(page).getByRole("link", { name: "Contact →" })).toHaveAttribute("href", "/#contact");
+    await expect(input(page)).toHaveValue("");
+  });
+
+  test("empty input asks nothing", async ({ page }) => {
+    await open(page);
+    await input(page).fill("   ");
+    await page.keyboard.press("Enter");
+    await expect(status(page)).toHaveCount(0);
+  });
+
+  for (const [mode, copy] of [
+    ["error", "Ask my work couldn't answer this time. Try again, or ask Aswin directly."],
+    ["limited", "That's the limit for questions this hour. Aswin is one message away."],
+  ] as const) {
+    test(`${mode} state`, async ({ page }) => {
+      await page.addInitScript((m) => sessionStorage.setItem("ask-stub", m), mode);
+      await open(page);
+      await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
+      await expect(status(page)).toContainText(copy);
+      await expect(status(page).getByRole("link", { name: "Contact →" })).toHaveAttribute("href", "/#contact");
+      await expect(status(page).getByText(/^kb\.search/)).toHaveCount(0);
+    });
+  }
+
+  test("X-ray trace line shows only in X-ray", async ({ page }) => {
+    await open(page);
+    await dialog(page).getByRole("button", { name: "prompt injection", exact: true }).click();
+    const line = status(page).getByText(/^kb\.search → 1 sources · guardrail fired: guard\.prompt_injection/);
+    await expect(line).toBeHidden();
+    await page.keyboard.press("Escape");
+    await page.goto("/?xray=1");
+    await askButton(page).click();
+    await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
+    await expect(
+      status(page).getByText(
+        "kb.search → 2 sources · guardrail fired: none · answered from the knowledge base · trace [run id] · live usage: cost [logged] · [logged] ms",
+      ),
+    ).toBeVisible();
+  });
+});
+
+test.describe("layout", () => {
+  test("desktop: modal 680 wide, 10vh from the top, 14px radius", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await open(page);
+    const box = (await dialog(page).boundingBox())!;
+    expect(box.width).toBe(680);
+    expect(box.y).toBe(90);
+    expect(box.x).toBe((1440 - 680) / 2);
+    await expect(dialog(page)).toHaveCSS("border-top-left-radius", "14px");
+  });
+
+  test("390px: bottom sheet, full width, 18px top radius", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await open(page);
+    const box = (await dialog(page).boundingBox())!;
+    expect(box.width).toBe(390);
+    expect(Math.round(box.y + box.height)).toBe(844);
+    await expect(dialog(page)).toHaveCSS("border-top-left-radius", "18px");
+    await expect(dialog(page)).toHaveCSS("border-bottom-left-radius", "0px");
+    // The phone artboard's fixed "Ask my work" bottom button is a prototype control: not built.
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: "Ask my work", exact: true })).toHaveCount(0);
+  });
+});
