@@ -194,6 +194,21 @@ test.describe("Break my AI", () => {
     await expect(page.getByLabel("Job description")).toBeVisible();
   });
 
+  test("a failed attempt shows Ask's error line and isn't counted", async ({ page }) => {
+    await stubMode(page, "error");
+    await page.goto("/");
+    await hero(page).getByRole("button", { name: "prompt injection" }).click();
+    await expect(hero(page).getByRole("alert")).toHaveText("Ask my work couldn't answer this time. Try again, or ask Aswin directly.");
+    await expect(hero(page).getByText("held up of 0")).toBeVisible();
+  });
+
+  test("a rate-limited attempt shows Ask's limit line", async ({ page }) => {
+    await stubMode(page, "limited");
+    await page.goto("/");
+    await hero(page).getByRole("button", { name: "ambiguous ask" }).click();
+    await expect(hero(page).getByRole("alert")).toHaveText("That's the limit for questions this hour. Aswin is one message away.");
+  });
+
   test("keeps the last 6 attempts", async ({ page }) => {
     await page.goto("/");
     for (let i = 0; i < 7; i++) {

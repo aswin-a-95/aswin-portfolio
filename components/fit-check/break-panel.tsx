@@ -26,6 +26,7 @@ export const resetButton =
 export function BreakPanel({
   log,
   pending,
+  error,
   xray,
   evalSet,
   onAttack,
@@ -34,6 +35,8 @@ export function BreakPanel({
 }: {
   log: BreakEntry[];
   pending: boolean;
+  /** Ask's error or limit line when the last attempt failed. */
+  error: string | null;
   xray: boolean;
   evalSet: { href: string; todo: string };
   onAttack: (text: string) => void;
@@ -97,6 +100,11 @@ export function BreakPanel({
           Run
         </button>
       </form>
+      {error && (
+        <p role="alert" className="m-0 text-[15px] leading-[1.5] text-muted">
+          {error}
+        </p>
+      )}
       {log.map((l) => (
         <div key={l.id} className="flex flex-col gap-[6px] border-t border-rule pt-3">
           <div className="flex flex-wrap items-center gap-[10px]">

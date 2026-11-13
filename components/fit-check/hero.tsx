@@ -7,6 +7,7 @@ import { FitInput } from "@/components/fit-check/fit-input";
 import { HowBuilt, type HowIBuiltMeta } from "@/components/fit-check/how-built";
 import { Result, type ResultMeta } from "@/components/fit-check/result";
 import { useSite } from "@/components/xray-provider";
+import { ASK_ERROR, ASK_LIMITED } from "@/lib/ask/copy";
 import { sessionMemory } from "@/lib/ask/session-memory";
 import { breakAttempt, runFitCheck } from "@/lib/fit-check/client";
 import {
@@ -47,6 +48,7 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
   const [fallback, setFallback] = useState<FallbackEvent | null>(null);
   const [log, setLog] = useState<BreakEntry[]>([]);
   const [pending, setPending] = useState(0);
+  const [breakError, setBreakError] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const entryId = useRef(0);
@@ -129,10 +131,14 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
     abortRef.current?.abort();
     setPhase("break");
     setPending((n) => n + 1);
+    setBreakError(null);
     const r = await breakAttempt(text);
     setPending((n) => n - 1);
-    // No design for a failed attempt yet (flagged for Milestone 5): nothing is logged.
-    if (r.status !== "ok") return;
+    // A failed or rate-limited attempt isn't logged or counted; Ask's line says why (SPEC §8).
+    if (r.status !== "ok") {
+      setBreakError(r.status === "limited" ? ASK_LIMITED : ASK_ERROR);
+      return;
+    }
     const [verdict, tone] = breakVerdict(r.reply.kind);
     const entry: BreakEntry = {
       id: ++entryId.current,
@@ -187,6 +193,7 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
           <BreakPanel
             log={log}
             pending={pending > 0}
+            error={breakError}
             xray={xray}
             evalSet={resultMeta.evalSet}
             onAttack={attack}
