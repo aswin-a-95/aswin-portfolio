@@ -45,6 +45,8 @@ export function WorkSection({ studies, headingLevel = 2 }: { studies: CaseStudy[
                   <span className="font-mono text-[11px] tracking-[0.06em] text-muted">WHAT I BUILT </span>
                   {c.built}
                 </p>
+                {/* The approval step is amber, as on the phone artboard. Main.dc.html renders it neutral
+                    only because its token set lacks the amber values (Aswin, 2026-11-13). */}
                 {c.flow && (
                   <div className="flex flex-wrap items-center gap-[6px] font-mono text-[12px]">
                     {c.flow.map((f, i) => (
