@@ -26,7 +26,7 @@ import { FitEventSchema, type Drill, type FallbackEvent, type ResultEvent, type 
 
 export type { HowIBuiltMeta };
 
-type Phase = "empty" | "running" | "result" | "badfit" | "break" | "error" | "limited";
+type Phase = "empty" | "running" | "result" | "badfit" | "break" | "error" | "limited" | "budget";
 
 const statusLabel = "m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-muted";
 
@@ -154,7 +154,7 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
 
   const talk = () => rolePrefill.send(role);
   const isResult = (phase === "result" || phase === "badfit") && result !== null;
-  const showFallback = (phase === "error" || phase === "limited") && fallback !== null;
+  const showFallback = (phase === "error" || phase === "limited" || phase === "budget") && fallback !== null;
   const linkRun = isLink(jd);
 
   let nudge = "";

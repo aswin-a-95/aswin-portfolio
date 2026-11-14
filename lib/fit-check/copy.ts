@@ -70,7 +70,7 @@ export function isLink(jd: string): boolean {
 }
 
 type FallbackCopy = { tag: string; title: string; text: string };
-export const FALLBACK_COPY: { error: FallbackCopy; limited: FallbackCopy; kb: FallbackCopy; rate: FallbackCopy } = {
+export const FALLBACK_COPY: { error: FallbackCopy; limited: FallbackCopy; budget: FallbackCopy; kb: FallbackCopy; rate: FallbackCopy } = {
   error: {
     tag: "Fit check · error",
     title: "The fit check couldn't finish this time.",
@@ -80,6 +80,12 @@ export const FALLBACK_COPY: { error: FallbackCopy; limited: FallbackCopy; kb: Fa
     tag: "Fit check · daily limit reached",
     title: "That's today's limit for live checks.",
     text: "Live checks are capped per visitor per day to keep the AI bill predictable. The precomputed matches below come from the same knowledge base, and Aswin is one message away.",
+  },
+  // Approved in M5 planning: the monthly AI budget is spent (SPEC §10).
+  budget: {
+    tag: "Fit check · monthly budget reached",
+    title: "Live checks are paused for this month.",
+    text: "This site caps what it spends on AI each month, and that cap is reached. The precomputed matches below come from the same knowledge base, and Aswin is one message away.",
   },
   kb: {
     tag: "Failure drill · knowledge base offline",

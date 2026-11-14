@@ -88,11 +88,11 @@ export const TraceLineSchema = z.object({
 });
 export type TraceLine = z.infer<typeof TraceLineSchema>;
 
-/** Terminal event when the run can't produce a result. Not named in SPEC §7 (M5 contract). */
+/** Terminal event when the run can't produce a result (SPEC §7). */
 export const FallbackEventSchema = z.object({
   type: z.literal("fallback"),
-  /** `error` → the error state; `limited` → the rate-limited state. */
-  reason: z.enum(["error", "limited"]),
+  /** `error` → the error state; `limited` → the rate-limited state; `budget` → the monthly AI budget is spent. */
+  reason: z.enum(["error", "limited", "budget"]),
   drill: z.enum(DRILLS).optional(),
   runId: z.string().optional(),
   trace: z.array(TraceLineSchema).optional(),
