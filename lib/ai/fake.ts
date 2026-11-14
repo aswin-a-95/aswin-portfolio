@@ -1,6 +1,6 @@
 import { MockLanguageModelV4 } from "ai/test";
 import { WORK_ATTACKS, WORK_SAFE } from "@/content/case-studies/cloudeagle-attacks";
-import { ASK_QUESTIONS } from "@/lib/ask/copy";
+import { ASK_QUESTIONS, CTX_QUESTION, gapQuestion } from "@/lib/ask/copy";
 import { ASK_ANSWERS } from "@/lib/ask/fixtures";
 import { HERO_SAMPLES, PASTED_ROLE } from "@/lib/fit-check/copy";
 import { BREAK_REPLIES, HERO_BAD, HERO_FIT } from "@/lib/fit-check/fixtures";
@@ -20,6 +20,9 @@ import { ASK_SYSTEM, EVIDENCE_MAP_SYSTEM, JD_PARSE_SYSTEM, SANDBOX_SYSTEM } from
  */
 
 export class FakeModelError extends Error {}
+
+/** Vitest runs many calls per test, so it skips the delay. */
+export const FAKE_LATENCY_MS = process.env.VITEST ? 0 : 600;
 
 const failedOnce = new Set<string>();
 
@@ -101,20 +104,44 @@ const ASK_SOURCE_IDS: Record<string, string> = {
   "Your fit check": "memory",
 };
 
+/** Questions whose design answer cites a specific KB entry rather than a page. */
+const SOURCES_BY_QUESTION: Partial<Record<keyof typeof ASK_QUESTIONS, string[]>> = {
+  win: ["fact-platform-win"],
+  health: ["healthcare-integrations"],
+};
+
+/** The design's ctxAnswer for session-memory questions (Ask.dc.html). */
+function fromMemory(q: string, memory: string): AskOutput | null {
+  const gaps = memory
+    .split("\n")
+    .filter((l) => l.startsWith("gap: "))
+    .map((l) => {
+      const [req, closest = "", close = ""] = l.slice(5).split(" | ").map((x) => x.replace(/^(closest|close): /, ""));
+      return { req, closest, close };
+    });
+  if (q === CTX_QUESTION) {
+    return { kind: "fit", text: `Ask how he would ramp up on: ${gaps.map((g) => g.req).join("; ")}. Each case study also ends with questions to ask him.`, sourceIds: ["memory", "fact-ai-work"], guard: "none" };
+  }
+  const g = gaps.find((x) => gapQuestion(x.req) === q);
+  if (!g) return null;
+  const none = /^Not something Aswin has done/.test(g.closest);
+  return { kind: none ? "none" : "gap", text: g.closest + (g.close ? ` ${g.close}` : ""), sourceIds: ["memory", "fact-focus"], guard: none ? "guard.not_done" : "guard.gap_stated" };
+}
+
 function ask(user: string): AskOutput {
   const q = between(user, "question").trim();
+  const memory = between(user, "session_memory");
+  const ctx = memory ? fromMemory(q, memory) : null;
+  if (ctx) return ctx;
   const attack = BREAK_REPLIES[q];
   if (attack) return { kind: attack.kind, text: attack.text, sourceIds: attack.kind === "none" ? ["fact-focus"] : attack.kind === "conflict" ? ["fact-llm-experience"] : [], guard: attack.guard as AskOutput["guard"] };
   const id = (Object.keys(ASK_QUESTIONS) as (keyof typeof ASK_QUESTIONS)[]).find((k) => ASK_QUESTIONS[k] === q);
   if (!id) {
-    if (/<session_memory>/.test(user)) {
-      return { kind: "fit", text: "Ask how he would ramp up on the gaps from your fit check.", sourceIds: ["memory"], guard: "none" };
-    }
     return { kind: "unknown", text: ASK_ANSWERS.unknown.text, sourceIds: [], guard: "none" };
   }
   const f = ASK_ANSWERS[id];
   const guard = (f.guard ?? (f.kind === "gap" ? "guard.gap_stated" : "none")) as AskOutput["guard"];
-  const sourceIds = [...new Set(f.sources.map((s) => ASK_SOURCE_IDS[s.label]).filter((x): x is string => !!x))];
+  const sourceIds = SOURCES_BY_QUESTION[id] ?? [...new Set(f.sources.map((s) => ASK_SOURCE_IDS[s.label]).filter((x): x is string => !!x))];
   return { kind: f.kind, text: f.text, sourceIds, guard };
 }
 
@@ -130,6 +157,9 @@ export function fakeModel(): MockLanguageModelV4 {
     modelId: "fake",
     doGenerate: async (options) => {
       const { system, user } = textOf(options.prompt);
+      // Roughly the prototype's pace, so loading and running states are visible. Real durations are
+      // still measured around it; nothing reports this delay as anything else.
+      await new Promise((r) => setTimeout(r, FAKE_LATENCY_MS));
       if (user.includes("[[fake:error]]")) throw new FakeModelError("fake: forced error");
       const key = system.slice(0, 40) + user;
       if (user.includes("[[fake:fail-once]]") && !failedOnce.has(key)) {

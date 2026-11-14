@@ -9,6 +9,8 @@ export type Project = {
   evidence: string[];
   label: string;
   href: string;
+  /** Search tags for kb.search (SPEC §6), not claims. Taken from how the design maps requirements to this entry. */
+  tags?: string[];
 };
 
 export const projects: Project[] = [
@@ -20,6 +22,7 @@ export const projects: Project[] = [
     evidence: [todo("[evidence]")], // TODO(aswin)
     label: "Case study · CloudEagle concept",
     href: "/work/cloudeagle",
+    tags: ["ai agent", "guardrails", "safeguards", "integrations", "evals"],
   },
   {
     id: "job-search-agent",
@@ -29,6 +32,7 @@ export const projects: Project[] = [
     evidence: [todo("[evidence]")], // TODO(aswin)
     label: "Case study · Job-search agent",
     href: "/work/job-search-agent",
+    tags: ["ai agent", "human-in-the-loop", "approval", "workflows"],
   },
   {
     id: "dhees-instagram-agent",
@@ -38,6 +42,7 @@ export const projects: Project[] = [
     evidence: [todo("[evidence]")], // TODO(aswin)
     label: "Case study · Dhee's agent",
     href: "/work/dhees-instagram-agent",
+    tags: ["ai agent", "business stakeholders", "adoption"],
   },
   {
     id: "platform-api-work",

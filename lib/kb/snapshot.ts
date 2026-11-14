@@ -22,6 +22,8 @@ export const KbEntrySchema = z.object({
   href: z.string().min(1),
   /** The entry as the model sees it. */
   text: z.string().min(1),
+  /** Extra words kb.search matches on (not shown to the model as facts). */
+  tags: z.array(z.string()),
   /** Not-done entries: what the gap card says. */
   notDone: z.object({ closest: z.string().optional(), note: z.string() }).optional(),
   /** Placeholders still in the entry (dev and preview only; production drops these entries). */
@@ -37,6 +39,7 @@ function build(): KbEntry[] {
       label: r.label,
       href: r.href,
       text: `${r.title} at ${r.company} (${r.years}). ${r.summary}`,
+      tags: r.tags ?? [],
       todos: todosIn(r),
     })),
     ...projects.map((p) => ({
@@ -45,6 +48,7 @@ function build(): KbEntry[] {
       label: p.label,
       href: p.href,
       text: `${p.title} (${p.status}). ${p.summary} Evidence: ${p.evidence.join(" ")}`,
+      tags: p.tags ?? [],
       todos: todosIn(p),
     })),
     ...notDone.map((n) => ({
@@ -54,9 +58,10 @@ function build(): KbEntry[] {
       href: "/about",
       text: `NOT DONE: ${n.topic}.${n.closest ? ` Closest: ${n.closest}` : ""}`,
       notDone: { closest: n.closest, note: n.note },
+      tags: [],
       todos: todosIn(n),
     })),
-    ...facts.map((f) => ({ id: f.id, scope: "facts" as const, label: f.label, href: f.href, text: f.text, todos: todosIn(f) })),
+    ...facts.map((f) => ({ id: f.id, scope: "facts" as const, label: f.label, href: f.href, text: f.text, tags: [], todos: todosIn(f) })),
   ];
   const kept = HIDE_UNPROVEN ? entries.filter((e) => !containsTodo(e)) : entries;
   const parsed = z.array(KbEntrySchema).parse(kept);

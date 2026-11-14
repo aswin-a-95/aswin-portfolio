@@ -1,4 +1,5 @@
-import { test } from "@playwright/test";
+import { FAKE, test } from "./fixtures";
+import { HERO_SAMPLES } from "@/lib/fit-check/copy";
 
 // Not assertions: full-page captures for the side-by-side check against /design/screenshots.
 const PAGES = ["/", "/work", "/work/cloudeagle", "/work/job-search-agent", "/log", "/log/integrations-experience-is-agent-experience", "/about"];
@@ -51,27 +52,32 @@ for (const [name, width, height] of SIZES) {
 }
 
 // Fit-check hero, for the side-by-side check against HeroStates and Mobile.
-// [state, stub mode, action]: the mock streams the same events as /api/run.
+// [state, pasted JD with an AI_FAKE marker, chip]: the real /api/run under AI_FAKE.
 const HERO_STATES: [string, string | null, string | null][] = [
   ["empty", null, null],
-  ["running", "hold", "Senior Platform PM"],
+  ["running", `${HERO_SAMPLES[0].jd} ${FAKE.hold}`, null],
   ["result", null, "Senior Platform PM"],
   ["badfit", null, "A bad fit, on purpose"],
   ["break", null, "conflicting info"],
-  ["error", "error", "Senior Platform PM"],
-  ["limited", "limited", "Senior Platform PM"],
+  ["error", `${HERO_SAMPLES[0].jd} ${FAKE.error}`, null],
+  ["limited", `${HERO_SAMPLES[0].jd} ${FAKE.limited}`, null],
+  ["budget", `${HERO_SAMPLES[0].jd} ${FAKE.budget}`, null],
   ["drill-kb", null, "knowledge base offline"],
 ];
 for (const [name, width, height] of SIZES) {
   for (const xray of [false, true]) {
-    for (const [state, mode, pick] of HERO_STATES) {
+    for (const [state, jd, pick] of HERO_STATES) {
       const file = `hero-${state}-${name}${xray ? "-xray" : ""}`;
       test(`capture ${file}`, async ({ page }) => {
-        if (mode) await page.addInitScript((m) => window.sessionStorage.setItem("fit-stub", m), mode);
         await page.setViewportSize({ width, height });
         await page.goto(xray ? "/?xray=1" : "/");
         const hero = page.locator("section").first();
-        if (pick) {
+        if (jd) {
+          await page.getByLabel("Job description").fill(jd);
+          await page.getByRole("button", { name: "Check fit" }).click();
+          if (state === "running") await hero.getByRole("status").getByText(/evidence\.map/).waitFor();
+          else await hero.getByRole("heading", { level: 2 }).waitFor();
+        } else if (pick) {
           await hero.getByRole("button", { name: pick, exact: true }).click();
           if (state === "break") {
             await hero.getByText("FLAGGED", { exact: true }).waitFor();

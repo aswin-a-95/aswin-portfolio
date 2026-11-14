@@ -1,4 +1,5 @@
 import { siteMeta } from "@/content/site-meta";
+import { todo } from "@/lib/content";
 
 export type Fact = { id: string; text: string; label: string; href: string };
 
@@ -32,5 +33,11 @@ export const facts: Fact[] = [
     label: "About · career",
     href: "/about",
   },
-  // TODO(aswin): add facts as the knowledge base grows (biggest measured platform win, healthcare systems and outcome).
+  {
+    id: "fact-platform-win",
+    text: todo("[Biggest measured platform win, one line, with the number]"), // TODO(aswin): Ask.dc.html "What's his biggest platform win?"
+    label: "About · career",
+    href: "/about",
+  },
+  // TODO(aswin): add facts as the knowledge base grows.
 ];

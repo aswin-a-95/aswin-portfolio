@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, FAKE, test, type Page } from "./fixtures";
 
 // Session memory in the shape the hero writes (Milestone 4). Uses the design's HERO_BAD sample.
 const MEMORY = {
@@ -221,11 +221,12 @@ test.describe("answers", () => {
   for (const [mode, copy] of [
     ["error", "Ask my work couldn't answer this time. Try again, or ask Aswin directly."],
     ["limited", "That's the limit for questions this hour. Aswin is one message away."],
+    ["budget", "Ask my work is paused for this month: the AI budget is spent. Aswin is one message away."],
   ] as const) {
     test(`${mode} state`, async ({ page }) => {
-      await page.addInitScript((m) => sessionStorage.setItem("ask-stub", m), mode);
       await open(page);
-      await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
+      await input(page).fill(`Has he worked on APIs? ${FAKE[mode]}`);
+      await page.keyboard.press("Enter");
       await expect(status(page)).toContainText(copy);
       await expect(status(page).getByRole("link", { name: "Contact →" })).toHaveAttribute("href", "/#contact");
       await expect(status(page).getByText(/^kb\.search/)).toHaveCount(0);
@@ -243,7 +244,7 @@ test.describe("answers", () => {
     await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
     await expect(
       status(page).getByText(
-        "kb.search → 2 sources · guardrail fired: none · answered from the knowledge base · trace [run id] · live usage: cost [logged] · [logged] ms",
+        /^kb\.search → 2 sources · guardrail fired: none · answered from the knowledge base · trace run_[0-9a-f]{12} · live usage: cost \$0\.0000 · \d+ ms$/,
       ),
     ).toBeVisible();
   });

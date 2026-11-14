@@ -9,6 +9,8 @@ import type { RunRow } from "@/lib/server/log-run";
 import { resetMemoryLimits } from "@/lib/server/ratelimit";
 import { handleRun, type HandleDeps } from "@/lib/run/handle";
 import { ASK_UNKNOWN_TEXT } from "@/lib/run/guards";
+import { kbSearch } from "@/lib/kb/search";
+import { getModel } from "@/lib/ai/model";
 
 const ENV: ServerEnv = {
   AI_FAKE: "1",
@@ -62,8 +64,7 @@ describe("/api/run · fit", () => {
     if (r.type !== "result") return;
     expect(r.role).toBe(HERO_SAMPLES[0].role);
     // Matches stand only where kb.search found the cited source, so the count follows the KB.
-    expect(r.verdict).toBe(`Strong on ${r.matches.length} of 6 requirements.`);
-    expect(r.matches.length).toBeGreaterThanOrEqual(3);
+    expect(r.verdict).toBe("Strong on 4 of 6 requirements.");
     expect(r.retries).toBe(0);
     expect(r.trace).toMatchObject({ runId: (evs[0] as { runId: string }).runId, costUsd: 0, model: "Fake · test model (AI_FAKE)" });
     expect(r.matches.map((m) => m.source)).toContain("Case study · CloudEagle concept");
@@ -74,12 +75,22 @@ describe("/api/run · fit", () => {
     expect(evs.find((e) => e.type === "step" && e.tool === "fetch_url" && e.status !== "running")).toMatchObject({ status: "skipped", detail: "skipped" });
   });
 
+  it("a link takes the fetch_url branch and parses the fetched page", async () => {
+    const fetchPage = vi.fn(async () => HERO_SAMPLES[1].jd);
+    const d: HandleDeps = { ...deps, fit: { fetchPage, search: async (r) => kbSearch(r), model: async () => getModel("fit", ENV) } };
+    const evs = await fit({ jd: "https://jobs.example.com/pm-agents" }, d);
+    expect(fetchPage).toHaveBeenCalledWith("https://jobs.example.com/pm-agents", expect.any(AbortSignal));
+    expect(evs.find((e) => e.type === "step" && e.tool === "fetch_url" && e.status === "done")).toMatchObject({ detail: "fetched" });
+    expect(terminal(evs)).toMatchObject({ type: "result", role: HERO_SAMPLES[1].role });
+    expect(rows[0].branch).toBe("link");
+  });
+
   it("the bad-fit sample: not-done topics are gaps, never matches, and the verdict is not strong", async () => {
     const r = terminal(await fit({ jd: HERO_SAMPLES[3].jd }));
     expect(r.type).toBe("result");
     if (r.type !== "result") return;
     // The match count depends on what proof the KB holds; the verdict is never "Strong".
-    expect(r.verdict).toMatch(/^Not a strong fit: [01] of 5 requirements\.$/);
+    expect(r.verdict).toBe("Not a strong fit: 1 of 5 requirements.");
     expect(r.matches.some((m) => /hardware|manufactur|retail/i.test(m.req))).toBe(false);
     expect(r.note).toBe("Better you hear it from this site than in round two.");
     const hw = r.gaps.find((g) => g.req.startsWith("Hardware roadmaps"));

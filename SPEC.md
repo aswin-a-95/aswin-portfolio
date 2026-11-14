@@ -125,8 +125,8 @@ Everything the AI may say comes from typed content in `/content/kb/`:
 ```
 
 - Each entry has a stable `id`, a human `label` for source chips (e.g. "Case study · CloudEagle concept", "Role · About") and an `href`.
-- **`kb.search`** is a deterministic server function, not the model: it scores entries by keyword/tag overlap with the requirements and returns the top entries from the scopes `roles`, `projects`, `not_done`. No embeddings.
-- `kb.search` reads from a build-time JSON snapshot. Keep a last-good copy for the fallback drill.
+- **`kb.search`** is a deterministic server function, not the model: it scores entries by keyword/tag overlap with the requirements and returns the top entries from the scopes `roles`, `projects`, `not_done`. No embeddings. Optional `tags` on roles and projects are search words only, never claims.
+- `kb.search` reads a frozen, Zod-validated snapshot of `/content/kb` built into the server bundle (`lib/kb/snapshot.ts`). Production leaves out entries that still hold a `TODO(aswin)` placeholder. The last-good copy for the fallback drill is the precomputed `fallback.ts`.
 
 ## 7. Fit check — `/api/run` with `mode: "fit"`
 
@@ -144,7 +144,7 @@ The design's honest note is a requirement: **"the fit check is a fixed pipeline 
 | 6 | `guard.honesty` | Deterministic: verdict counts match the cards, no percentages or scores, not-done topics never appear as matches | "Gaps stated, score not inflated" · `guard.honesty(verdict, gaps)` |
 | 7 | `verdict.compose` | Deterministic template: "Strong on {m} of {n} requirements." when m/n ≥ 0.5, else "Not a strong fit: {m} of {n} requirements." Note line as in the design | "Writing the verdict" · `verdict.compose(cards)` |
 
-- **Transport:** NDJSON or SSE events: an optional `{type:"start", runId}`, then `{type:"step", tool, status, detail, ms}` (`status`: `running` | `done` | `skipped`), then exactly one terminal event: `{type:"result", …}` or `{type:"fallback", reason, drill?, runId?, trace?}`. `reason` is `error` (the error state) or `limited` (the rate-limited state). `trace` is the X-ray fallback trace (`HERO_DRILL_TRACE` shape: `[{mark, text, bad, timed, ms?}]`). The running state in the design ("Agent · streaming from the live run") must reflect these real events, never a timer. Zod schemas: `lib/fit-check/types.ts`.
+- **Transport:** NDJSON or SSE events: an optional `{type:"start", runId}`, then `{type:"step", tool, status, detail, ms}` (`status`: `running` | `done` | `skipped`), then exactly one terminal event: `{type:"result", …}` or `{type:"fallback", reason, drill?, runId?, trace?}`. `reason` is `error` (the error state), `limited` (the rate-limited state) or `budget` (the monthly budget is spent, §10). `trace` is the X-ray fallback trace (`HERO_DRILL_TRACE` shape: `[{mark, text, bad, timed, ms?}]`). The running state in the design ("Agent · streaming from the live run") must reflect these real events, never a timer. Zod schemas: `lib/fit-check/types.ts`.
 - **Retry:** one retry on a failed LLM or `kb.search` call. If `kb.search` still fails, `guard.no_sources` stops the run and the UI shows the fallback state ("The knowledge base didn't answer, so the AI won't guess.").
 - **Result shape** = `HERO_FIT` / `HERO_BAD` in `Hero.dc.html`: `verdict`, `note`, `matches[{req, evidence, source, href}]`, `gaps[{req, closest, close}]`, plus `role` (a short role title that `jd.parse` extracts; the hero shows it, stores it in session memory and pre-fills Contact with it), `retries` (0 or 1) and `trace {runId, costUsd, ms, model}`. Not-done gaps use "Not something Aswin has done." and leave `close` empty.
 - **Samples:** the 4 sample chips (3 fits + "A bad fit, on purpose") send their JD text from the design through the real pipeline.
@@ -160,8 +160,12 @@ The design's honest note is a requirement: **"the fit check is a fixed pipeline 
 - `kind` → label and colour exactly as `ASK_LABELS`: gap "PARTIAL · STATED PLAINLY" (amber), none "NOT SOMETHING ASWIN HAS DONE" (amber), refuse "REFUSED · PROMPT INJECTION" (accent), conflict "CONFLICT FLAGGED · GOING WITH THE RECORD" (amber), clarify "NEEDS CLARIFYING" (muted). `unknown` → "The knowledge base doesn't cover that, so there's no answer to give. Try a suggested question, or ask Aswin directly." with a Contact chip.
 - Guard names shown in X-ray: `guard.prompt_injection`, `guard.not_done`, `guard.conflicting_info`, `guard.ambiguous_ask`, `guard.gap_stated`, or "none · answered from the knowledge base".
 - Every factual answer cites ≥ 1 KB source; a server check drops uncited claims to `unknown`.
-- **Break my AI on the hero** uses the same mode. The UI shows the verdicts from the design: REFUSED / STATED / FLAGGED / CLARIFIED / ANSWERED (mapping: refuse→REFUSED, none→STATED, conflict→FLAGGED, clarify→CLARIFIED, others→ANSWERED), the "{held} held up of {attempts}" counter (session only, last 6 attempts) and the X-ray guard line. A failed or rate-limited attempt isn't logged or counted; it shows Ask's error or limit line below the input.
-- **Case study "Try to break it"** (`Work.dc.html`) uses `mode: "sandbox"` with a prompt that plays the CloudEagle integration builder and returns `{verdict: BLOCKED|FLAGGED|CLARIFIED|DRAFTED, reason, guard}`. The six preset attacks and their expected verdicts are `WORK_ATTACKS`; they are also eval cases.
+- **Break my AI on the hero** uses the same mode. The UI shows the verdicts from the design: REFUSED / STATED / FLAGGED / CLARIFIED / ANSWERED (mapping: refuse→REFUSED, none→STATED, conflict→FLAGGED, clarify→CLARIFIED, others→ANSWERED), the "{held} held up of {attempts}" counter (session only, last 6 attempts) and the X-ray guard line. A failed, rate-limited or budget-stopped attempt isn't logged or counted; it shows Ask's error, limit or budget line below the input. Ask's budget line: "Ask my work is paused for this month: the AI budget is spent. Aswin is one message away."
+- **Case study "Try to break it"** (`Work.dc.html`) uses `mode: "sandbox"` with a prompt that plays the CloudEagle integration builder and returns `{verdict: BLOCKED|FLAGGED|CLARIFIED|DRAFTED, reason, guard}`. The six preset attacks and their expected verdicts are `WORK_ATTACKS`; they are also eval cases. The verdict and guard must agree, or the attempt fails closed as an error. States the design doesn't show (approved M5), one line under the input; a failed attempt isn't logged or counted:
+  - Loading: "Running against the builder…"
+  - Error: "The builder couldn't answer this time. Try again."
+  - Limit: "That's the limit for attempts this hour. Aswin is one message away."
+  - Budget: "Live attempts are paused for this month."
 
 ## 9. Contact form — `/api/contact`
 
@@ -169,8 +173,8 @@ Fields exactly as designed: Name, Work email, Role, Message; button "Send to Asw
 
 ## 10. Limits, cost, logging, evals
 
-- **Rate limits (Upstash, hashed IP):** fit checks per visitor per day = `FIT_DAILY_LIMIT` (default 10); Ask = 30/hour. Over the limit → the hero's "limited" state, no LLM call ("llm.call skipped · nothing billed").
-- **Budget cap:** monthly spend counter in Upstash; at `MONTHLY_BUDGET_USD`, all AI modes return the limited/fallback state. Plus a spend limit on the Anthropic workspace.
+- **Rate limits (Upstash, hashed IP):** fit checks per visitor per day = `FIT_DAILY_LIMIT` (default 10); Ask = 30/hour, shared by Ask my work, Break my AI and the sandbox; failure drills = `FIT_DAILY_LIMIT` per day in their own bucket (the rate drill makes no LLM call and uses no bucket). Over the limit → the hero's "limited" state, no LLM call ("llm.call skipped · nothing billed").
+- **Budget cap:** monthly spend counter in Upstash, increased by each run's real cost; at `MONTHLY_BUDGET_USD`, all AI modes return the `budget` state. Hero copy: tag "Fit check · monthly budget reached", title "Live checks are paused for this month.", text "This site caps what it spends on AI each month, and that cap is reached. The precomputed matches below come from the same knowledge base, and Aswin is one message away." Plus a spend limit on the Anthropic workspace.
 - **Every model call:** Zod-validated input (JD ≤ 12,000 chars, Ask ≤ 1,000), Turnstile, `maxOutputTokens`, 60 s timeout. User text wrapped in tags and treated as data.
 - **Privacy, as the design promises:** pasted JDs and questions are **not stored**. Log only run metrics.
 
@@ -232,6 +236,8 @@ CONTACT_TO_EMAIL=
 NEXT_PUBLIC_POSTHOG_KEY=
 NEXT_PUBLIC_POSTHOG_HOST=
 IP_HASH_SALT=
+# Tests only: AI_FAKE=1 swaps in a deterministic fake model and relaxes Turnstile. Refused when VERCEL_ENV=production.
+AI_FAKE=
 ```
 Provide `.env.example`. Verify model IDs against Anthropic's current model list before shipping.
 

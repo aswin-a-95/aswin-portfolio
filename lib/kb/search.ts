@@ -65,7 +65,7 @@ const ENTRY_TOKENS = new Map<string, Set<string>>();
 function entryTokens(e: KbEntry): Set<string> {
   let t = ENTRY_TOKENS.get(e.id);
   if (!t) {
-    t = tokens(e.text);
+    t = tokens(`${e.text} ${e.tags.join(" ")}`);
     ENTRY_TOKENS.set(e.id, t);
   }
   return t;
