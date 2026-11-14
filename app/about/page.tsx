@@ -4,11 +4,13 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { deps, graphProjects } from "@/content/career-graph";
 import { certificates } from "@/content/certificates";
-import { notDone } from "@/content/kb/not-done";
-import { projects } from "@/content/kb/projects";
 import { roles } from "@/content/kb/roles";
+import { KB, type KbScope } from "@/lib/kb/snapshot";
 import { siteMeta } from "@/content/site-meta";
 import { hrefOf } from "@/lib/content";
+
+/** Entries the AI can actually use (production leaves out unproven ones). */
+const kbCount = (scope: KbScope) => KB.filter((e) => e.scope === scope).length;
 
 export const metadata: Metadata = { title: "About Aswin" };
 
@@ -51,8 +53,8 @@ export default function About() {
               Built from the same master resume as the fit check, so the two never disagree. Updated {siteMeta.resumeUpdated}.
             </p>
             <p className="xray-only m-0 border-t border-dashed border-rule pt-[10px] font-mono text-[12px] leading-[1.6] text-muted">
-              knowledge base: {roles.length} roles · {projects.length} projects · {notDone.length} not-done entries · synced{" "}
-              {siteMeta.kbSynced}
+              knowledge base: {kbCount("roles")} roles · {kbCount("projects")} projects · {kbCount("not_done")} not-done entries · synced{" "}
+              {process.env.KB_BUILT_AT}
             </p>
           </aside>
         </header>

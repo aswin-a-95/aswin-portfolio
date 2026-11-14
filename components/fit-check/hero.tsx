@@ -7,7 +7,7 @@ import { FitInput } from "@/components/fit-check/fit-input";
 import { HowBuilt, type HowIBuiltMeta } from "@/components/fit-check/how-built";
 import { Result, type ResultMeta } from "@/components/fit-check/result";
 import { useSite } from "@/components/xray-provider";
-import { ASK_ERROR, ASK_LIMITED } from "@/lib/ask/copy";
+import { ASK_BUDGET, ASK_ERROR, ASK_LIMITED } from "@/lib/ask/copy";
 import { sessionMemory } from "@/lib/ask/session-memory";
 import { breakAttempt, runFitCheck } from "@/lib/fit-check/client";
 import {
@@ -136,7 +136,7 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
     setPending((n) => n - 1);
     // A failed or rate-limited attempt isn't logged or counted; Ask's line says why (SPEC §8).
     if (r.status !== "ok") {
-      setBreakError(r.status === "limited" ? ASK_LIMITED : ASK_ERROR);
+      setBreakError(r.status === "limited" ? ASK_LIMITED : r.status === "budget" ? ASK_BUDGET : ASK_ERROR);
       return;
     }
     const [verdict, tone] = breakVerdict(r.reply.kind);

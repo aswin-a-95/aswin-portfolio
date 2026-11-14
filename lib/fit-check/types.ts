@@ -114,4 +114,4 @@ export type BreakReply = {
   guard: string;
   trace?: { runId: string; ms: number };
 };
-export type BreakResult = { status: "ok"; reply: BreakReply } | { status: "error" } | { status: "limited" };
+export type BreakResult = { status: "ok"; reply: BreakReply } | { status: "error" } | { status: "limited" } | { status: "budget" };

@@ -1,41 +1,46 @@
-import type { StubMode } from "./stub";
+import { AskAnswerSchema } from "@/lib/ask/types";
+import { postRun } from "@/lib/run-client";
 import type { BreakResult, FitEvent, FitRequest } from "./types";
 
 /**
- * The mock runs everywhere except production builds (VERCEL_ENV=production, as in
- * lib/content.ts and the Ask stub). Inlined at build time by next.config.ts.
- */
-export const FIT_STUB_ENABLED = process.env.NEXT_PUBLIC_FIT_STUB === "1";
-
-function stubMode(): StubMode {
-  try {
-    const m = window.sessionStorage.getItem("fit-stub");
-    return m === "error" || m === "limited" || m === "hold" ? m : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Runs a fit check and yields its events (SPEC §7). Milestone 5 replaces the body with a
- * streamed call to `/api/run` (`mode: "fit"`). Until then production has no backend, so it
- * ends in the error state with the precomputed matches rather than a fake result.
+ * Runs a fit check against `/api/run` (`mode: "fit"`) and yields its events as they stream in
+ * (NDJSON, SPEC §7). The hero validates every event with FitEventSchema. Any transport failure
+ * ends in the error state.
  */
 export async function* runFitCheck(req: FitRequest, signal?: AbortSignal): AsyncGenerator<FitEvent> {
-  if (FIT_STUB_ENABLED) {
-    // Dynamic import keeps the fixtures out of the production bundle.
-    const { stubFitCheck } = await import("./stub");
-    yield* stubFitCheck(req, { signal, mode: stubMode() });
+  const res = await postRun({ mode: "fit", jd: req.jd, ...(req.drill ? { drill: req.drill } : {}) }, signal);
+  if (!res.ok || !res.body) {
+    yield { type: "fallback", reason: "error" };
     return;
   }
-  yield { type: "fallback", reason: "error" };
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    let nl: number;
+    while ((nl = buf.indexOf("\n")) !== -1) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (line) yield JSON.parse(line) as FitEvent;
+    }
+  }
+  if (buf.trim()) yield JSON.parse(buf) as FitEvent;
 }
 
-/** One Break my AI attempt: `/api/run` with `mode: "ask"` in Milestone 5 (SPEC §8). */
+/** One Break my AI attempt: `/api/run` with `mode: "ask"` (SPEC §8), reduced to what the hero shows. */
 export async function breakAttempt(text: string): Promise<BreakResult> {
-  if (FIT_STUB_ENABLED) {
-    const { stubBreak } = await import("./stub");
-    return stubBreak(text, stubMode());
+  try {
+    const res = await postRun({ mode: "ask", question: text, memory: null });
+    if (!res.ok) return { status: "error" };
+    const data = (await res.json()) as { status: string; answer?: unknown };
+    if (data.status === "limited" || data.status === "budget") return { status: data.status };
+    const answer = AskAnswerSchema.safeParse(data.answer);
+    if (data.status !== "ok" || !answer.success) return { status: "error" };
+    const { kind, text: reply, guard, trace } = answer.data;
+    return { status: "ok", reply: { kind, text: reply, guard, ...(trace ? { trace: { runId: trace.runId, ms: trace.ms } } : {}) } };
+  } catch {
+    return { status: "error" };
   }
-  return { status: "error" };
 }

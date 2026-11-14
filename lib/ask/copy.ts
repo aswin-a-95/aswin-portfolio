@@ -60,6 +60,8 @@ export const CONTACT_SOURCE = { label: "Contact", href: "/#contact" };
 export const ASK_LOADING = "Answering from the knowledge base…";
 export const ASK_ERROR = "Ask my work couldn't answer this time. Try again, or ask Aswin directly.";
 export const ASK_LIMITED = "That's the limit for questions this hour. Aswin is one message away.";
+// Approved in M5 planning: the monthly AI budget is spent.
+export const ASK_BUDGET = "Ask my work is paused for this month: the AI budget is spent. Aswin is one message away.";
 
 /** `/work`, `/work/*` → work; `/log`, `/log/*` → log; `/about` → about; everything else → home. */
 export function askPageFor(pathname: string): AskPage {

@@ -1,5 +1,5 @@
 import { AskLink } from "@/components/ask/ask-link";
-import { ASK_ERROR, ASK_LABELS, ASK_LIMITED, ASK_LOADING, CONTACT_SOURCE } from "@/lib/ask/copy";
+import { ASK_BUDGET, ASK_ERROR, ASK_LABELS, ASK_LIMITED, ASK_LOADING, CONTACT_SOURCE } from "@/lib/ask/copy";
 import type { AskAnswer, AskResult, AskSource } from "@/lib/ask/types";
 
 const CARD_TONE = {
@@ -14,6 +14,7 @@ type Card = { tone: keyof typeof CARD_TONE; label?: [string, keyof typeof LABEL_
 function cardFor(result: AskResult): Card {
   if (result.status === "error") return { tone: "plain", text: ASK_ERROR, sources: [CONTACT_SOURCE] };
   if (result.status === "limited") return { tone: "plain", text: ASK_LIMITED, sources: [CONTACT_SOURCE] };
+  if (result.status === "budget") return { tone: "plain", text: ASK_BUDGET, sources: [CONTACT_SOURCE] };
   const a = result.answer;
   const label = ASK_LABELS[a.kind];
   const tone = label?.[1] === "amber" ? "amber" : label?.[1] === "accent" ? "accent" : "plain";

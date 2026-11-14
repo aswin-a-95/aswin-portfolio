@@ -15,7 +15,6 @@ export const siteMeta = {
   ninetyDayPlan: todo("[Your 90-day ramp-up plan.]"), // TODO(aswin)
   evalToolingPlan: todo("[How you would adopt the team’s eval tooling.]"), // TODO(aswin): fit-check gap "Running evals at team scale"
   resumeUpdated: todo("[date]"), // TODO(aswin): date of the resume in public/resume.pdf
-  kbSynced: todo("[date]"), // Filled by the KB snapshot in Milestone 5.
   liveResponseTime: todo("[response time]"), // TODO(aswin): measured median, live usage
   // Offline eval numbers. Milestone 7 replaces these with content/eval-results.json written by CI.
   evalCaseCount: todo("[N]"),

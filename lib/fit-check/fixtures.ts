@@ -1,10 +1,10 @@
 import { siteMeta } from "@/content/site-meta";
-import type { BreakReply, ResultEvent, TraceLine } from "./types";
+import type { BreakReply, ResultEvent } from "./types";
 
 /**
  * HERO_FIT, HERO_BAD, HERO_ATTACKS replies and HERO_DRILL_TRACE from Hero.dc.html, word for
- * word. Dev mock only: in Milestone 5 the real results come from `/api/run` (SPEC §7). The
- * mock is off in production builds, so none of this ships.
+ * word. Replayed only by the AI_FAKE test model (lib/ai/fake.ts), which production refuses;
+ * real results come from `/api/run` (SPEC §7).
  *
  * Prototype links are mapped to routes: About.dc.html → /about, Work.dc.html → the matching
  * case study.
@@ -78,22 +78,4 @@ export const BREAK_OTHER: BreakReply = {
   kind: "unknown",
   guard: "none · answered from the knowledge base",
   text: "No attack found in that. For questions about his work, use Ask my work.",
-};
-
-const line = (mark: TraceLine["mark"], text: string, bad: boolean, timed: boolean): TraceLine => ({ mark, text, bad, timed });
-
-/** HERO_DRILL_TRACE, with the "· [ms]" suffixes moved into `timed`. */
-export const DRILL_TRACE: Record<"kb" | "rate", TraceLine[]> = {
-  kb: [
-    line("✓", "jd.parse(text) → 6 requirements", false, true),
-    line("×", "kb.search(...) → timeout", true, true),
-    line("×", "retry 1 of 1: kb.search(...) → timeout", true, true),
-    line("›", "guard.no_sources → stop instead of answering", false, false),
-    line("✓", "fallback.precomputed(role_types=3)", false, true),
-  ],
-  rate: [
-    line("×", "ratelimit.check(visitor) → 429 · daily cap reached", true, false),
-    line("›", "llm.call skipped · nothing billed", false, false),
-    line("✓", "fallback.precomputed(role_types=3)", false, true),
-  ],
 };

@@ -1,20 +1,16 @@
-import type { AskRequest, AskResult } from "./types";
+import { postRun } from "@/lib/run-client";
+import { AskAnswerSchema, type AskRequest, type AskResult } from "./types";
 
-/**
- * The stub runs everywhere except production builds (VERCEL_ENV=production, as in
- * lib/content.ts). Inlined at build time by next.config.ts.
- */
-export const ASK_STUB_ENABLED = process.env.NEXT_PUBLIC_ASK_STUB === "1";
-
-/**
- * Asks a question. Milestone 5 replaces the body with a call to `/api/run` (`mode: "ask"`).
- * Until then production has no backend, so it returns the error state rather than a fake answer.
- */
+/** Asks a question through `/api/run` (`mode: "ask"`, SPEC §8). Session memory rides along. */
 export async function ask(req: AskRequest): Promise<AskResult> {
-  if (ASK_STUB_ENABLED) {
-    // Dynamic import keeps the fixtures out of the production bundle.
-    const { stubAsk } = await import("./stub");
-    return stubAsk(req);
+  try {
+    const res = await postRun({ mode: "ask", question: req.question, memory: req.memory });
+    if (!res.ok) return { status: "error" };
+    const data = (await res.json()) as { status: string; answer?: unknown };
+    if (data.status === "limited" || data.status === "budget") return { status: data.status };
+    const answer = AskAnswerSchema.safeParse(data.answer);
+    return data.status === "ok" && answer.success ? { status: "ok", answer: answer.data } : { status: "error" };
+  } catch {
+    return { status: "error" };
   }
-  return { status: "error" };
 }

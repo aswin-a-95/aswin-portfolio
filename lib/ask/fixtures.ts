@@ -2,9 +2,8 @@ import type { AskQuestionId } from "./copy";
 import type { AskKind, AskSource } from "./types";
 
 /**
- * ASK_ANSWERS from Ask.dc.html, word for word. Dev stub only: the real answers come from
- * `/api/run` (SPEC §8) in Milestone 5. `[bracketed]` text is the design's placeholder for
- * Aswin's content; it never reaches production because the stub is off there.
+ * ASK_ANSWERS from Ask.dc.html, word for word. Replayed only by the AI_FAKE test model
+ * (lib/ai/fake.ts), which production refuses; real answers come from `/api/run` (SPEC §8).
  *
  * Prototype links are mapped to routes: About.dc.html → /about, Work.dc.html → the matching
  * case study or /work, BuildLog.dc.html → /log, Main.dc.html → the fit check (/#top) or /#contact.

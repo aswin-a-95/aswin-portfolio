@@ -41,6 +41,8 @@ export type AskRequest = {
 export type AskResult =
   | { status: "ok"; answer: AskAnswer }
   | { status: "error" }
-  | { status: "limited" };
+  | { status: "limited" }
+  /** The monthly AI budget is spent (SPEC §10). */
+  | { status: "budget" };
 
 export const ASK_MAX_CHARS = 1000;
