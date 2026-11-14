@@ -45,3 +45,12 @@ export function withTodo(label: string, url: string, sep = " "): string {
 export function hrefOf(url: string): string {
   return isTodo(url) ? "#" : url;
 }
+
+/** Every placeholder anywhere in the value, in first-seen order. */
+export function todosIn(value: unknown, found: string[] = []): string[] {
+  if (typeof value === "string") {
+    for (const t of TODOS) if (value.includes(t) && !found.includes(t)) found.push(t);
+  } else if (Array.isArray(value)) value.forEach((v) => todosIn(v, found));
+  else if (value && typeof value === "object") Object.values(value).forEach((v) => todosIn(v, found));
+  return found;
+}
