@@ -1,5 +1,3 @@
-import { todo } from "@/lib/content";
-
 export type Role = {
   id: string;
   title: string;
@@ -12,14 +10,17 @@ export type Role = {
   tags?: string[];
 };
 
-/** Roles the fit check and Ask my work may cite. Only the shape and the Dhee's entry come from the design. */
+/**
+ * Roles the fit check and Ask my work may cite. The shape and the Dhee's summary come from the design;
+ * titles, companies, years and the other summaries come from Aswin's master resume (Nov 2026).
+ */
 export const roles: Role[] = [
   {
     id: "platform-api",
-    title: todo("[Role]"), // TODO(aswin)
-    company: todo("[Company]"), // TODO(aswin)
-    years: todo("[years]"), // TODO(aswin)
-    summary: todo("[What you owned, one line: platform, APIs, integrations]"), // TODO(aswin)
+    title: "Senior Product Manager",
+    company: "Zelthy",
+    years: "2020 – 2024",
+    summary: "Owned the core platform, APIs and 10+ third-party integrations of a multi-tenant SaaS platform (100+ tenants, 1M API calls/day at peak)",
     label: "Role · About",
     href: "/about",
     // Hero.dc.html cites this role for public APIs, partner integrations and leading cross-functional teams.
@@ -27,19 +28,19 @@ export const roles: Role[] = [
   },
   {
     id: "healthcare-integrations",
-    title: todo("[Role]"), // TODO(aswin)
-    company: todo("[Company]"), // TODO(aswin)
-    years: todo("[years]"), // TODO(aswin)
-    summary: todo("[Healthcare integrations: systems and outcome]"), // TODO(aswin)
+    title: "Senior Product Manager",
+    company: "Zelthy",
+    years: "2020 – 2024",
+    summary: "Client EHR integrations and daily two-way SOAP syncs of millions of rows for healthcare and pharma clients, meeting GDPR, HIPAA and SOC2",
     label: "Role · About",
     href: "/about",
     tags: ["healthcare", "hospital", "integrations", "platform reliability"],
   },
   {
     id: "dhees",
-    title: todo("[Your title]"), // TODO(aswin)
+    title: "Founder and Product Lead",
     company: "Dhee's",
-    years: todo("[years]"), // TODO(aswin)
+    years: "2024 – 2026",
     summary: "Runs a fresh dog-food brand, direct to consumer",
     label: "Role · About",
     href: "/about",

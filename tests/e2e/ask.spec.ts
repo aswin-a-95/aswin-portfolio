@@ -172,11 +172,19 @@ test.describe("answers", () => {
   });
 
   test("todo box for content Aswin still has to supply", async ({ page }) => {
-    await open(page);
-    await dialog(page).getByRole("button", { name: /What's his biggest platform win\?/ }).click();
-    const todoBox = status(page).getByText("[Biggest measured platform win, one line, with the number]");
+    // The CloudEagle KB entry still has an [evidence] placeholder; the dotted box lists it.
+    await open(page, "/work/cloudeagle");
+    await dialog(page).getByRole("button", { name: /Is this CloudEagle's product\?/ }).click();
+    const todoBox = status(page).getByText("[evidence]", { exact: true });
     await expect(todoBox).toBeVisible();
     await expect(todoBox).toHaveCSS("border-top-style", "dotted");
+  });
+
+  test("no todo box once the cited content is supplied", async ({ page }) => {
+    await open(page);
+    await dialog(page).getByRole("button", { name: /What's his biggest platform win\?/ }).click();
+    await expect(status(page).getByRole("link", { name: "About · career →" })).toBeVisible();
+    await expect(status(page).getByText(/^\[.*\]$/)).toHaveCount(0);
   });
 
   const TONES: [string, string, string, string][] = [

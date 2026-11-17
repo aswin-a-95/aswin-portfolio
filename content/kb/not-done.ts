@@ -11,5 +11,65 @@ export const notDone: NotDone[] = [
     note: "Not retail, not hardware.",
   },
   { id: "consumer-hardware-launches", topic: "Consumer hardware launches", note: "Not something Aswin has done." },
-  // TODO(aswin): add anything else you have not done (e.g. professional LLM role is a stated gap, not a match).
+
+  // From the master resume's "gaps (do not claim)" notes, Nov 2026. Professional gaps only; review before launch.
+  {
+    id: "llm-feature-shipped-at-work",
+    topic: "Shipping an LLM feature to production in a professional role",
+    closest: "Shipped ML-based OCR to production at Zelthy; his LLM work there was prototypes that did not ship. His shipped agents are his own projects.",
+    note: "Not something Aswin has done in a job yet.",
+  },
+  {
+    id: "experimentation",
+    topic: "A/B tests, experiments and product analytics tools",
+    closest: "Tracked adoption, defects and time to deploy to prioritize features at Zelthy.",
+    note: "Not something Aswin has done.",
+  },
+  {
+    id: "graphql",
+    topic: "Working with GraphQL APIs",
+    closest: "REST, webhooks and SOAP APIs at Zelthy.",
+    note: "Tried out only, no working experience.",
+  },
+  {
+    id: "scim-provisioning",
+    topic: "SCIM or directory-driven user provisioning",
+    closest: "SAML SSO with Azure AD and an approval-based provisioning workflow at Zelthy.",
+    note: "Not something Aswin has done.",
+  },
+  {
+    id: "payments",
+    topic: "Payments products",
+    closest: "Invoicing linked to sales orders in ERPNext at Dhee's.",
+    note: "Not something Aswin has done.",
+  },
+  {
+    id: "data-warehouse",
+    topic: "Data warehouses or working with a dedicated data team",
+    closest: "Batch pipelines into a data lake and 10+ Power BI dashboards at Zelthy.",
+    note: "Not something Aswin has done.",
+  },
+  {
+    id: "enterprise-erp-hands-on",
+    topic: "Hands-on SAP, Oracle ERP or Microsoft Dynamics",
+    closest: "Integrated the platform with a client's SAP; ran ERPNext at Dhee's.",
+    note: "Not something Aswin has done.",
+  },
+  {
+    id: "mcp-server",
+    topic: "Building an MCP server",
+    closest: "Connected his job-search agent to Google Drive and Chrome through existing MCP connectors.",
+    note: "Not something Aswin has done.",
+  },
+  {
+    id: "accessibility-wcag",
+    topic: "Accessibility (WCAG) programs",
+    note: "Not something Aswin has done.",
+  },
+  {
+    id: "hr-software",
+    topic: "HR or hiring software (HRIS, ATS)",
+    closest: "Hired and onboarded PMs and developers, but never built software for it.",
+    note: "Not something Aswin has done.",
+  },
 ];
