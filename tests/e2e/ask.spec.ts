@@ -6,7 +6,7 @@ const MEMORY = {
   matchCount: 1,
   gaps: [
     { req: "Hardware roadmaps from prototype to mass production", closest: "Not something Aswin has done.", close: "" },
-    { req: "Retail channel P&L", closest: "Runs Dhee's, a direct-to-consumer brand. Not retail, not hardware.", close: "" },
+    { req: "Retail channel P&L", closest: "Ran Dhee's, a direct-to-consumer brand. Not retail, not hardware.", close: "" },
   ],
 };
 

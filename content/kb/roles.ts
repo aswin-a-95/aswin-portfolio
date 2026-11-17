@@ -20,28 +20,19 @@ export const roles: Role[] = [
     title: "Senior Product Manager",
     company: "Zelthy",
     years: "2020 – 2024",
-    summary: "Owned the core platform, APIs and 10+ third-party integrations of a multi-tenant SaaS platform (100+ tenants, 1M API calls/day at peak)",
+    summary: "Owned the core platform, APIs and integrations, including EHR systems, for healthcare and pharma clients",
     label: "Role · About",
     href: "/about",
     // Hero.dc.html cites this role for public APIs, partner integrations and leading cross-functional teams.
+    // One Zelthy row on About (Aswin, Nov 2026); the design's separate healthcare role is the "healthcare-integrations" KB project.
     tags: ["platform", "public api", "partner integrations", "cross-functional", "product teams", "engineering"],
-  },
-  {
-    id: "healthcare-integrations",
-    title: "Senior Product Manager",
-    company: "Zelthy",
-    years: "2020 – 2024",
-    summary: "Client EHR integrations and daily two-way SOAP syncs of millions of rows for healthcare and pharma clients, meeting GDPR, HIPAA and SOC2",
-    label: "Role · About",
-    href: "/about",
-    tags: ["healthcare", "hospital", "integrations", "platform reliability"],
   },
   {
     id: "dhees",
     title: "Founder and Product Lead",
     company: "Dhee's",
     years: "2024 – 2026",
-    summary: "Runs a fresh dog-food brand, direct to consumer",
+    summary: "Ran a fresh dog-food brand, direct to consumer", // Design copy changed to past tense (Aswin, Nov 2026: Dhee's has ended)
     label: "Role · About",
     href: "/about",
   },

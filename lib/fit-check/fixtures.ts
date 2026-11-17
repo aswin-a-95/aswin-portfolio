@@ -19,7 +19,7 @@ export const HERO_FIT: ResultBody = {
     { req: "Own a public API and partner integrations", evidence: "Platform PM for APIs and integrations, including healthcare integrations.", source: "Role · About", href: "/about" },
     { req: "Ship AI agent features with clear guardrails", evidence: "Designed an AI integration builder with safeguards as the centrepiece (CloudEagle.ai take-home concept).", source: "Case study · CloudEagle concept", href: "/work/cloudeagle" },
     { req: "Design human-in-the-loop workflows", evidence: "Built a job-search agent that never applies to a role without explicit approval.", source: "Case study · Job-search agent", href: "/work/job-search-agent" },
-    { req: "Work with business stakeholders on adoption", evidence: "Runs Dhee's, a fresh dog-food brand, and built an Instagram competitor agent for it.", source: "Case study · Dhee's agent", href: "/work/dhees-instagram-agent" },
+    { req: "Work with business stakeholders on adoption", evidence: "Ran Dhee's, a fresh dog-food brand, and is building an Instagram competitor agent for it.", source: "Case study · Dhee's agent", href: "/work/dhees-instagram-agent" },
   ],
   gaps: [
     {
@@ -44,7 +44,7 @@ export const HERO_BAD: ResultBody = {
   gaps: [
     { req: "Hardware roadmaps from prototype to mass production", closest: "Not something Aswin has done.", close: "" },
     { req: "Contract manufacturers and supply chain", closest: "Not something Aswin has done.", close: "" },
-    { req: "Retail channel P&L", closest: "Runs Dhee's, a direct-to-consumer brand. Not retail, not hardware.", close: "" },
+    { req: "Retail channel P&L", closest: "Ran Dhee's, a direct-to-consumer brand. Not retail, not hardware.", close: "" },
     { req: "10+ years of consumer hardware launches", closest: "Not something Aswin has done.", close: "" },
   ],
 };

@@ -43,7 +43,7 @@ export const projects: Project[] = [
   {
     id: "dhees-instagram-agent",
     title: "Dhee's Instagram competitor agent",
-    status: "IN USE · RECORDED RUN",
+    status: "IN PROGRESS · NOT LIVE YET",
     summary: "What competitors post, what performs, and what Dhee’s should make next.",
     evidence: [todo("[evidence]")], // TODO(aswin)
     label: "Case study · Dhee's agent",
@@ -97,11 +97,12 @@ export const projects: Project[] = [
     tags: ["api", "rest", "webhooks", "integrations", "connectors", "oauth", "soap", "data sync", "ehr", "fhir", "hl7", "public api", "partner integrations"],
   },
   {
-    id: "zelthy-healthcare-compliance",
-    title: "Zelthy healthcare and pharma: compliance, privacy and data",
+    id: "healthcare-integrations",
+    title: "Zelthy healthcare and pharma: integrations, compliance and data",
     status: "SHIPPED · 2020–2024",
-    summary: "Security, privacy and regulatory requirements for healthcare and pharma clients across Southeast Asia and Australia.",
+    summary: "Integrations, security, privacy and regulatory requirements for healthcare and pharma clients across Southeast Asia and Australia.",
     evidence: [
+      "Integrated client EHR systems and ran daily two-way SOAP syncs of millions of rows for healthcare and pharma clients.",
       "Specified security, privacy and regulatory requirements to meet GDPR, HIPAA and SOC2 with 100% compliance; wrote IQ, OQ and PQ validation documents for a pharma client; checked vendors against HIPAA.",
       "Met data residency requirements by hosting client data in Singapore and Australia.",
       "Migrated client master data (HCPs, hospitals, clinics) from Excel into apps, de-duplicating and sequencing imports by foreign-key dependencies, with data validation rules.",
@@ -109,7 +110,7 @@ export const projects: Project[] = [
     ],
     label: "Role · About",
     href: "/about",
-    tags: ["healthcare", "hospital", "pharma", "hipaa", "gdpr", "soc2", "compliance", "security", "privacy", "validated systems", "data residency", "data migration", "regulated"],
+    tags: ["healthcare", "hospital", "integrations", "platform reliability", "pharma", "hipaa", "gdpr", "soc2", "compliance", "security", "privacy", "validated systems", "data residency", "data migration", "regulated"],
   },
   {
     id: "zelthy-delivery",

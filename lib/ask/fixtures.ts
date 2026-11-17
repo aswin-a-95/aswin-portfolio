@@ -29,7 +29,7 @@ export const ASK_ANSWERS: Record<AskQuestionId | "unknown", AskFixture> = {
   },
   llm: {
     kind: "gap",
-    text: "Not in a professional role yet. He has built and shipped AI agents on his own projects: a job-search agent with an approval step, an Instagram competitor agent for Dhee's, and the fit check on this site.",
+    text: "Not in a professional role yet. He has built and shipped AI agents on his own projects: a job-search agent with an approval step and the fit check on this site. An Instagram competitor agent for Dhee's is in progress.",
     todo: "",
     sources: [STUDIES, LOG],
   },

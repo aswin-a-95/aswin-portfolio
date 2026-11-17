@@ -7,7 +7,7 @@ export const notDone: NotDone[] = [
   {
     id: "retail-channel-pl",
     topic: "Retail channel P&L",
-    closest: "Runs Dhee's, a direct-to-consumer brand. Not retail, not hardware.",
+    closest: "Ran Dhee's, a direct-to-consumer brand. Not retail, not hardware.",
     note: "Not retail, not hardware.",
   },
   { id: "consumer-hardware-launches", topic: "Consumer hardware launches", note: "Not something Aswin has done." },

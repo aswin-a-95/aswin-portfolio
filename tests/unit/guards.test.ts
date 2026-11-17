@@ -42,14 +42,14 @@ describe("guard.citations", () => {
 
 describe("guard.honesty", () => {
   it("never lets a not-done topic be a match", () => {
-    const cards: EvidenceCard[] = [{ type: "match", req: "Consumer hardware launches at scale", evidence: "Runs Dhee's.", sourceId: "dhees" }];
+    const cards: EvidenceCard[] = [{ type: "match", req: "Consumer hardware launches at scale", evidence: "Ran Dhee's.", sourceId: "dhees" }];
     const out = guardHonesty(cards, notDone);
     expect(out.matches).toEqual([]);
     expect(out.gaps[0]).toEqual({ req: "Consumer hardware launches at scale", closest: "Not something Aswin has done.", close: "" });
   });
   it("uses the not-done entry's own closest line", () => {
     const cards: EvidenceCard[] = [{ type: "gap", req: "Retail channel P&L", closest: "x", close: "y", notDoneId: "retail-channel-pl" }];
-    expect(guardHonesty(cards, notDone).gaps[0]).toEqual({ req: "Retail channel P&L", closest: "Runs Dhee's, a direct-to-consumer brand. Not retail, not hardware.", close: "" });
+    expect(guardHonesty(cards, notDone).gaps[0]).toEqual({ req: "Retail channel P&L", closest: "Ran Dhee's, a direct-to-consumer brand. Not retail, not hardware.", close: "" });
   });
   it("rejects percentages and scores", () => {
     expect(hasScore("a 92% match")).toBe(true);
