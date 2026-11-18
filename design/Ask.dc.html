@@ -17,11 +17,20 @@
 
 <form onSubmit="{{submit}}" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid {{t.rule}}">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-<input type="text" value="{{query}}" onChange="{{onQuery}}" aria-label="Ask a question about Aswin's work" placeholder="Ask about Aswin's work, or jump to a page…" style="flex: 1; min-width: 0; min-height: 44px; border: 0; outline: none; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 17px">
-<button type="submit" style="min-height: 40px; padding: 6px 14px; border-radius: 8px; border: 0; background: {{t.btnBg}}; color: {{t.btnInk}}; font-family: {{t.sans}}; font-size: 14px; font-weight: 600; cursor: pointer">Ask</button>
+<input type="text" value="{{query}}" onChange="{{onQuery}}" disabled="{{thinking}}" aria-busy="{{thinking}}" aria-label="Ask a question about Aswin's work" placeholder="{{placeholder}}" style="opacity: {{inputOpacity}}; flex: 1; min-width: 0; min-height: 44px; border: 0; outline: none; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 17px">
+<button type="submit" disabled="{{thinking}}" style="min-height: 40px; padding: 6px 14px; border-radius: 8px; border: 0; background: {{t.btnBg}}; color: {{t.btnInk}}; font-family: {{t.sans}}; font-size: 14px; font-weight: 600; cursor: pointer; opacity: {{inputOpacity}}">{{askLabel}}</button>
 <button type="button" onClick="{{close}}" aria-label="Close" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: {{t.muted}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
 </form>
 
+<sc-if value="{{thinking}}" hint-placeholder-val="{{ false }}">
+<div role="status" aria-live="polite" style="padding: 18px; display: flex; flex-direction: column; gap: 10px; font-family: {{t.mono}}; font-size: 13px">
+<p style="margin: 0; color: {{t.muted}}">› {{asked}}</p>
+<span aria-hidden="true" style="display: block; height: 3px; border-radius: 999px; background: {{t.accentTint}}; overflow: hidden"><span style="display: block; height: 3px; width: {{thinkProgress}}; background: {{t.accent}}"></span></span>
+<sc-for list="{{thinkSteps}}" as="ts" hint-placeholder-count="2">
+<p style="margin: 0; color: {{ts.color}}">{{ts.mark}} {{ts.text}}</p>
+</sc-for>
+</div>
+</sc-if>
 <sc-if value="{{noAnswer}}" hint-placeholder-val="{{ true }}">
 <div style="padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 18px">
 <sc-if value="{{hasCtx}}" hint-placeholder-val="{{ false }}">
@@ -144,12 +153,23 @@ function askRoute(text) {
   return 'unknown';
 }
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { query: '', answerId: null, asked: '' }; }
+  constructor(props) { super(props); this.state = { query: '', answerId: null, asked: '', thinking: false, tstep: 0 }; this.timer = null; }
+  componentWillUnmount() { if (this.timer) clearInterval(this.timer); }
+  ask(id, asked) {
+    if (this.timer) clearInterval(this.timer);
+    this.setState({ thinking: true, tstep: 0, answerId: null, asked: asked || '', query: '' });
+    this.timer = setInterval(() => {
+      var n = this.state.tstep + 1;
+      if (n >= 3) { clearInterval(this.timer); this.timer = null; this.setState({ thinking: false, tstep: 0, answerId: id }); }
+      else this.setState({ tstep: n });
+    }, 450);
+  }
   componentDidUpdate(prev) {
     if (prev.open !== this.props.open && this.props.open) {
       var c = this.props.context;
       var focus = c && c.focus !== null && c.focus !== undefined ? 'ctx' + c.focus : null;
-      this.setState({ query: '', answerId: focus, asked: '' });
+      if (this.timer) { clearInterval(this.timer); this.timer = null; }
+      this.setState({ query: '', answerId: focus, asked: '', thinking: false, tstep: 0 });
     }
   }
   ctxAnswer(id) {
@@ -203,20 +223,26 @@ class Component extends DCLogic {
       radius: sheet ? '18px 18px 0 0' : '14px',
       scrim: x ? 'rgba(0, 0, 0, 0.6)' : 'rgba(27, 26, 23, 0.38)',
       query: this.state.query,
-      noAnswer: !a, hasAnswer: !!a,
+      noAnswer: !a && !this.state.thinking, hasAnswer: !!a && !this.state.thinking,
+      thinking: !!this.state.thinking, asked: this.state.asked,
+      askLabel: this.state.thinking ? 'Thinking…' : 'Ask',
+      inputOpacity: this.state.thinking ? 0.5 : 1,
+      placeholder: this.state.thinking ? 'Answering from the knowledge base…' : "Ask about Aswin's work, or jump to a page…",
+      thinkProgress: Math.round(((this.state.tstep + 1) / 3) * 100) + '%',
+      thinkSteps: [['kb.search', 'searching the knowledge base'], ['guardrails', 'checking the answer cites a source'], ['compose', 'writing the answer']].slice(0, this.state.tstep + 1).map((st, i) => ({ text: st[0] + ' · ' + st[1] + (i === this.state.tstep ? '…' : ''), mark: i < this.state.tstep ? '✓' : '›', color: i < this.state.tstep ? t.accent : t.ink })),
       answer: answer, answerBorder: answerBorder, answerBg: answerBg,
-      questions: ids.map((id) => ({ text: ASK_ANSWERS[id].q, pick: () => this.setState({ answerId: id, asked: ASK_ANSWERS[id].q }) })),
+      questions: ids.map((id) => ({ text: ASK_ANSWERS[id].q, pick: () => this.ask(id, ASK_ANSWERS[id].q) })),
       hasCtx: !!ctx,
       ctx: ctx ? { role: ctx.role, matchCount: ctx.matchCount, gapCount: ctx.gaps.length } : { role: '', matchCount: 0, gapCount: 0 },
-      ctxQuestions: ctx ? ctx.gaps.map((g, i) => ({ text: 'About the gap: ' + g.req, pick: () => this.setState({ answerId: 'ctx' + i }) })).concat([{ text: 'What should I ask him about these gaps?', pick: () => this.setState({ answerId: 'ctxq' }) }]) : [],
+      ctxQuestions: ctx ? ctx.gaps.map((g, i) => ({ text: 'About the gap: ' + g.req, pick: () => this.ask('ctx' + i, 'About the gap: ' + g.req) })).concat([{ text: 'What should I ask him about these gaps?', pick: () => this.ask('ctxq', 'What should I ask him about these gaps?') }]) : [],
       forget: () => { if (this.props.onForget) this.props.onForget(); },
-      attacks: ASK_ATTACKS.map((a) => ({ chip: a[1], pick: () => this.setState({ answerId: a[0], asked: ASK_ANSWERS[a[0]].q }) })),
+      attacks: ASK_ATTACKS.map((a) => ({ chip: a[1], pick: () => this.ask(a[0], ASK_ANSWERS[a[0]].q) })),
       onQuery: (e) => this.setState({ query: e.target.value }),
       submit: (e) => {
         if (e && e.preventDefault) e.preventDefault();
         var q = this.state.query.trim();
-        if (!q) return;
-        this.setState({ answerId: askRoute(q), asked: q, query: '' });
+        if (!q || this.state.thinking) return;
+        this.ask(askRoute(q), q);
       },
       again: () => this.setState({ answerId: null, asked: '' }),
       close: () => { if (this.props.onClose) this.props.onClose(); }

@@ -16,14 +16,22 @@
 
 <div style="display: flex; flex-direction: column; gap: 18px">
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: {{t.muted}}">Aswin · Senior Product Manager</p>
-<h1 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: clamp(42px, 6vw, 72px); line-height: 1.02; letter-spacing: -0.02em">Platform PM who builds for agents.</h1>
-<p style="margin: 0; max-width: 760px; font-family: {{t.serif}}; font-size: 24px; line-height: 1.4; color: {{t.muted}}">I build platforms, AI-powered products, and systems that turn emerging technology into real-world capability.</p>
+<h1 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: clamp(32px, 4vw, 46px); line-height: 1.1; letter-spacing: -0.015em">Platform PM who builds for agents.</h1>
+<p style="margin: 0; max-width: 720px; font-family: {{t.serif}}; font-size: 20px; line-height: 1.45; color: {{t.muted}}">I build platforms, AI-powered products, and systems that turn emerging technology into real-world capability.</p>
+</div>
+
+<section aria-labelledby="fit-h" style="margin-top: 8px; border: 1px solid {{t.rule}}; border-radius: 20px; background: {{t.panel}}; padding: clamp(18px, 3vw, 32px); display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 8px 20px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid {{t.rule}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="align-self: flex-start; padding: 3px 9px; border-radius: 999px; background: {{t.accent}}; color: {{t.paper}}; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.08em">FIT CHECK · LIVE AI</span>
+<h2 id="fit-h" style="margin: 0; font-family: {{t.sans}}; font-size: clamp(24px, 3vw, 30px); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">Will I fit your role?</h2>
+</div>
+<span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">answers from my real record · gaps shown, not hidden</span>
 </div>
 
 <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}">
 <div style="background: {{t.paper}}; border: 1.5px solid {{t.accent}}; box-shadow: 0 0 0 4px {{t.accentTint}}; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="align-self: flex-start; padding: 3px 9px; border-radius: 999px; background: {{t.accent}}; color: {{t.paper}}; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.08em">TRY IT · LIVE AI</span>
 <label for="jd-input" style="font-family: {{t.sans}}; font-size: 21px; font-weight: 600; line-height: 1.35; color: {{t.ink}}">Paste a job description. This site will tell you honestly where I fit and where I don't.</label>
 <span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">text or a link · not stored</span>
 </div>
@@ -89,8 +97,16 @@
 
 <sc-if value="{{showCompact}}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 14px; padding: 14px 18px">
-<p style="margin: 0; font-size: 15px"><span style="font-family: {{t.mono}}; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: {{t.muted}}">{{compactLabel}} </span><b style="font-weight: 600">{{role}}</b></p>
+<p style="margin: 0; flex: 1 1 320px; min-width: 0; font-size: 15px; line-height: 1.45"><span style="font-family: {{t.mono}}; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: {{t.muted}}">{{compactLabel}} </span><b style="font-weight: 600; overflow-wrap: anywhere">{{role}}</b></p>
+<sc-if value="{{isRunning}}" hint-placeholder-val="{{ false }}">
+<div role="status" aria-live="polite" style="display: flex; flex-direction: column; gap: 6px; min-width: 180px">
+<span style="font-family: {{t.mono}}; font-size: 13px; color: {{t.accent}}">Checking… step {{stepNum}} of {{stepTotal}}</span>
+<span aria-hidden="true" style="display: block; height: 4px; border-radius: 999px; background: {{t.accentTint}}; overflow: hidden"><span style="display: block; height: 4px; width: {{progress}}; border-radius: 999px; background: {{t.accent}}"></span></span>
+</div>
+</sc-if>
+<sc-if value="{{notRunning}}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{reset}}" style="min-height: 44px; padding: 8px 14px; border-radius: 8px; border: 1px solid {{t.rule}}; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 14px; cursor: pointer">{{resetLabel}}</button>
+</sc-if>
 </div>
 </sc-if>
 
@@ -253,6 +269,7 @@
 </div>
 </sc-if>
 </div>
+</section>
 
 </div>
 </section>
@@ -261,8 +278,8 @@
 var THEME_FONTS = { serif: "'Newsreader', Georgia, serif", sans: "'IBM Plex Sans', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, Menlo, monospace" };
 function heroTokens(x) {
   var c = x
-    ? { bg: '#101214', paper: '#171A1D', ink: '#E9E6DF', muted: '#A3A9B0', rule: '#2B3036', accent: '#8DBBF2', accentTint: '#17283D', amberText: '#EDB65E', amberBorder: '#B8862F', amberBg: '#241C10', btnBg: '#E9E6DF', btnInk: '#101214' }
-    : { bg: '#F6F3EC', paper: '#FFFDF8', ink: '#1B1A17', muted: '#5C574E', rule: '#E2DCD0', accent: '#1F4C86', accentTint: '#E8EEF6', amberText: '#8A5510', amberBorder: '#C08A2E', amberBg: '#FBF2E2', btnBg: '#1B1A17', btnInk: '#FFFDF8' };
+    ? { bg: '#101214', panel: '#14171A', paper: '#171A1D', ink: '#E9E6DF', muted: '#A3A9B0', rule: '#2B3036', accent: '#8DBBF2', accentTint: '#17283D', amberText: '#EDB65E', amberBorder: '#B8862F', amberBg: '#241C10', btnBg: '#E9E6DF', btnInk: '#101214' }
+    : { bg: '#F6F3EC', panel: '#EFEAE0', paper: '#FFFDF8', ink: '#1B1A17', muted: '#5C574E', rule: '#E2DCD0', accent: '#1F4C86', accentTint: '#E8EEF6', amberText: '#8A5510', amberBorder: '#C08A2E', amberBg: '#FBF2E2', btnBg: '#1B1A17', btnInk: '#FFFDF8' };
   c.serif = THEME_FONTS.serif; c.sans = THEME_FONTS.sans; c.mono = THEME_FONTS.mono;
   return c;
 }
@@ -336,6 +353,13 @@ function heroClassify(text) {
 }
 function heroEntry(a, text) { return { text: text || a.text, verdict: a.verdict, tone: a.tone, guard: a.guard, reply: a.reply }; }
 function heroIsLink(jd) { return /^\s*https?:\/\//i.test(jd || ''); }
+function heroSummary(jd) {
+  var s = (jd || '').trim();
+  var cut = (v, n) => (v.length > n ? v.slice(0, n - 1).trim() + '…' : v);
+  if (heroIsLink(s)) return cut(s.split(/\s/)[0].replace(/^https?:\/\/(www\.)?/i, ''), 64);
+  var first = s.split(/\n|\.\s/)[0].trim();
+  return cut(first || s, 72);
+}
 function heroSteps(kind, isLink) {
   var first = isLink
     ? { tool: 'fetch_url', label: 'Fetching the job post', xr: 'fetch_url(url) → page text', detail: 'fetched' }
@@ -452,7 +476,10 @@ class Component extends DCLogic {
       isEmpty: phase === 'empty', isRunning: phase === 'running', isResult: isResult,
       isError: phase === 'error' && !drill, showFallback: showFallback,
       showCompact: phase !== 'empty' && phase !== 'break',
-      compactLabel: drill ? 'Drill running against' : 'Checking against',
+      compactLabel: drill ? 'Drill running against' : (phase === 'running' ? 'Checking against' : 'Checked against'),
+      notRunning: phase !== 'running',
+      stepNum: Math.min(s.step + 1, HERO_STEP_COUNT), stepTotal: HERO_STEP_COUNT,
+      progress: Math.round((Math.min(s.step + 1, HERO_STEP_COUNT) / HERO_STEP_COUNT) * 100) + '%',
       resetLabel: drill ? 'Back to the fit check' : 'Try another role',
       jd: s.jd, role: s.role, noJd: noJd, btnOpacity: noJd ? 0.45 : 1,
       steps: steps, samples: samples, data: data,
@@ -492,7 +519,7 @@ class Component extends DCLogic {
       check: () => {
         if (noJd) return;
         var bad = /hardware|manufactur|supply chain/i.test(s.jd);
-        this.run(s.jd, bad ? HERO_SAMPLES[3].role : 'Your pasted role', bad ? 'bad' : 'fit');
+        this.run(s.jd, heroSummary(s.jd), bad ? 'bad' : 'fit');
       },
       reset: () => { this.stopTimer(); this.setState({ phase: 'empty', jd: '', step: 0, drill: null }); },
       retry: () => this.run(s.jd || HERO_SAMPLES[0].jd, s.role, s.kind),
