@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { useShowIntro, useSite } from "@/components/xray-provider";
 
 export type NavCurrent = "home" | "work" | "log" | "about";
@@ -18,8 +19,28 @@ export function Nav({ current }: { current: NavCurrent }) {
   const introShowing = useShowIntro();
   const showNew = current === "home" && introShowing;
 
+  // The header is sticky (Aswin's request). Its height changes as it wraps, so publish it
+  // as --nav-h for scroll-padding-top and the case-study rail's sticky offset.
+  const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const set = () => root.style.setProperty("--nav-h", `${el.getBoundingClientRect().height}px`);
+    set();
+    // A direct load of /#contact jumps before --nav-h exists; align it again now that it does.
+    const target = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (target) target.scrollIntoView({ block: "start" });
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty("--nav-h");
+    };
+  }, []);
+
   return (
-    <header className="box-border w-full border-b border-rule bg-bg font-sans text-ink">
+    <header ref={headerRef} className="sticky top-0 z-40 box-border w-full border-b border-rule bg-bg font-sans text-ink">
       <nav
         aria-label="Main"
         className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-x-5 gap-y-3 px-6 py-[14px]"

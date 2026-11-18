@@ -133,6 +133,11 @@ html:has(.cs-page) {
 @media (min-width: 900px) {
   .cs-rail {
     position: sticky;
-    top: 24px;
+    top: calc(var(--nav-h, 0px) + 24px);
   }
+}
+
+/* Sticky nav: anchor targets (#top, #contact, the case-study rail) land below it. */
+html {
+  scroll-padding-top: var(--nav-h, 0px);
 }
