@@ -17,13 +17,14 @@
 <div style="display: flex; flex-direction: column; gap: 18px">
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: {{t.muted}}">Aswin · Senior Product Manager</p>
 <h1 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: clamp(42px, 6vw, 72px); line-height: 1.02; letter-spacing: -0.02em">Platform PM who builds for agents.</h1>
-<p style="margin: 0; max-width: 640px; font-family: {{t.serif}}; font-size: 22px; line-height: 1.4; color: {{t.muted}}">Paste a job description. This site will tell you honestly where I fit and where I don't.</p>
+<p style="margin: 0; max-width: 760px; font-family: {{t.serif}}; font-size: 24px; line-height: 1.4; color: {{t.muted}}">I build platforms, AI-powered products, and systems that turn emerging technology into real-world capability.</p>
 </div>
 
 <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}">
-<div style="background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap">
-<label for="jd-input" style="font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Job description</label>
+<div style="background: {{t.paper}}; border: 1.5px solid {{t.accent}}; box-shadow: 0 0 0 4px {{t.accentTint}}; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="align-self: flex-start; padding: 3px 9px; border-radius: 999px; background: {{t.accent}}; color: {{t.paper}}; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.08em">TRY IT · LIVE AI</span>
+<label for="jd-input" style="font-family: {{t.sans}}; font-size: 21px; font-weight: 600; line-height: 1.35; color: {{t.ink}}">Paste a job description. This site will tell you honestly where I fit and where I don't.</label>
 <span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">text or a link · not stored</span>
 </div>
 <textarea id="jd-input" rows="5" value="{{jd}}" onChange="{{onJd}}" placeholder="Paste the role, or a link to it…" style="width: 100%; box-sizing: border-box; resize: vertical; border: 0; outline: none; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 17px; line-height: 1.5"></textarea>
