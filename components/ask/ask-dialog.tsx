@@ -5,17 +5,19 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type Fo
 import { createPortal } from "react-dom";
 import { AskAnswerView } from "@/components/ask/ask-answer";
 import { AskStart } from "@/components/ask/ask-start";
+import { AskThinking } from "@/components/ask/ask-thinking";
 import { ask } from "@/lib/ask/client";
-import { askPageFor, CTX_QUESTION, gapQuestion } from "@/lib/ask/copy";
+import { ASK_LOADING, ASK_PLACEHOLDER, ASK_SUBMIT, ASK_THINKING, askPageFor, CTX_QUESTION, gapQuestion } from "@/lib/ask/copy";
 import { sessionMemory } from "@/lib/ask/session-memory";
-import { ASK_MAX_CHARS, type AskResult } from "@/lib/ask/types";
+import { ASK_MAX_CHARS, type AskResult, type AskStepEvent } from "@/lib/ask/types";
 
 /** Which session-memory question to open on: a gap index, or "q" for "What should I ask him…". */
 export type AskFocus = number | "q";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-type Asked = { question: string; result: AskResult | null };
+/** A question in flight (`result` null: the thinking state) or answered. `steps` are the run's real step events. */
+type Asked = { question: string; steps: AskStepEvent[]; result: AskResult | null };
 
 /** "Ask my work" command bar (Ask.dc.html); a bottom sheet at ≤ 640 px (MobileAsk.dc.html), via the [@media(max-width:640px)] classes. */
 export function AskDialog({ focus, onClose }: { focus?: AskFocus; onClose: () => void }) {
@@ -25,20 +27,43 @@ export function AskDialog({ focus, onClose }: { focus?: AskFocus; onClose: () =>
   const [asked, setAsked] = useState<Asked | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const thinkingRef = useRef<HTMLDivElement>(null);
   const requestId = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
 
   const submitQuestion = useCallback((question: string) => {
     const id = ++requestId.current;
-    setAsked({ question, result: null });
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    setAsked({ question, steps: [], result: null });
     setQuery("");
-    inputRef.current?.focus();
-    ask({ question, memory: sessionMemory.get() })
+    // Ignore events for a question that was replaced, or a dialog that closed.
+    const current = () => id === requestId.current;
+    const onStep = (ev: AskStepEvent) => {
+      if (!current()) return;
+      setAsked((prev) => {
+        if (!prev || prev.result) return prev;
+        const i = prev.steps.findIndex((s) => s.tool === ev.tool);
+        return { ...prev, steps: i === -1 ? [...prev.steps, ev] : prev.steps.map((s, j) => (j === i ? ev : s)) };
+      });
+    };
+    ask({ question, memory: sessionMemory.get() }, onStep, ac.signal)
       .catch((): AskResult => ({ status: "error" }))
       .then((result) => {
-        // Ignore answers to a question that was replaced, or a dialog that closed.
-        if (id === requestId.current) setAsked({ question, result });
+        if (current()) setAsked((prev) => (prev ? { ...prev, result } : prev));
       });
   }, []);
+
+  const thinking = asked !== null && asked.result === null;
+
+  // The input is disabled while thinking, so focus moves to the thinking block, then back to the input.
+  const wasThinking = useRef(false);
+  useEffect(() => {
+    if (thinking) thinkingRef.current?.focus({ preventScroll: true });
+    else if (wasThinking.current) inputRef.current?.focus({ preventScroll: true });
+    wasThinking.current = thinking;
+  }, [thinking]);
 
   // Modal: the rest of the page is inert and doesn't scroll; focus returns to the trigger on close.
   useEffect(() => {
@@ -56,8 +81,10 @@ export function AskDialog({ focus, onClose }: { focus?: AskFocus; onClose: () =>
     html.style.overflow = "hidden";
     inputRef.current?.focus();
     const ids = requestId;
+    const abort = abortRef;
     return () => {
       ids.current++;
+      abort.current?.abort();
       made.forEach((el) => el.removeAttribute("inert"));
       html.style.overflow = overflow;
       if (trigger?.isConnected) trigger.focus({ preventScroll: true });
@@ -78,12 +105,13 @@ export function AskDialog({ focus, onClose }: { focus?: AskFocus; onClose: () =>
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     const q = query.trim();
-    if (!q || (asked && !asked.result)) return;
+    if (!q || thinking) return;
     submitQuestion(q);
   };
 
   const again = () => {
     requestId.current++;
+    abortRef.current?.abort();
     setAsked(null);
     inputRef.current?.focus();
   };
@@ -107,8 +135,6 @@ export function AskDialog({ focus, onClose }: { focus?: AskFocus; onClose: () =>
       first.focus();
     }
   };
-
-  const waiting = asked !== null && asked.result === null;
 
   return createPortal(
     <div
@@ -148,17 +174,21 @@ export function AskDialog({ focus, onClose }: { focus?: AskFocus; onClose: () =>
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            disabled={thinking}
+            aria-busy={thinking}
             maxLength={ASK_MAX_CHARS}
             aria-label="Ask a question about Aswin's work"
-            placeholder="Ask about Aswin's work, or jump to a page…"
+            placeholder={thinking ? ASK_LOADING : ASK_PLACEHOLDER}
             className="min-h-11 min-w-0 flex-1 border-0 bg-transparent font-sans text-[17px] text-ink outline-none"
+            style={{ opacity: thinking ? 0.5 : 1 }}
           />
           <button
             type="submit"
-            disabled={waiting}
+            disabled={thinking}
             className="min-h-10 cursor-pointer rounded-[8px] border-0 bg-btn-bg px-[14px] py-[6px] font-sans text-[14px] font-semibold text-btn-ink disabled:cursor-default"
+            style={{ opacity: thinking ? 0.5 : 1 }}
           >
-            Ask
+            {thinking ? ASK_THINKING : ASK_SUBMIT}
           </button>
           <button
             type="button"
@@ -171,8 +201,10 @@ export function AskDialog({ focus, onClose }: { focus?: AskFocus; onClose: () =>
             </svg>
           </button>
         </form>
-        {asked ? (
+        {asked?.result ? (
           <AskAnswerView question={asked.question} result={asked.result} onAgain={again} onNavigate={onClose} />
+        ) : asked ? (
+          <AskThinking question={asked.question} steps={asked.steps} focusRef={thinkingRef} />
         ) : (
           <AskStart page={page} memory={memory} onAsk={submitQuestion} onForget={forget} onNavigate={onClose} />
         )}

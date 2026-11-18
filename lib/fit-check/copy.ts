@@ -35,8 +35,18 @@ export const HERO_SAMPLES = [
 ] as const;
 export type HeroSample = (typeof HERO_SAMPLES)[number];
 
-/** Shown until jd.parse returns a role title for a pasted JD. */
-export const PASTED_ROLE = "Your pasted role";
+/**
+ * heroSummary() (Hero.dc.html, update 2): the role shown for a pasted JD until jd.parse returns
+ * a role title. A link: its first token without `http(s)://` and `www.`, cut to 64 characters.
+ * Text: the first line or sentence, cut to 72.
+ */
+export function heroSummary(jd: string): string {
+  const s = jd.trim();
+  const cut = (v: string, n: number) => (v.length > n ? v.slice(0, n - 1).trim() + "…" : v);
+  if (isLink(s)) return cut(s.split(/\s/)[0].replace(/^https?:\/\/(www\.)?/i, ""), 64);
+  const first = s.split(/\n|\.\s/)[0].trim();
+  return cut(first || s, 72);
+}
 
 /** HERO_ATTACKS chips and the text each one sends. */
 export const HERO_ATTACKS = [

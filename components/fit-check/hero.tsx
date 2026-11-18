@@ -16,13 +16,13 @@ import {
   HERO_SAMPLES,
   isLink,
   isStrongFit,
+  heroSummary,
   NUDGE,
-  PASTED_ROLE,
   SKIPPED_FETCH,
   STEP_COPY,
 } from "@/lib/fit-check/copy";
 import { rolePrefill } from "@/lib/fit-check/role-prefill";
-import { FitEventSchema, type Drill, type FallbackEvent, type ResultEvent, type StepEvent } from "@/lib/fit-check/types";
+import { FIT_TOOLS, FitEventSchema, type Drill, type FallbackEvent, type ResultEvent, type StepEvent } from "@/lib/fit-check/types";
 
 export type { HowIBuiltMeta };
 
@@ -156,6 +156,8 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
   const isResult = (phase === "result" || phase === "badfit") && result !== null;
   const showFallback = (phase === "error" || phase === "limited" || phase === "budget") && fallback !== null;
   const linkRun = isLink(jd);
+  // "Checking… step n of 7": the step running now, counted from the real step events.
+  const stepNum = Math.min(steps.filter((st) => st.status !== "running").length + 1, FIT_TOOLS.length);
 
   let nudge = "";
   if (isResult) nudge = NUDGE.result;
@@ -167,128 +169,160 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
       <div className="mx-auto flex max-w-[1040px] flex-col gap-7">
         <div className="flex flex-col gap-[18px]">
           <p className="m-0 font-mono text-[12px] uppercase tracking-[0.08em] text-muted">Aswin · Senior Product Manager</p>
-          <h1 className="m-0 font-serif text-[clamp(42px,6vw,72px)] font-normal leading-[1.02] tracking-[-0.02em]">
+          <h1 className="m-0 font-serif text-[clamp(32px,4vw,46px)] font-normal leading-[1.1] tracking-[-0.015em]">
             Platform PM who builds for agents.
           </h1>
-          <p className="m-0 max-w-[760px] font-serif text-[24px] leading-[1.4] text-muted">
+          <p className="m-0 max-w-[720px] font-serif text-[20px] leading-[1.45] text-muted">
             I build platforms, AI-powered products, and systems that turn emerging technology into real-world capability.
           </p>
         </div>
 
-        {phase === "empty" && (
-          <FitInput
-            jd={jd}
-            onJd={setJd}
-            onCheck={() => {
-              if (jd.trim()) run(jd, PASTED_ROLE);
-            }}
-            onSample={(s) => run(s.jd, s.role)}
-            onAttack={attack}
-            onDrill={(d) => run(HERO_SAMPLES[0].jd, HERO_SAMPLES[0].role, d)}
-            inputRef={setFocusTarget}
-          />
-        )}
-
-        {phase === "break" && (
-          <BreakPanel
-            log={log}
-            pending={pending > 0}
-            error={breakError}
-            xray={xray}
-            evalSet={resultMeta.evalSet}
-            onAttack={attack}
-            onReset={reset}
-            headingRef={setFocusTarget}
-          />
-        )}
-
-        {phase !== "empty" && phase !== "break" && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-rule bg-paper px-[18px] py-[14px]">
-            <p className="m-0 text-[15px]">
-              <span className="font-mono text-[12px] uppercase tracking-[0.06em] text-muted">
-                {drill ? "Drill running against" : "Checking against"}{" "}
+        <section
+          aria-labelledby="fit-h"
+          className="mt-2 flex flex-col gap-[22px] rounded-[20px] border border-rule bg-panel p-[clamp(18px,3vw,32px)]"
+        >
+          <div className="flex flex-wrap items-end justify-between gap-x-5 gap-y-2 border-b border-rule pb-[18px]">
+            <div className="flex flex-col gap-2">
+              <span className="self-start rounded-full bg-accent px-[9px] py-[3px] font-mono text-[11px] tracking-[0.08em] text-paper">
+                FIT CHECK · LIVE AI
               </span>
-              <b className="font-semibold">{role}</b>
-            </p>
-            <button type="button" onClick={reset} className={resetButton}>
-              {drill ? "Back to the fit check" : "Try another role"}
-            </button>
-          </div>
-        )}
-
-        {phase === "running" && !drill && (
-          <div
-            ref={setFocusTarget}
-            tabIndex={-1}
-            role="status"
-            aria-live="polite"
-            className="flex flex-col gap-3 rounded-[14px] border border-rule bg-paper px-[22px] py-5 outline-none"
-          >
-            <div className="flex flex-wrap justify-between gap-3">
-              <p className={statusLabel}>Agent · streaming from the live run</p>
-              {xray && <p className="m-0 font-mono text-[12px] text-muted">trace {runId ?? "[run id]"} · logged</p>}
+              <h2 id="fit-h" className="m-0 font-sans text-[clamp(24px,3vw,30px)] font-semibold leading-[1.2] tracking-[-0.01em]">
+                Will I fit your role?
+              </h2>
             </div>
-            {steps.map((st) => {
-              const done = st.status !== "running";
-              const skipped = st.status === "skipped";
-              const copy = st.tool === "fetch_url" && !linkRun ? SKIPPED_FETCH : STEP_COPY[st.tool];
-              const status = !done
-                ? "running…"
-                : xray && !skipped
-                  ? `${st.detail ?? ""} · ${st.ms !== undefined ? `${st.ms} ms` : "[ms]"}`
-                  : (st.detail ?? "");
-              const statusColor = done && !skipped ? "text-accent" : "text-muted";
-              return (
-                <div key={st.tool} className="flex flex-wrap justify-between gap-4 font-mono text-[14px] leading-[1.5]">
-                  <span className={skipped ? "text-muted" : "text-ink"}>
-                    <span className={statusColor}>{skipped ? "–" : done ? "✓" : "›"} </span>
-                    {xray ? copy.xr : `${st.tool} · ${copy.label}`}
+            <span className="font-mono text-[12px] text-muted">answers from my real record · gaps shown, not hidden</span>
+          </div>
+
+          {phase === "empty" && (
+            <FitInput
+              jd={jd}
+              onJd={setJd}
+              onCheck={() => {
+                if (jd.trim()) run(jd, heroSummary(jd));
+              }}
+              onSample={(s) => run(s.jd, s.role)}
+              onAttack={attack}
+              onDrill={(d) => run(HERO_SAMPLES[0].jd, HERO_SAMPLES[0].role, d)}
+              inputRef={setFocusTarget}
+            />
+          )}
+
+          {phase === "break" && (
+            <BreakPanel
+              log={log}
+              pending={pending > 0}
+              error={breakError}
+              xray={xray}
+              evalSet={resultMeta.evalSet}
+              onAttack={attack}
+              onReset={reset}
+              headingRef={setFocusTarget}
+            />
+          )}
+
+          {phase !== "empty" && phase !== "break" && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-rule bg-paper px-[18px] py-[14px]">
+              <p className="m-0 min-w-0 flex-[1_1_320px] text-[15px] leading-[1.45]">
+                <span className="font-mono text-[12px] uppercase tracking-[0.06em] text-muted">
+                  {drill ? "Drill running against" : phase === "running" ? "Checking against" : "Checked against"}{" "}
+                </span>
+                <b className="font-semibold [overflow-wrap:anywhere]">{role}</b>
+              </p>
+              {phase === "running" ? (
+                <div role="status" aria-live="polite" className="flex min-w-[180px] flex-col gap-[6px]">
+                  <span className="font-mono text-[13px] text-accent">
+                    Checking… step {stepNum} of {FIT_TOOLS.length}
                   </span>
-                  <span className={statusColor}>{status}</span>
+                  <span aria-hidden="true" className="block h-1 overflow-hidden rounded-full bg-accent-tint">
+                    <span
+                      data-progress
+                      className="block h-1 rounded-full bg-accent"
+                      style={{ width: `${Math.round((stepNum / FIT_TOOLS.length) * 100)}%` }}
+                    />
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              ) : (
+                <button type="button" onClick={reset} className={resetButton}>
+                  {drill ? "Back to the fit check" : "Try another role"}
+                </button>
+              )}
+            </div>
+          )}
 
-        {isResult && (
-          <Result
-            result={result}
-            bad={phase === "badfit"}
-            linkBranch={linkRun}
-            xray={xray}
-            meta={resultMeta}
-            onAskGap={(i) => openAsk(i)}
-            onAsk={() => openAsk()}
-            onTalk={talk}
-            headingRef={setFocusTarget}
-          />
-        )}
-
-        {showFallback && (
-          <Fallback
-            event={fallback}
-            xray={xray}
-            onRetry={() => run(jd, role)}
-            onTalk={talk}
-            headingRef={setFocusTarget}
-          />
-        )}
-
-        {!xray && nudge && (
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-[10px] border border-dashed border-accent bg-accent-tint px-[14px] py-[10px]">
-            <span className="text-[15px]">{nudge}</span>
-            <button
-              type="button"
-              onClick={() => setXray(true)}
-              className="min-h-10 cursor-pointer rounded-lg border border-accent bg-transparent px-3 py-[6px] font-mono text-[13px] text-accent"
+          {phase === "running" && !drill && (
+            <div
+              ref={setFocusTarget}
+              tabIndex={-1}
+              role="status"
+              aria-live="polite"
+              className="flex flex-col gap-3 rounded-[14px] border border-rule bg-paper px-[22px] py-5 outline-none"
             >
-              Turn on X-ray →
-            </button>
-          </div>
-        )}
+              <div className="flex flex-wrap justify-between gap-3">
+                <p className={statusLabel}>Agent · streaming from the live run</p>
+                {xray && <p className="m-0 font-mono text-[12px] text-muted">trace {runId ?? "[run id]"} · logged</p>}
+              </div>
+              {steps.map((st) => {
+                const done = st.status !== "running";
+                const skipped = st.status === "skipped";
+                const copy = st.tool === "fetch_url" && !linkRun ? SKIPPED_FETCH : STEP_COPY[st.tool];
+                const status = !done
+                  ? "running…"
+                  : xray && !skipped
+                    ? `${st.detail ?? ""} · ${st.ms !== undefined ? `${st.ms} ms` : "[ms]"}`
+                    : (st.detail ?? "");
+                const statusColor = done && !skipped ? "text-accent" : "text-muted";
+                return (
+                  <div key={st.tool} className="flex flex-wrap justify-between gap-4 font-mono text-[14px] leading-[1.5]">
+                    <span className={skipped ? "text-muted" : "text-ink"}>
+                      <span className={statusColor}>{skipped ? "–" : done ? "✓" : "›"} </span>
+                      {xray ? copy.xr : `${st.tool} · ${copy.label}`}
+                    </span>
+                    <span className={statusColor}>{status}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-        <HowBuilt meta={meta} xray={xray} />
+          {isResult && (
+            <Result
+              result={result}
+              bad={phase === "badfit"}
+              linkBranch={linkRun}
+              xray={xray}
+              meta={resultMeta}
+              onAskGap={(i) => openAsk(i)}
+              onAsk={() => openAsk()}
+              onTalk={talk}
+              headingRef={setFocusTarget}
+            />
+          )}
+
+          {showFallback && (
+            <Fallback
+              event={fallback}
+              xray={xray}
+              onRetry={() => run(jd, role)}
+              onTalk={talk}
+              headingRef={setFocusTarget}
+            />
+          )}
+
+          {!xray && nudge && (
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-[10px] border border-dashed border-accent bg-accent-tint px-[14px] py-[10px]">
+              <span className="text-[15px]">{nudge}</span>
+              <button
+                type="button"
+                onClick={() => setXray(true)}
+                className="min-h-10 cursor-pointer rounded-lg border border-accent bg-transparent px-3 py-[6px] font-mono text-[13px] text-accent"
+              >
+                Turn on X-ray →
+              </button>
+            </div>
+          )}
+
+          <HowBuilt meta={meta} xray={xray} />
+        </section>
       </div>
     </section>
   );

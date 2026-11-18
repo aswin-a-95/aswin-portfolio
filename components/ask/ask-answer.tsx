@@ -1,5 +1,5 @@
 import { AskLink } from "@/components/ask/ask-link";
-import { ASK_BUDGET, ASK_ERROR, ASK_LABELS, ASK_LIMITED, ASK_LOADING, CONTACT_SOURCE } from "@/lib/ask/copy";
+import { ASK_BUDGET, ASK_ERROR, ASK_LABELS, ASK_LIMITED, CONTACT_SOURCE } from "@/lib/ask/copy";
 import type { AskAnswer, AskResult, AskSource } from "@/lib/ask/types";
 
 const CARD_TONE = {
@@ -37,58 +37,51 @@ export function AskAnswerView({
   onNavigate,
 }: {
   question: string;
-  /** null while waiting for the answer. */
-  result: AskResult | null;
+  result: AskResult;
   onAgain: () => void;
   onNavigate: () => void;
 }) {
-  const card = result ? cardFor(result) : null;
+  const card = cardFor(result);
   return (
     <div role="status" aria-live="polite" className="flex flex-col gap-[14px] px-[18px] pt-4 pb-5">
       <p className="m-0 font-mono text-[13px] text-muted">› {question}</p>
-      {!card ? (
-        <p className="m-0 font-mono text-[13px] text-muted">{ASK_LOADING}</p>
-      ) : (
-        <>
-          <div className={`flex flex-col gap-2 rounded-[10px] p-4 ${CARD_TONE[card.tone]}`}>
-            {card.label && (
-              <p className={`m-0 font-mono text-[12px] tracking-[0.06em] ${LABEL_TONE[card.label[1]]}`}>
-                {card.label[0]}
-              </p>
-            )}
-            <p className="m-0 text-[17px] leading-[1.55]">{card.text}</p>
-            {card.todo && (
-              <p className="m-0 rounded-[6px] border border-dotted border-muted px-2 py-[6px] font-mono text-[13px] text-muted">
-                {card.todo}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {card.sources.map((s) => (
-              <AskLink
-                key={s.label}
-                href={s.href}
-                onNavigate={onNavigate}
-                className="rounded-[6px] bg-accent-tint px-[10px] py-[6px] font-mono text-[12px] text-accent no-underline"
-              >
-                {s.label} →
-              </AskLink>
-            ))}
-          </div>
-          {result?.status === "ok" && (
-            <p className="xray-only m-0 border-t border-dashed border-rule pt-[10px] font-mono text-[12px] leading-[1.6] text-muted">
-              {traceLine(result.answer)}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={onAgain}
-            className="min-h-11 cursor-pointer self-start border-0 bg-transparent px-0 py-2 font-mono text-[13px] text-accent"
+      <div className={`flex flex-col gap-2 rounded-[10px] p-4 ${CARD_TONE[card.tone]}`}>
+        {card.label && (
+          <p className={`m-0 font-mono text-[12px] tracking-[0.06em] ${LABEL_TONE[card.label[1]]}`}>
+            {card.label[0]}
+          </p>
+        )}
+        <p className="m-0 text-[17px] leading-[1.55]">{card.text}</p>
+        {card.todo && (
+          <p className="m-0 rounded-[6px] border border-dotted border-muted px-2 py-[6px] font-mono text-[13px] text-muted">
+            {card.todo}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {card.sources.map((s) => (
+          <AskLink
+            key={s.label}
+            href={s.href}
+            onNavigate={onNavigate}
+            className="rounded-[6px] bg-accent-tint px-[10px] py-[6px] font-mono text-[12px] text-accent no-underline"
           >
-            ← Ask another
-          </button>
-        </>
+            {s.label} →
+          </AskLink>
+        ))}
+      </div>
+      {result.status === "ok" && (
+        <p className="xray-only m-0 border-t border-dashed border-rule pt-[10px] font-mono text-[12px] leading-[1.6] text-muted">
+          {traceLine(result.answer)}
+        </p>
       )}
+      <button
+        type="button"
+        onClick={onAgain}
+        className="min-h-11 cursor-pointer self-start border-0 bg-transparent px-0 py-2 font-mono text-[13px] text-accent"
+      >
+        ← Ask another
+      </button>
     </div>
   );
 }

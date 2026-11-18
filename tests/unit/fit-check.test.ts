@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { breakVerdict, HERO_SAMPLES, isLink, isStrongFit } from "@/lib/fit-check/copy";
+import { breakVerdict, HERO_SAMPLES, heroSummary, isLink, isStrongFit } from "@/lib/fit-check/copy";
 import { rolePrefill } from "@/lib/fit-check/role-prefill";
 import { FitEventSchema } from "@/lib/fit-check/types";
 
@@ -23,6 +23,24 @@ describe("copy rules", () => {
     expect(isLink("https://x.y")).toBe(true);
     expect(isLink(" HTTP://x.y")).toBe(true);
     expect(isLink("see https://x.y")).toBe(false);
+  });
+});
+
+describe("heroSummary (Hero.dc.html, update 2)", () => {
+  it("a link: first token, no scheme or www., cut to 64 with …", () => {
+    expect(heroSummary("https://www.example.com/jobs/123 apply now")).toBe("example.com/jobs/123");
+    expect(heroSummary(" http://jobs.example.com/x")).toBe("jobs.example.com/x");
+    const long = heroSummary(`https://example.com/${"a".repeat(100)}`);
+    expect(long).toHaveLength(64);
+    expect(long.endsWith("…")).toBe(true);
+  });
+
+  it("text: first line or first sentence, trimmed, cut to 72 with …", () => {
+    expect(heroSummary("  Senior PM, Payments\nWe are hiring.")).toBe("Senior PM, Payments");
+    expect(heroSummary("Lead platform PM. You will own APIs.")).toBe("Lead platform PM");
+    const long = heroSummary("x".repeat(100));
+    expect(long).toHaveLength(72);
+    expect(long.endsWith("…")).toBe(true);
   });
 });
 
@@ -67,7 +85,31 @@ describe("client", () => {
     for await (const e of runFitCheck({ jd: "x" })) evs.push(e);
     expect(evs).toEqual([{ type: "fallback", reason: "error" }]);
     expect(await breakAttempt("Is he any good?")).toEqual({ status: "error" });
-    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ status: "budget" })));
+    vi.stubGlobal("fetch", vi.fn(async () => streamOf(['{"type":"result","status":"budget"}\n'])));
     expect(await breakAttempt("Is he any good?")).toEqual({ status: "budget" });
+  });
+
+  it("Ask reads its NDJSON stream: each step goes to onStep, then the result returns", async () => {
+    const answer = { kind: "fit", text: "Yes.", sources: [{ label: "About", href: "/about" }], guard: "none · answered from the knowledge base" };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        streamOf([
+          '{"type":"step","tool":"kb.search","status":"running"}\n{"type":"step","tool":"kb.search","status":"done","ms":1}\n',
+          '{"type":"step","tool":"compose","status":"running"}\n',
+          `{"type":"result","status":"ok","answer":${JSON.stringify(answer)}}\n`,
+        ]),
+      ),
+    );
+    const { ask } = await import("@/lib/ask/client");
+    const steps: string[] = [];
+    const r = await ask({ question: "Has he worked on APIs?", memory: null }, (ev) => steps.push(`${ev.tool}:${ev.status}`));
+    expect(steps).toEqual(["kb.search:running", "kb.search:done", "compose:running"]);
+    expect(r).toEqual({ status: "ok", answer });
+    // A malformed event or a stream without a result is an error.
+    vi.stubGlobal("fetch", vi.fn(async () => streamOf(['{"type":"step","tool":"nope","status":"running"}\n'])));
+    expect(await ask({ question: "x", memory: null })).toEqual({ status: "error" });
+    vi.stubGlobal("fetch", vi.fn(async () => streamOf(['{"type":"step","tool":"compose","status":"running"}\n'])));
+    expect(await ask({ question: "x", memory: null })).toEqual({ status: "error" });
   });
 });

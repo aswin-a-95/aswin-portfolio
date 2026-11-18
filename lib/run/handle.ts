@@ -1,5 +1,6 @@
 import { PROMPT_VERSION } from "@/lib/ai/prompts";
 import { RunRequestSchema } from "@/lib/ai/schemas";
+import type { AskEvent } from "@/lib/ask/types";
 import type { FitEvent } from "@/lib/fit-check/types";
 import { addSpend } from "@/lib/server/budget";
 import { serverEnv, type ServerEnv } from "@/lib/server/env";
@@ -93,19 +94,14 @@ export async function handleRun(request: Request, deps: HandleDeps = {}): Promis
   const ctx: RunContext = { env, visitor: visitorId(ip, env), signal, now };
   const rec = newRecord(req.mode, now);
 
-  if (req.mode === "ask") {
-    const res = await runAsk(req, ctx, rec);
-    await finish(rec, env, logger, now);
-    return json(res);
-  }
   if (req.mode === "sandbox") {
     const res = await runSandbox(req, ctx, rec);
     await finish(rec, env, logger, now);
     return json(res);
   }
 
-  // Fit: NDJSON, one event per line, flushed as each step happens.
-  const events: AsyncGenerator<FitEvent> = runFit(req, ctx, rec, deps.fit);
+  // Fit and Ask: NDJSON, one event per line, flushed as each step happens.
+  const events: AsyncGenerator<FitEvent | AskEvent> = req.mode === "ask" ? runAsk(req, ctx, rec) : runFit(req, ctx, rec, deps.fit);
   const enc = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async pull(controller) {

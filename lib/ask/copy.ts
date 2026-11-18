@@ -1,4 +1,4 @@
-import type { AskKind } from "./types";
+import type { AskKind, AskTool } from "./types";
 
 /** Copy and lookup tables from Ask.dc.html, word for word. */
 
@@ -56,8 +56,20 @@ export const gapQuestion = (req: string) => `About the gap: ${req}`;
 
 export const CONTACT_SOURCE = { label: "Contact", href: "/#contact" };
 
-// Approved additions for states the design doesn't show (loading, error, limit).
+/** The input while idle and while thinking, and the submit label (Ask.dc.html, update 2). */
+export const ASK_PLACEHOLDER = "Ask about Aswin's work, or jump to a page…";
 export const ASK_LOADING = "Answering from the knowledge base…";
+export const ASK_SUBMIT = "Ask";
+export const ASK_THINKING = "Thinking…";
+
+/** The thinking state's step lines. They appear as the run's real step events arrive. */
+export const ASK_STEP_COPY: Record<AskTool, string> = {
+  "kb.search": "searching the knowledge base",
+  guardrails: "checking the answer cites a source",
+  compose: "writing the answer",
+};
+
+// Approved additions for states the design doesn't show (error, limit).
 export const ASK_ERROR = "Ask my work couldn't answer this time. Try again, or ask Aswin directly.";
 export const ASK_LIMITED = "That's the limit for questions this hour. Aswin is one message away.";
 // Approved in M5 planning: the monthly AI budget is spent.

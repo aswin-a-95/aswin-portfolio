@@ -2,7 +2,7 @@ import { MockLanguageModelV4 } from "ai/test";
 import { WORK_ATTACKS, WORK_SAFE } from "@/content/case-studies/cloudeagle-attacks";
 import { ASK_QUESTIONS, CTX_QUESTION, gapQuestion } from "@/lib/ask/copy";
 import { ASK_ANSWERS } from "@/lib/ask/fixtures";
-import { HERO_SAMPLES, PASTED_ROLE } from "@/lib/fit-check/copy";
+import { HERO_SAMPLES, heroSummary } from "@/lib/fit-check/copy";
 import { BREAK_REPLIES, HERO_BAD, HERO_FIT } from "@/lib/fit-check/fixtures";
 import type { AskOutput, EvidenceCard, JdParse, SandboxOutput } from "./schemas";
 import { ASK_SYSTEM, EVIDENCE_MAP_SYSTEM, JD_PARSE_SYSTEM, SANDBOX_SYSTEM } from "./prompts";
@@ -52,7 +52,7 @@ function jdParse(user: string): JdParse {
   const sample = sampleFor(jd);
   const body = sample?.bad ? HERO_BAD : HERO_FIT;
   return {
-    role: sample?.role ?? PASTED_ROLE,
+    role: sample?.role ?? heroSummary(jd),
     requirements: [...body.matches.map((m) => m.req), ...body.gaps.map((g) => g.req)],
   };
 }

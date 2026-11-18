@@ -3,6 +3,7 @@ import { WORK_ATTACKS } from "@/content/case-studies/cloudeagle-attacks";
 import { ASK_QUESTIONS } from "@/lib/ask/copy";
 import { HERO_ATTACKS, HERO_SAMPLES } from "@/lib/fit-check/copy";
 import { FitEventSchema, FIT_TOOLS, type FitEvent } from "@/lib/fit-check/types";
+import { AskEventSchema, ASK_TOOLS, type AskEvent } from "@/lib/ask/types";
 import { resetMemoryBudget, addSpend } from "@/lib/server/budget";
 import type { ServerEnv } from "@/lib/server/env";
 import type { RunRow } from "@/lib/server/log-run";
@@ -10,6 +11,9 @@ import { resetMemoryLimits } from "@/lib/server/ratelimit";
 import { handleRun, type HandleDeps } from "@/lib/run/handle";
 import { ASK_UNKNOWN_TEXT } from "@/lib/run/guards";
 import { kbSearch } from "@/lib/kb/search";
+import { KB_SCOPES } from "@/lib/kb/snapshot";
+import { askSearch } from "@/lib/run/ask";
+import { askPrompt } from "@/lib/ai/prompts";
 import { getModel } from "@/lib/ai/model";
 
 const ENV: ServerEnv = {
@@ -49,6 +53,24 @@ async function fit(body: object, d: HandleDeps = deps): Promise<FitEvent[]> {
 }
 
 const terminal = (evs: FitEvent[]) => evs[evs.length - 1];
+
+async function askEvents(body: object, d: HandleDeps = deps): Promise<AskEvent[]> {
+  const res = await handleRun(post({ mode: "ask", ...body }), d);
+  expect(res.headers.get("content-type")).toContain("application/x-ndjson");
+  return (await res.text())
+    .trim()
+    .split("\n")
+    .map((l) => AskEventSchema.parse(JSON.parse(l)));
+}
+
+/** Ask's result event without its `type`: `{status, answer?}`. */
+async function askResult(body: object, d: HandleDeps = deps) {
+  const evs = await askEvents(body, d);
+  const last = evs[evs.length - 1];
+  expect(last.type).toBe("result");
+  expect(evs.filter((e) => e.type === "result")).toHaveLength(1);
+  return Object.fromEntries(Object.entries(last).filter(([k]) => k !== "type"));
+}
 
 describe("/api/run · fit", () => {
   it("streams start, each tool running then done in order, then exactly one result", async () => {
@@ -155,8 +177,7 @@ describe("/api/run · fit", () => {
   it("monthly budget spent → budget fallback for every mode", async () => {
     await addSpend(25, ENV);
     expect(await fit({ jd: HERO_SAMPLES[0].jd })).toEqual([{ type: "fallback", reason: "budget" }]);
-    const ask = await handleRun(post({ mode: "ask", question: ASK_QUESTIONS.apis }), deps);
-    expect(await ask.json()).toEqual({ status: "budget" });
+    expect(await askEvents({ question: ASK_QUESTIONS.apis })).toEqual([{ type: "result", status: "budget" }]);
     const sb = await handleRun(post({ mode: "sandbox", attempt: WORK_ATTACKS[0].text }), deps);
     expect(await sb.json()).toEqual({ status: "budget" });
   });
@@ -164,7 +185,7 @@ describe("/api/run · fit", () => {
   it("never logs the visitor's text", async () => {
     const secret = "Unique-JD-marker-7f3a requirements for a role";
     await fit({ jd: secret });
-    await handleRun(post({ mode: "ask", question: "secret-question-9c1d?" }), deps);
+    await (await handleRun(post({ mode: "ask", question: "secret-question-9c1d?" }), deps)).text();
     const logged = JSON.stringify(rows);
     expect(logged).not.toContain("7f3a");
     expect(logged).not.toContain("9c1d");
@@ -203,10 +224,29 @@ describe("/api/run · validation and Turnstile", () => {
 });
 
 describe("/api/run · ask", () => {
-  async function ask(question: string, memory: unknown = null) {
-    const res = await handleRun(post({ mode: "ask", question, memory }), deps);
-    return res.json();
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- loose access to the parsed answer in assertions
+  const ask = async (question: string, memory: unknown = null): Promise<any> => askResult({ question, memory });
+
+  it("streams kb.search, compose and guardrails in that order, each running then done, then one result", async () => {
+    const evs = await askEvents({ question: ASK_QUESTIONS.apis });
+    const steps = evs.filter((e) => e.type === "step").map((e) => (e.type === "step" ? `${e.tool}:${e.status}` : ""));
+    expect(steps).toEqual(ASK_TOOLS.flatMap((t) => [`${t}:running`, `${t}:done`]));
+    for (const e of evs) if (e.type === "step" && e.status === "done") expect(typeof e.ms).toBe("number");
+    expect(evs[evs.length - 1]).toMatchObject({ type: "result", status: "ok" });
+    expect(rows[0].steps.map((s) => s.tool)).toEqual([...ASK_TOOLS]);
+  });
+
+  it("kb.search is the §6 search of the question; its ids go to the model as likely sources", async () => {
+    const hits = askSearch(ASK_QUESTIONS.apis).map((e) => e.id);
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits).toEqual(kbSearch([ASK_QUESTIONS.apis], KB_SCOPES).map((e) => e.id));
+    expect(askPrompt(ASK_QUESTIONS.apis, null, hits)).toContain(`<likely_sources>\n${hits.join(", ")}\n</likely_sources>`);
+  });
+
+  it("a limited question gets only the result, no steps", async () => {
+    for (let i = 0; i < 30; i++) await ask(ASK_QUESTIONS.apis);
+    expect(await askEvents({ question: ASK_QUESTIONS.apis })).toEqual([{ type: "result", status: "limited" }]);
+  });
 
   it("answers from the KB with cited sources, the guard line and a live trace", async () => {
     const r = await ask(ASK_QUESTIONS.apis);

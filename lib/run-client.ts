@@ -10,3 +10,21 @@ export async function postRun(body: Record<string, unknown>, signal?: AbortSigna
     signal,
   });
 }
+
+/** Reads an NDJSON response body (SPEC §7–8) and yields each line, parsed, as it arrives. */
+export async function* readNdjson(body: ReadableStream<Uint8Array<ArrayBuffer>>): AsyncGenerator<unknown> {
+  const reader = body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    let nl: number;
+    while ((nl = buf.indexOf("\n")) !== -1) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (line) yield JSON.parse(line);
+    }
+  }
+  if (buf.trim()) yield JSON.parse(buf);
+}

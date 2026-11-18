@@ -46,3 +46,28 @@ export type AskResult =
   | { status: "budget" };
 
 export const ASK_MAX_CHARS = 1000;
+
+/**
+ * The Ask pipeline's steps, in the order they really run (approved 2026-11-18: the design lists
+ * guardrails before compose, but the citation check needs the written answer).
+ */
+export const ASK_TOOLS = ["kb.search", "compose", "guardrails"] as const;
+export type AskTool = (typeof ASK_TOOLS)[number];
+
+/** `/api/run` with `mode: "ask"` streams NDJSON: `step` events as they happen, then one `result`. */
+export const AskStepEventSchema = z.object({
+  type: z.literal("step"),
+  tool: z.enum(ASK_TOOLS),
+  status: z.enum(["running", "done"]),
+  ms: z.number().optional(),
+});
+export type AskStepEvent = z.infer<typeof AskStepEventSchema>;
+
+export const AskResultEventSchema = z.discriminatedUnion("status", [
+  z.object({ type: z.literal("result"), status: z.literal("ok"), answer: AskAnswerSchema }),
+  z.object({ type: z.literal("result"), status: z.enum(["error", "limited", "budget"]) }),
+]);
+export type AskResultEvent = z.infer<typeof AskResultEventSchema>;
+
+export const AskEventSchema = z.union([AskStepEventSchema, AskResultEventSchema]);
+export type AskEvent = z.infer<typeof AskEventSchema>;

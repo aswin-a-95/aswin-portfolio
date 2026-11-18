@@ -3,6 +3,7 @@
 /* Design tokens, SPEC.md §3. Light is the default; X-ray is the dark theme. */
 :root {
   --bg: #f6f3ec;
+  --panel: #efeae0;
   --paper: #fffdf8;
   --ink: #1b1a17;
   --muted: #5c574e;
@@ -27,6 +28,7 @@
 
 :root[data-theme="xray"] {
   --bg: #101214;
+  --panel: #14171a;
   --paper: #171a1d;
   --ink: #e9e6df;
   --muted: #a3a9b0;
@@ -43,6 +45,7 @@
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-panel: var(--panel);
   --color-paper: var(--paper);
   --color-ink: var(--ink);
   --color-muted: var(--muted);

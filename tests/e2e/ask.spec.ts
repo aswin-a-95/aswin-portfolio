@@ -154,16 +154,56 @@ test.describe("session memory", () => {
 });
 
 test.describe("answers", () => {
-  test("loading line, then a plain answer with sources; Ask another goes back", async ({ page }) => {
+  test("thinking: the real steps stream in, input and Ask disabled; reopening resets (Ask.dc.html update 2)", async ({ page }) => {
+    await open(page);
+    // Held in compose: kb.search is done, the model call is running.
+    await input(page).fill(`Has he worked on APIs? ${FAKE.hold}`);
+    await page.keyboard.press("Enter");
+    const thinking = status(page);
+    await expect(thinking).toHaveAttribute("aria-live", "polite");
+    await expect(thinking.getByText(`› Has he worked on APIs? ${FAKE.hold}`, { exact: true })).toBeVisible();
+    const done = thinking.getByText("✓ kb.search · searching the knowledge base", { exact: true });
+    const current = thinking.getByText("› compose · writing the answer…", { exact: true });
+    await expect(done).toHaveCSS("color", "rgb(31, 76, 134)");
+    await expect(current).toHaveCSS("color", "rgb(27, 26, 23)");
+    // guardrails hasn't started, so it isn't shown.
+    await expect(thinking.getByText(/guardrails/)).toHaveCount(0);
+    await expect(thinking).toHaveCSS("padding-top", "18px");
+    await expect(thinking).toHaveCSS("row-gap", "10px");
+    await expect(thinking).toHaveCSS("font-size", "13px");
+    const track = thinking.locator('span[aria-hidden="true"]');
+    await expect(track).toHaveCSS("height", "3px");
+    await expect(track).toHaveCSS("background-color", "rgb(232, 238, 246)");
+    await expect(track.locator("[data-progress]")).toHaveAttribute("style", "width: 67%;");
+
+    await expect(input(page)).toBeDisabled();
+    await expect(input(page)).toHaveAttribute("aria-busy", "true");
+    await expect(input(page)).toHaveAttribute("placeholder", "Answering from the knowledge base…");
+    await expect(input(page)).toHaveCSS("opacity", "0.5");
+    const submit = dialog(page).getByRole("button", { name: "Thinking…", exact: true });
+    await expect(submit).toBeDisabled();
+    await expect(submit).toHaveCSS("opacity", "0.5");
+    await expect(dialog(page).getByText("Suggested for this page")).toHaveCount(0);
+    await expect(thinking).toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await askButton(page).click();
+    await expect(dialog(page).getByText("Suggested for this page")).toBeVisible();
+    await expect(input(page)).toBeEnabled();
+    await expect(input(page)).toHaveAttribute("aria-busy", "false");
+    await expect(input(page)).toHaveAttribute("placeholder", "Ask about Aswin's work, or jump to a page…");
+    await expect(dialog(page).getByRole("button", { name: "Ask", exact: true })).toBeEnabled();
+  });
+
+  test("a question, then a plain answer with sources; Ask another goes back", async ({ page }) => {
     await open(page);
     await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
     await expect(status(page)).toHaveAttribute("aria-live", "polite");
     await expect(status(page)).toContainText("› Has he worked on APIs?");
-    await expect(status(page)).toContainText("Answering from the knowledge base…");
-    await expect(dialog(page).getByRole("button", { name: "Ask", exact: true })).toBeDisabled();
     await expect(status(page)).toContainText("Yes. His platform PM work is APIs and integrations");
-    await expect(status(page)).not.toContainText("Answering from the knowledge base…");
+    await expect(status(page)).not.toContainText("compose · writing the answer");
     await expect(dialog(page).getByRole("button", { name: "Ask", exact: true })).toBeEnabled();
+    await expect(input(page)).toBeFocused();
     await expect(status(page).getByRole("link", { name: "About · career →" })).toHaveAttribute("href", "/about");
     await expect(status(page).getByRole("link", { name: "Case study · Platform & API work →" })).toBeVisible();
     await status(page).getByRole("button", { name: "← Ask another" }).click();

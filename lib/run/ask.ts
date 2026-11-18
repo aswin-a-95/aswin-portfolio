@@ -1,13 +1,14 @@
 import { getModel, type ResolvedModel } from "@/lib/ai/model";
 import { ASK_SYSTEM, SANDBOX_SYSTEM, askKbBlock, askPrompt, sandboxPrompt } from "@/lib/ai/prompts";
 import { AskOutputSchema, SandboxOutputSchema, type AskRun, type FailStatus, type SandboxReply, type SandboxRun } from "@/lib/ai/schemas";
-import type { AskAnswer, SessionMemory } from "@/lib/ask/types";
-import { KB, formatEntries } from "@/lib/kb/snapshot";
+import type { AskEvent, AskTool, SessionMemory } from "@/lib/ask/types";
+import { kbSearch } from "@/lib/kb/search";
+import { KB, KB_SCOPES, formatEntries, type KbEntry } from "@/lib/kb/snapshot";
 import { budgetLeft } from "@/lib/server/budget";
 import { checkLimit } from "@/lib/server/ratelimit";
 import { addUsage, displayCost, runCost, type RunContext, type RunRecord } from "./context";
 import { guardAsk, sandboxConsistent } from "./guards";
-import { hook } from "./hooks";
+import { hook, untilAborted } from "./hooks";
 import { LlmError, callLlm } from "./llm";
 
 /**
@@ -16,7 +17,6 @@ import { LlmError, callLlm } from "./llm";
  * logged or counted (rec.log = false).
  */
 
-export type AskResponse = { status: "ok"; answer: AskAnswer } | { status: FailStatus };
 export type SandboxResponse = { status: "ok"; reply: SandboxReply } | { status: FailStatus };
 
 const LIMITS = {
@@ -62,20 +62,47 @@ async function withRetry<T>(rec: RunRecord, signal: AbortSignal, fn: () => Promi
   }
 }
 
-export async function runAsk(req: AskRun, ctx: RunContext, rec: RunRecord, modelFor: ModelFor = chatModel): Promise<AskResponse> {
+/** The step `kb.search` runs for a question: the same deterministic search as the fit check, over every scope. */
+export function askSearch(question: string): KbEntry[] {
+  return kbSearch([question], KB_SCOPES);
+}
+
+/**
+ * Ask streams its real steps (SPEC §8): `kb.search` (deterministic), `compose` (the model call),
+ * `guardrails` (the citation and honesty check on the written answer), then one `result`.
+ * The limit and budget gates run first, so a blocked question gets only the `result`.
+ */
+export async function* runAsk(req: AskRun, ctx: RunContext, rec: RunRecord, modelFor: ModelFor = chatModel): AsyncGenerator<AskEvent> {
   rec.log = false;
   const blocked = await gate(req.question, ctx);
-  if (blocked) return { status: blocked };
+  if (blocked) {
+    yield { type: "result", status: blocked };
+    return;
+  }
+  const step = (tool: AskTool, status: "running" | "done", ms?: number): AskEvent => {
+    if (status === "done") rec.steps.push({ tool, status, ms: ms ?? 0 });
+    return { type: "step", tool, status, ...(ms !== undefined ? { ms } : {}) };
+  };
+  const since = (t0: number) => Math.round(ctx.now() - t0);
   try {
     const model = await modelFor(ctx);
     rec.model = model.id;
     const memory = req.memory ?? null;
+
+    yield step("kb.search", "running");
+    let t0 = ctx.now();
+    const likely = askSearch(req.question).map((e) => e.id);
+    yield step("kb.search", "done", since(t0));
+
+    yield step("compose", "running");
+    t0 = ctx.now();
+    if (hook(ctx.env, req.question, "hold")) await untilAborted(ctx.signal);
     const out = await withRetry(rec, ctx.signal, async () => {
       const r = await callLlm({
         model,
         system: ASK_SYSTEM,
         cachedContext: KB_BLOCK,
-        prompt: askPrompt(req.question, memory ? memoryBlock(memory) : null),
+        prompt: askPrompt(req.question, memory ? memoryBlock(memory) : null, likely),
         schema: AskOutputSchema,
         signal: ctx.signal,
         ...LIMITS.ask,
@@ -83,16 +110,24 @@ export async function runAsk(req: AskRun, ctx: RunContext, rec: RunRecord, model
       addUsage(rec, r.tokens);
       return r.output;
     });
+    yield step("compose", "done", since(t0));
+
+    yield step("guardrails", "running");
+    t0 = ctx.now();
     const { fired, ...answer } = guardAsk(out, memory !== null);
     if (fired) rec.guardFired.push(fired);
+    yield step("guardrails", "done", since(t0));
+
     rec.log = true;
-    return {
+    yield {
+      type: "result",
       status: "ok",
       answer: { ...answer, trace: { runId: rec.runId, costUsd: displayCost(runCost(rec)), ms: Math.round(ctx.now() - rec.startedAt) } },
     };
   } catch (e) {
     if (!ctx.signal.aborted) console.error("ask failed:", e instanceof Error ? e.message : e);
-    return { status: "error" };
+    rec.log = false;
+    yield { type: "result", status: "error" };
   }
 }
 

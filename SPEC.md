@@ -61,6 +61,7 @@ Two themes. **Light** is the default. **X-ray** is the dark theme that turns on 
 | Token | Light | X-ray |
 | --- | --- | --- |
 | `bg` | `#F6F3EC` | `#101214` |
+| `panel` | `#EFEAE0` | `#14171A` |
 | `paper` | `#FFFDF8` | `#171A1D` |
 | `ink` | `#1B1A17` | `#E9E6DF` |
 | `muted` | `#5C574E` | `#A3A9B0` |
@@ -146,7 +147,7 @@ The design's honest note is a requirement: **"the fit check is a fixed pipeline 
 
 - **Transport:** NDJSON or SSE events: an optional `{type:"start", runId}`, then `{type:"step", tool, status, detail, ms}` (`status`: `running` | `done` | `skipped`), then exactly one terminal event: `{type:"result", …}` or `{type:"fallback", reason, drill?, runId?, trace?}`. `reason` is `error` (the error state), `limited` (the rate-limited state) or `budget` (the monthly budget is spent, §10). `trace` is the X-ray fallback trace (`HERO_DRILL_TRACE` shape: `[{mark, text, bad, timed, ms?}]`). The running state in the design ("Agent · streaming from the live run") must reflect these real events, never a timer. Zod schemas: `lib/fit-check/types.ts`.
 - **Retry:** one retry on a failed LLM or `kb.search` call. If `kb.search` still fails, `guard.no_sources` stops the run and the UI shows the fallback state ("The knowledge base didn't answer, so the AI won't guess.").
-- **Result shape** = `HERO_FIT` / `HERO_BAD` in `Hero.dc.html`: `verdict`, `note`, `matches[{req, evidence, source, href}]`, `gaps[{req, closest, close}]`, plus `role` (a short role title that `jd.parse` extracts; the hero shows it, stores it in session memory and pre-fills Contact with it), `retries` (0 or 1) and `trace {runId, costUsd, ms, model}`. Not-done gaps use "Not something Aswin has done." and leave `close` empty.
+- **Result shape** = `HERO_FIT` / `HERO_BAD` in `Hero.dc.html`: `verdict`, `note`, `matches[{req, evidence, source, href}]`, `gaps[{req, closest, close}]`, plus `role` (a short role title that `jd.parse` extracts; the hero shows it, stores it in session memory and pre-fills Contact with it; until it arrives, and in the fallback states, the hero shows `heroSummary` of the pasted JD: a link's first token without `http(s)://` and `www.`, cut to 64 characters, or the text's first line or sentence, cut to 72), `retries` (0 or 1) and `trace {runId, costUsd, ms, model}`. Not-done gaps use "Not something Aswin has done." and leave `close` empty.
 - **Samples:** the 4 sample chips (3 fits + "A bad fit, on purpose") send their JD text from the design through the real pipeline.
 - **Result footer:** offline eval line (pass rate + last run date from the latest eval results, §10), this run's cost and seconds, eval set link. **X-ray block:** trace/run id, sources cited, guardrails passed, branch, retries used, model name. Eval numbers and live-usage numbers are always labelled separately and never combined.
 - **States:** implement all 7 from `HeroStates.dc.html`: empty, running, result, badfit, break, error, limited, with the exact copy.
@@ -156,6 +157,8 @@ The design's honest note is a requirement: **"the fit check is a fixed pipeline 
 ## 8. Ask my work and Break my AI — `/api/run` with `mode: "ask"`
 
 - One prompt over the same knowledge base (whole KB in context with prompt caching; it's small) plus session memory if present.
+- **Steps (approved 2026-11-18, design update 2), streamed in this order as they happen:** `kb.search` (deterministic §6 search of the question over every scope; its entry ids go to the model as `<likely_sources>`, and the whole KB stays in context), `compose` (the model call), `guardrails` (the citation and honesty check on the written answer, `guardAsk`). The design lists `guardrails` before `compose`; the real order is kept because the check needs the answer. Ask's thinking state shows these lines: "kb.search · searching the knowledge base", "compose · writing the answer", "guardrails · checking the answer cites a source".
+- **Transport:** NDJSON, like the fit check: `{type:"step", tool, status: "running"|"done", ms?}` events, then exactly one `{type:"result", status:"ok", answer}` or `{type:"result", status:"error"|"limited"|"budget"}`. The limit and budget checks run before any step, so a blocked question gets only the result. Zod schemas: `lib/ask/types.ts`. Break my AI reads the same stream and uses only the result.
 - Structured output: `{ kind: "fit"|"gap"|"none"|"refuse"|"conflict"|"clarify"|"unknown", text, sources: [{label, href}], guard }`.
 - `kind` → label and colour exactly as `ASK_LABELS`: gap "PARTIAL · STATED PLAINLY" (amber), none "NOT SOMETHING ASWIN HAS DONE" (amber), refuse "REFUSED · PROMPT INJECTION" (accent), conflict "CONFLICT FLAGGED · GOING WITH THE RECORD" (amber), clarify "NEEDS CLARIFYING" (muted). `unknown` → "The knowledge base doesn't cover that, so there's no answer to give. Try a suggested question, or ask Aswin directly." with a Contact chip.
 - Guard names shown in X-ray: `guard.prompt_injection`, `guard.not_done`, `guard.conflicting_info`, `guard.ambiguous_ask`, `guard.gap_stated`, or "none · answered from the knowledge base".

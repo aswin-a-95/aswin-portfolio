@@ -1,4 +1,4 @@
-import { HERO_SAMPLES } from "@/lib/fit-check/copy";
+import { HERO_SAMPLES, heroSummary } from "@/lib/fit-check/copy";
 import { expect as baseExpect, FAKE, JD_LABEL, test, type Page } from "./fixtures";
 
 // The kb drill waits out two real 1.5 s kb.search timeouts, so waits allow for a loaded machine.
@@ -7,6 +7,8 @@ const expect = baseExpect.configure({ timeout: 15_000 });
 // Runs against the real /api/run under AI_FAKE: real pipeline, guards and timings; fake model.
 const hero = (page: Page) => page.locator("section").first();
 const running = (page: Page) => hero(page).getByRole("status").filter({ hasText: "Agent · streaming from the live run" });
+const progress = (page: Page) => hero(page).getByRole("status").filter({ hasText: /^Checking… step [1-7] of 7$/ });
+const panel = (page: Page) => page.getByRole("region", { name: "Will I fit your role?" });
 
 /** Pastes a JD (with an AI_FAKE marker) and runs the check. */
 async function paste(page: Page, jd: string) {
@@ -19,13 +21,50 @@ async function sample(page: Page, label: string) {
 }
 
 test.describe("fit check", () => {
-  test("empty: subheading, emphasised JD card and its header (Hero.dc.html 2026-11-18)", async ({ page }) => {
+  test("empty: smaller intro, the fit-check panel and its header, emphasised JD card (Hero.dc.html 2026-11-18 update 2)", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
+    const h1 = hero(page).getByRole("heading", { level: 1, name: "Platform PM who builds for agents." });
+    // clamp(32px, 4vw, 46px) at 1440 px is 46px; line-height 1.1.
+    await expect(h1).toHaveCSS("font-size", "46px");
+    await expect(h1).toHaveCSS("line-height", "50.6px");
+    await expect(h1).toHaveCSS("letter-spacing", "-0.69px");
     const sub = hero(page).getByText("I build platforms, AI-powered products, and systems that turn emerging technology into real-world capability.");
-    await expect(sub).toHaveCSS("font-size", "24px");
-    await expect(sub).toHaveCSS("max-width", "760px");
-    const pill = hero(page).getByText("TRY IT · LIVE AI", { exact: true });
+    await expect(sub).toHaveCSS("font-size", "20px");
+    await expect(sub).toHaveCSS("max-width", "720px");
+    await expect(sub).toHaveCSS("line-height", "29px");
+
+    // Every state, the nudge and "How I built this" sit in the panel.
+    await expect(panel(page)).toHaveCSS("border-radius", "20px");
+    await expect(panel(page)).toHaveCSS("border-top-width", "1px");
+    await expect(panel(page)).toHaveCSS("margin-top", "8px");
+    await expect(panel(page)).toHaveCSS("padding-top", "32px");
+    await expect(panel(page)).toHaveCSS("row-gap", "22px");
+    await expect(panel(page)).toHaveCSS("background-color", "rgb(239, 234, 224)");
+    await expect(panel(page)).toHaveClass(/bg-panel/);
+    await expect(panel(page).getByLabel(JD_LABEL)).toBeVisible();
+    await expect(panel(page).getByRole("button", { name: "+ How I built this" })).toBeVisible();
+    const pill = panel(page).getByText("FIT CHECK · LIVE AI", { exact: true });
     await expect(pill).toHaveCSS("font-size", "11px");
+    await expect(pill).toHaveCSS("letter-spacing", "0.88px");
+    const h2 = panel(page).getByRole("heading", { level: 2, name: "Will I fit your role?" });
+    await expect(h2).toHaveAttribute("id", "fit-h");
+    await expect(h2).toHaveCSS("font-size", "30px");
+    await expect(h2).toHaveCSS("font-weight", "600");
+    await expect(h2).toHaveCSS("line-height", "36px");
+    await expect(h2).toHaveCSS("letter-spacing", "-0.3px");
+    const aside = panel(page).getByText("answers from my real record · gaps shown, not hidden", { exact: true });
+    await expect(aside).toHaveCSS("font-size", "12px");
+    const header = h2.locator("xpath=../..");
+    await expect(header).toHaveCSS("padding-bottom", "18px");
+    await expect(header).toHaveCSS("border-bottom-width", "1px");
+    // align-items: flex-end (Chrome reports the computed value as "flow-end").
+    await expect(header).toHaveClass(/(^| )items-end( |$)/);
+    await expect(header).toHaveCSS("column-gap", "20px");
+    await expect(header).toHaveCSS("row-gap", "8px");
+    // The pill moved from the JD card to the panel header.
+    await expect(hero(page).getByText("TRY IT · LIVE AI")).toHaveCount(0);
+
     const label = hero(page).locator('label[for="jd-input"]');
     await expect(label).toHaveText(JD_LABEL);
     await expect(label).toHaveCSS("font-size", "21px");
@@ -51,10 +90,11 @@ test.describe("fit check", () => {
 
   test("running: steps stream in order with tool names; pasted text skips fetch_url", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel(JD_LABEL).fill("Staff PM, payments platform.");
+    await page.getByLabel(JD_LABEL).fill("Staff PM, payments platform.\nWe are hiring a platform PM.");
     await page.getByRole("button", { name: "Check fit" }).click();
     await expect(hero(page).getByText("Checking against")).toBeVisible();
-    await expect(hero(page).getByText("Your pasted role", { exact: true })).toBeVisible();
+    // heroSummary: the first line of pasted text.
+    await expect(hero(page).getByText("Staff PM, payments platform", { exact: true })).toBeVisible();
     await expect(running(page)).toBeVisible();
     await expect(running(page).getByText("fetch_url · skipped: text was pasted")).toBeVisible();
     await expect(running(page).getByText("jd.parse · Reading the job description")).toBeVisible();
@@ -62,6 +102,36 @@ test.describe("fit check", () => {
     // ~0 ms, so the result replaces the running state before they can be seen.
     await expect(running(page).getByText("evidence.map · Matching each requirement to evidence")).toBeVisible();
     await expect(page.getByRole("heading", { level: 2, name: "Strong on 4 of 6 requirements." })).toBeVisible();
+    await expect(hero(page).getByText("Checked against")).toBeVisible();
+    await expect(progress(page)).toHaveCount(0);
+    await expect(hero(page).getByRole("button", { name: "Try another role" })).toBeVisible();
+  });
+
+  test("running: the bar shows the step running now from the real stream, in place of Try another role", async ({ page }) => {
+    await page.goto("/");
+    // Held in evidence.map: fetch_url, jd.parse and kb.search are done, so step 4 of 7 runs.
+    await paste(page, `${HERO_SAMPLES[0].jd} ${FAKE.hold}`);
+    await expect(running(page).getByText("evidence.map · Matching each requirement to evidence")).toBeVisible();
+    await expect(progress(page)).toHaveText("Checking… step 4 of 7");
+    await expect(progress(page)).toHaveAttribute("aria-live", "polite");
+    await expect(progress(page)).toHaveCSS("min-width", "180px");
+    await expect(progress(page)).toHaveCSS("row-gap", "6px");
+    const label = progress(page).getByText("Checking… step 4 of 7");
+    await expect(label).toHaveCSS("font-size", "13px");
+    await expect(label).toHaveCSS("color", "rgb(31, 76, 134)");
+    const track = progress(page).locator('span[aria-hidden="true"]');
+    await expect(track).toHaveCSS("height", "4px");
+    await expect(track).toHaveCSS("background-color", "rgb(232, 238, 246)");
+    await expect(track).toHaveCSS("border-radius", /px/);
+    const fill = track.locator("[data-progress]");
+    await expect(fill).toHaveAttribute("style", "width: 57%;");
+    await expect(fill).toHaveCSS("background-color", "rgb(31, 76, 134)");
+    await expect(hero(page).getByRole("button", { name: "Try another role" })).toHaveCount(0);
+    const role = hero(page).getByText(heroSummary(HERO_SAMPLES[0].jd), { exact: true });
+    await expect(role).toHaveCSS("overflow-wrap", "anywhere");
+    const line = role.locator("xpath=..");
+    await expect(line).toHaveCSS("flex-basis", "320px");
+    await expect(line).toHaveCSS("line-height", "21.75px");
   });
 
   test("running in X-ray: the full call, the live run id and measured durations", async ({ page }) => {
@@ -126,23 +196,26 @@ test.describe("fit check", () => {
     await expect(hero(page).getByText("HOW I'D CLOSE IT")).toHaveCount(0);
     await hero(page).getByRole("link", { name: "Talk to Aswin anyway" }).click();
     await expect(page).toHaveURL(/#contact$/);
-    await expect(page.getByLabel("Role")).toHaveValue("Head of Hardware Product · consumer electronics");
+    await expect(page.getByLabel("Role", { exact: true })).toHaveValue("Head of Hardware Product · consumer electronics");
     await expect(page.getByText("pre-filled from your fit check")).toBeVisible();
-    await page.getByLabel("Role").fill("Something else");
+    await page.getByLabel("Role", { exact: true }).fill("Something else");
     await expect(page.getByText("pre-filled from your fit check")).toHaveCount(0);
   });
 
   test("a link takes the fetch_url branch; a page that can't be fetched ends in the error state", async ({ page }) => {
     await page.goto("/");
     // .invalid never resolves (RFC 2606), so this runs offline and always fails the fetch.
-    await paste(page, "https://jobs.example.invalid/1");
+    await paste(page, "https://www.jobs.example.invalid/1 apply here");
     await expect(page.getByRole("heading", { name: "The fit check couldn't finish this time." })).toBeVisible();
+    // heroSummary: the link's first token without the scheme and www.
+    await expect(hero(page).getByText("Checked against")).toBeVisible();
+    await expect(hero(page).getByText("jobs.example.invalid/1", { exact: true })).toBeVisible();
   });
 
   test("Try another role resets to the empty state with the input focused", async ({ page }) => {
     await page.goto("/");
-    await paste(page, `${HERO_SAMPLES[1].jd} ${FAKE.hold}`);
-    await expect(running(page)).toBeVisible();
+    await sample(page, "Senior Platform PM");
+    await expect(page.getByRole("heading", { name: "Strong on 4 of 6 requirements." })).toBeVisible();
     await hero(page).getByRole("button", { name: "Try another role" }).click();
     await expect(page.getByLabel(JD_LABEL)).toHaveValue("");
     await expect(page.getByLabel(JD_LABEL)).toBeFocused();
@@ -157,7 +230,7 @@ test.describe("fit check", () => {
     await expect(hero(page).getByText("Precomputed matches · same knowledge base")).toBeVisible();
     await expect(hero(page).getByRole("heading", { level: 3, name: "Platform PM · APIs & integrations" })).toBeVisible();
     await hero(page).getByRole("link", { name: "Message Aswin about this role" }).click();
-    await expect(page.getByLabel("Role")).toHaveValue("Your pasted role");
+    await expect(page.getByLabel("Role", { exact: true })).toHaveValue("Senior PM, platform");
   });
 
   test("rate-limited: explains the cap, no retry", async ({ page }) => {
