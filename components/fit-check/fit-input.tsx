@@ -27,10 +27,13 @@ export function FitInput({
   const noJd = jd.trim() === "";
   return (
     <>
-      <div className="flex flex-col gap-[14px] rounded-[14px] border border-rule bg-paper p-5">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <label htmlFor="jd-input" className={label}>
-            Job description
+      <div className="flex flex-col gap-[14px] rounded-[14px] border-[1.5px] border-accent bg-paper p-[22px] shadow-[0_0_0_4px_var(--accent-tint)]">
+        <div className="flex flex-col gap-[10px]">
+          <span className="self-start rounded-full bg-accent px-[9px] py-[3px] font-mono text-[11px] tracking-[0.08em] text-paper">
+            TRY IT · LIVE AI
+          </span>
+          <label htmlFor="jd-input" className="font-sans text-[21px] font-semibold leading-[1.35] text-ink">
+            Paste a job description. This site will tell you honestly where I fit and where I don&apos;t.
           </label>
           <span className="font-mono text-[12px] text-muted">text or a link · not stored</span>
         </div>

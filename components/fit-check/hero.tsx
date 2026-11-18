@@ -170,8 +170,8 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
           <h1 className="m-0 font-serif text-[clamp(42px,6vw,72px)] font-normal leading-[1.02] tracking-[-0.02em]">
             Platform PM who builds for agents.
           </h1>
-          <p className="m-0 max-w-[640px] font-serif text-[22px] leading-[1.4] text-muted">
-            Paste a job description. This site will tell you honestly where I fit and where I don&apos;t.
+          <p className="m-0 max-w-[760px] font-serif text-[24px] leading-[1.4] text-muted">
+            I build platforms, AI-powered products, and systems that turn emerging technology into real-world capability.
           </p>
         </div>
 

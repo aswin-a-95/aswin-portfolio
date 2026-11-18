@@ -47,7 +47,7 @@ export function Nav({ current }: { current: NavCurrent }) {
       >
         <Link href="/" className="flex min-h-11 items-center gap-[10px] text-ink no-underline">
           <span className="font-serif text-[24px] tracking-[-0.01em]">Aswin</span>
-          <span className="font-mono text-[12px] text-muted">platform pm · builds for agents</span>
+          <span className="font-mono text-[12px] text-muted">pm · builds for agents</span>
         </Link>
         <div className="flex flex-wrap items-center gap-x-[18px] gap-y-1">
           {LINKS.map((l) => {

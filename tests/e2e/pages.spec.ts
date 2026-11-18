@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { JD_LABEL } from "./fixtures";
 
 const theme = (page: import("@playwright/test").Page) => page.locator("html").getAttribute("data-theme");
 
@@ -14,7 +15,7 @@ test("home: Check fit is disabled until there is a job description", async ({ pa
   await page.goto("/");
   const check = page.getByRole("button", { name: "Check fit" });
   await expect(check).toBeDisabled();
-  await page.getByLabel("Job description").fill("Senior PM, APIs");
+  await page.getByLabel(JD_LABEL).fill("Senior PM, APIs");
   await expect(check).toBeEnabled();
 });
 

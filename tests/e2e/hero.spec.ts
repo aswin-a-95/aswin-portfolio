@@ -1,5 +1,5 @@
 import { HERO_SAMPLES } from "@/lib/fit-check/copy";
-import { expect as baseExpect, FAKE, test, type Page } from "./fixtures";
+import { expect as baseExpect, FAKE, JD_LABEL, test, type Page } from "./fixtures";
 
 // The kb drill waits out two real 1.5 s kb.search timeouts, so waits allow for a loaded machine.
 const expect = baseExpect.configure({ timeout: 15_000 });
@@ -10,7 +10,7 @@ const running = (page: Page) => hero(page).getByRole("status").filter({ hasText:
 
 /** Pastes a JD (with an AI_FAKE marker) and runs the check. */
 async function paste(page: Page, jd: string) {
-  await page.getByLabel("Job description").fill(jd);
+  await page.getByLabel(JD_LABEL).fill(jd);
   await page.getByRole("button", { name: "Check fit" }).click();
 }
 
@@ -19,9 +19,30 @@ async function sample(page: Page, label: string) {
 }
 
 test.describe("fit check", () => {
+  test("empty: subheading, emphasised JD card and its header (Hero.dc.html 2026-11-18)", async ({ page }) => {
+    await page.goto("/");
+    const sub = hero(page).getByText("I build platforms, AI-powered products, and systems that turn emerging technology into real-world capability.");
+    await expect(sub).toHaveCSS("font-size", "24px");
+    await expect(sub).toHaveCSS("max-width", "760px");
+    const pill = hero(page).getByText("TRY IT · LIVE AI", { exact: true });
+    await expect(pill).toHaveCSS("font-size", "11px");
+    const label = hero(page).locator('label[for="jd-input"]');
+    await expect(label).toHaveText(JD_LABEL);
+    await expect(label).toHaveCSS("font-size", "21px");
+    await expect(label).toHaveCSS("font-weight", "600");
+    await expect(page.getByLabel(JD_LABEL)).toHaveAttribute("id", "jd-input");
+    const card = label.locator("xpath=../..");
+    // Chrome draws 1.5px borders as 1px at DPR 1, so check the declared width.
+    await expect(card).toHaveClass(/border-\[1\.5px\]/);
+    await expect(card).toHaveClass(/border-accent/);
+    await expect(card).toHaveCSS("padding-top", "22px");
+    await expect(card).toHaveCSS("box-shadow", /0px 0px 0px 4px/);
+    await expect(page.getByRole("navigation", { name: "Main" }).getByText("pm · builds for agents", { exact: true })).toBeVisible();
+  });
+
   test("empty: Check fit is disabled until there is text; the input is capped at 12,000", async ({ page }) => {
     await page.goto("/");
-    const input = page.getByLabel("Job description");
+    const input = page.getByLabel(JD_LABEL);
     await expect(input).toHaveAttribute("maxlength", "12000");
     await expect(page.getByRole("button", { name: "Check fit" })).toBeDisabled();
     await input.fill("Staff PM, payments platform.");
@@ -30,7 +51,7 @@ test.describe("fit check", () => {
 
   test("running: steps stream in order with tool names; pasted text skips fetch_url", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("Job description").fill("Staff PM, payments platform.");
+    await page.getByLabel(JD_LABEL).fill("Staff PM, payments platform.");
     await page.getByRole("button", { name: "Check fit" }).click();
     await expect(hero(page).getByText("Checking against")).toBeVisible();
     await expect(hero(page).getByText("Your pasted role", { exact: true })).toBeVisible();
@@ -123,8 +144,8 @@ test.describe("fit check", () => {
     await paste(page, `${HERO_SAMPLES[1].jd} ${FAKE.hold}`);
     await expect(running(page)).toBeVisible();
     await hero(page).getByRole("button", { name: "Try another role" }).click();
-    await expect(page.getByLabel("Job description")).toHaveValue("");
-    await expect(page.getByLabel("Job description")).toBeFocused();
+    await expect(page.getByLabel(JD_LABEL)).toHaveValue("");
+    await expect(page.getByLabel(JD_LABEL)).toBeFocused();
   });
 
   test("error: calm message, retry and precomputed matches", async ({ page }) => {
@@ -170,7 +191,7 @@ test.describe("fit check", () => {
     await expect(hero(page).getByText(/^× retry 1 of 1: kb\.search\(\.\.\.\) → timeout · 1[5-9]\d\d ms$/)).toBeVisible();
     await expect(hero(page).getByText("› guard.no_sources → stop instead of answering")).toBeVisible();
     await hero(page).getByRole("button", { name: "Back to the fit check" }).click();
-    await expect(page.getByLabel("Job description")).toBeVisible();
+    await expect(page.getByLabel(JD_LABEL)).toBeVisible();
   });
 
   test("drills: rate limit", async ({ page }) => {
@@ -202,7 +223,7 @@ test.describe("Break my AI", () => {
     await expect(hero(page).getByText(/^guardrail fired: guard\.prompt_injection · trace run_[0-9a-f]{12} · \d+ ms$/)).toBeVisible();
 
     await hero(page).getByRole("button", { name: "Back to the fit check" }).click();
-    await expect(page.getByLabel("Job description")).toBeVisible();
+    await expect(page.getByLabel(JD_LABEL)).toBeVisible();
   });
 
   test("a failed attempt shows Ask's error line and isn't counted", async ({ page }) => {

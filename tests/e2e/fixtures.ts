@@ -22,3 +22,6 @@ export const FAKE = {
   budget: "[[fake:budget]]",
   hold: "[[fake:hold]]",
 } as const;
+
+/** The JD textarea's label (Hero.dc.html, 2026-11-18). */
+export const JD_LABEL = "Paste a job description. This site will tell you honestly where I fit and where I don't.";

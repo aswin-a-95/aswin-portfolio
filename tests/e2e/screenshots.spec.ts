@@ -1,4 +1,4 @@
-import { FAKE, test } from "./fixtures";
+import { FAKE, JD_LABEL, test } from "./fixtures";
 import { HERO_SAMPLES } from "@/lib/fit-check/copy";
 
 // Not assertions: full-page captures for the side-by-side check against /design/screenshots.
@@ -73,7 +73,7 @@ for (const [name, width, height] of SIZES) {
         await page.goto(xray ? "/?xray=1" : "/");
         const hero = page.locator("section").first();
         if (jd) {
-          await page.getByLabel("Job description").fill(jd);
+          await page.getByLabel(JD_LABEL).fill(jd);
           await page.getByRole("button", { name: "Check fit" }).click();
           if (state === "running") await hero.getByRole("status").getByText(/evidence\.map/).waitFor();
           else await hero.getByRole("heading", { level: 2 }).waitFor();
