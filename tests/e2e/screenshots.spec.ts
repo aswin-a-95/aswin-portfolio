@@ -1,7 +1,7 @@
 import { FAKE, JD_LABEL, test, type Page } from "./fixtures";
 
 /** A state's own h2, not the fit-check panel's "Will I fit your role?" (Hero.dc.html update 2). */
-const stateHeading = (page: Page) => page.locator("section").first().getByRole("heading", { level: 2 }).filter({ hasNotText: "Will I fit your role?" });
+const stateHeading = (page: Page) => page.locator("section").first().getByRole("heading", { level: 2 }).filter({ hasNotText: /^(Will I fit your role\?|Try to make it overclaim\.)$/ });
 import { ASK_ATTACKS, ASK_QUESTIONS } from "@/lib/ask/copy";
 import { HERO_SAMPLES } from "@/lib/fit-check/copy";
 

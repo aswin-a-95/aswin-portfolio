@@ -24,7 +24,8 @@ export type HowIBuiltMeta = {
 /**
  * "How I built this" (Hero.dc.html `showHow`, design update 3): no toggle, X-ray only, as an
  * X-ray panel. Always in the HTML (`.xray-only`) so check:content sees its placeholders and a
- * reload in X-ray shows it without a flash.
+ * reload in X-ray shows it without a flash. The design's `minmax(300px, 1fr)` is capped at the
+ * panel's width (`min(300px, 100%)`): inside the panel's 20px padding a 390px phone has < 300px.
  */
 export function HowBuilt({ meta }: { meta: HowIBuiltMeta }) {
   return (
@@ -32,7 +33,7 @@ export function HowBuilt({ meta }: { meta: HowIBuiltMeta }) {
     <div className="xray-only">
       <XrayPanel
         id="how-built"
-        className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-[18px] rounded-[14px] p-5 font-mono text-[13px] leading-[1.6]"
+        className="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-[18px] rounded-[14px] p-5 font-mono text-[13px] leading-[1.6]"
       >
         <h3 className="col-span-full m-0 font-sans text-[22px] font-semibold leading-[1.3] text-xr-ink">How I built this</h3>
         <p className="col-span-full m-0 rounded-lg border border-xr-rule bg-xr-paper px-[14px] py-3 font-sans text-[15px] leading-[1.55]">
