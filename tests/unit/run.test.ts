@@ -92,6 +92,30 @@ describe("/api/run · fit", () => {
     expect(r.matches.map((m) => m.source)).toContain("Case study · CloudEagle concept");
   });
 
+  it("the result trace carries every X-ray 'This run' field, the same as the logged row (SPEC §10)", async () => {
+    const evs = await fit({ jd: HERO_SAMPLES[0].jd });
+    const r = terminal(evs);
+    if (r.type !== "result" || !r.trace) throw new Error("expected a result with a trace");
+    const t = r.trace;
+    expect(Number.isNaN(Date.parse(t.startedAt))).toBe(false);
+    expect(t).toMatchObject({ branch: "text", requirements: 6, guards: { citations: true, honesty: true } });
+    expect(t.sourcesRetrieved).toBeGreaterThan(0);
+    expect(t.sourcesCited).toBeGreaterThan(0);
+    expect(t.sourcesCited).toBeLessThanOrEqual(r.matches.length);
+    expect(t.tokensIn).toBeGreaterThanOrEqual(0);
+    expect(t.tokensOut).toBeGreaterThanOrEqual(0);
+    expect(rows[0]).toMatchObject({
+      id: t.runId,
+      branch: t.branch,
+      requirement_count: t.requirements,
+      sources_retrieved: t.sourcesRetrieved,
+      sources_cited: t.sourcesCited,
+      fallback: null,
+      retries: r.retries,
+      output_tokens: t.tokensOut,
+    });
+  });
+
   it("skips fetch_url for pasted text", async () => {
     const evs = await fit({ jd: HERO_SAMPLES[1].jd });
     expect(evs.find((e) => e.type === "step" && e.tool === "fetch_url" && e.status !== "running")).toMatchObject({ status: "skipped", detail: "skipped" });
@@ -144,7 +168,7 @@ describe("/api/run · fit", () => {
       "fallback.precomputed(role_types=3)",
     ]);
     expect(f.trace?.[1].ms).toBeGreaterThanOrEqual(1400);
-    expect(rows[0]).toMatchObject({ drill: "kb", retries: 1 });
+    expect(rows[0]).toMatchObject({ drill: "kb", retries: 1, requirement_count: 6, sources_retrieved: null, fallback: "error" });
     expect(rows[0].guard_fired).toContain("guard.no_sources");
   }, 10_000);
 

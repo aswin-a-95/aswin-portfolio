@@ -22,7 +22,12 @@ test.describe("case study sandbox", () => {
   test("X-ray shows the guardrail, run id and duration", async ({ page }) => {
     await page.goto("/work/cloudeagle?xray=1");
     await section(page).getByRole("button", { name: /Set it up like last time/ }).click();
-    await expect(section(page).getByText(/^guardrail fired: guard\.clarify · trace run_[0-9a-f]{12} · \d+ ms$/)).toBeVisible();
+    const chip = section(page).getByText(/^guardrail fired: guard\.clarify · trace run_[0-9a-f]{12} · \d+ ms$/);
+    await expect(chip).toBeVisible();
+    // Update 3: a small dark chip.
+    await expect(chip).toHaveCSS("background-color", "rgb(16, 18, 20)");
+    await expect(chip).toHaveCSS("color", "rgb(163, 169, 176)");
+    await expect(chip).toHaveCSS("border-top-left-radius", "6px");
   });
 
   for (const [mode, copy] of [

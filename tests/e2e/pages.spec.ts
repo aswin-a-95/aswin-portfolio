@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { JD_LABEL } from "./fixtures";
 
-const theme = (page: import("@playwright/test").Page) => page.locator("html").getAttribute("data-theme");
+const theme = async (page: import("@playwright/test").Page) =>
+  (await page.locator("html").getAttribute("data-xray")) === null ? null : "xray";
 
 test("home: live 'Under the hood' card turns X-ray on and jumps to the hero", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -19,25 +20,37 @@ test("home: Check fit is disabled until there is a job description", async ({ pa
   await expect(check).toBeEnabled();
 });
 
-test("home: '+ How I built this' toggles, and opens itself in X-ray", async ({ page }) => {
+test("home: 'How I built this' has no toggle and shows only in X-ray, as an X-ray panel", async ({ page }) => {
   await page.goto("/");
-  const toggle = page.getByRole("button", { name: /How I built this/ });
-  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByRole("button", { name: /How I built this/ })).toHaveCount(0);
   await expect(page.getByText("Honest note:")).toBeHidden();
-  await toggle.click();
-  await expect(toggle).toHaveText("− How I built this");
-  await expect(page.getByText("Honest note:")).toBeVisible();
   await page.goto("/?xray=1");
-  await expect(page.getByRole("button", { name: /How I built this/ })).toHaveAttribute("aria-expanded", "true");
+  const h = page.getByRole("heading", { level: 3, name: "How I built this" });
+  await expect(h).toBeVisible();
+  await expect(h).toHaveCSS("font-size", "22px");
+  await expect(h.locator("xpath=..")).toHaveCSS("background-color", "rgb(16, 18, 20)");
+  await expect(h.locator("xpath=..")).toHaveCSS("display", "grid");
+  await expect(page.getByText("Honest note:")).toBeVisible();
 });
 
-test("X-ray-only blocks show only in X-ray", async ({ page }) => {
+test("home: the hood header (update 3)", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/log");
-  const line = page.getByText("written by Aswin · AI used for editing only · cross-posted to LinkedIn").first();
-  await expect(line).toBeHidden();
-  await page.getByRole("button", { name: /^X-ray/ }).click();
-  await expect(line).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByText("ACROSS ALL MY WORK", { exact: true }).first()).toBeVisible();
+  const h2 = page.locator("#uh-h");
+  await expect(h2).toHaveText("How I build agentic products, with proof");
+  await expect(h2).toHaveCSS("font-size", "36px");
+  await expect(page.getByText("Each part links to where you can see it working: live on this site, in a case study, or on GitHub.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Under the hood" })).toHaveCount(0);
+});
+
+test("removed X-ray-only lines stay gone in X-ray; the page never re-themes", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/log?xray=1");
+  await expect(page.getByText("written by Aswin · AI used for editing only · cross-posted to LinkedIn")).toHaveCount(0);
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(246, 243, 236)");
+  await page.goto("/about?xray=1");
+  await expect(page.getByText(/^knowledge base: /)).toHaveCount(0);
 });
 
 test("log: filters show counts, filter posts and the empty state (TIL stays upper-case)", async ({ page }) => {
@@ -71,7 +84,14 @@ test("case study: before/after tabs and the X-ray link button", async ({ page })
   await page.getByRole("button", { name: "How I built this (X-ray)" }).click();
   expect(await theme(page)).toBe("xray");
   await expect(page.getByRole("button", { name: "Close How I built this" })).toBeVisible();
-  await expect(page.getByText(/X-RAY · LOGGED TRACE/)).toBeVisible();
+  const trace = page.getByText(/^LOGGED TRACE · run .+ · real run, never a simulation$/);
+  await expect(trace).toBeVisible();
+  await expect(trace.locator("xpath=..")).toHaveCSS("background-color", "rgb(16, 18, 20)");
+  await expect(trace.locator("xpath=..").getByText("X-RAY", { exact: true })).toBeVisible();
+  const evals = page.getByText(/^OFFLINE EVAL SET · .+ cases incl\. red-team$/);
+  await expect(evals).toBeVisible();
+  await expect(evals.locator("xpath=..").getByText("X-RAY", { exact: true })).toBeVisible();
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(246, 243, 236)");
 });
 
 test("case study: rail is sticky from 900px only", async ({ page }) => {
@@ -95,6 +115,10 @@ test("phone home: compact Under the hood and Work lists", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Proof, one tap away." })).toBeVisible();
+  const hood = page.locator("#m-hood");
+  await expect(hood).toHaveText("How I build agentic products, with proof");
+  await expect(hood).toHaveCSS("font-size", "28px");
+  await expect(page.getByText("Each part links to where you can see it working.", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Proof, one click away." })).toBeHidden();
   await expect(page.getByRole("link", { name: /Platform & API work/ })).toBeHidden();
 });

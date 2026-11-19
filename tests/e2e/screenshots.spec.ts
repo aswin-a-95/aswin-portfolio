@@ -2,6 +2,7 @@ import { FAKE, JD_LABEL, test, type Page } from "./fixtures";
 
 /** A state's own h2, not the fit-check panel's "Will I fit your role?" (Hero.dc.html update 2). */
 const stateHeading = (page: Page) => page.locator("section").first().getByRole("heading", { level: 2 }).filter({ hasNotText: "Will I fit your role?" });
+import { ASK_ATTACKS, ASK_QUESTIONS } from "@/lib/ask/copy";
 import { HERO_SAMPLES } from "@/lib/fit-check/copy";
 
 // Not assertions: full-page captures for the side-by-side check against /design/screenshots.
@@ -50,7 +51,14 @@ for (const [name, width, height] of SIZES) {
           await page.keyboard.press("Enter");
           await dialog.getByText("› compose · writing the answer…").waitFor();
         } else if (pick) {
-          await dialog.getByRole("button", { name: pick }).first().click();
+          // Update 3: the Break my AI chips are X-ray only, so without X-ray the attack is typed.
+          const attack = ASK_ATTACKS.find(([, chip]) => chip === pick);
+          if (attack && !xray) {
+            await dialog.getByRole("textbox").fill(ASK_QUESTIONS[attack[0]]);
+            await page.keyboard.press("Enter");
+          } else {
+            await dialog.getByRole("button", { name: pick }).first().click();
+          }
           await dialog.getByRole("button", { name: "← Ask another" }).waitFor();
         }
         await page.evaluate(() => document.fonts.ready);
@@ -76,6 +84,8 @@ const HERO_STATES: [string, string | null, string | null][] = [
 for (const [name, width, height] of SIZES) {
   for (const xray of [false, true]) {
     for (const [state, jd, pick] of HERO_STATES) {
+      // Update 3: Break my AI and the drills live in the X-ray panel, so they need X-ray on.
+      if (!xray && (state === "break" || state === "drill-kb")) continue;
       const file = `hero-${state}-${name}${xray ? "-xray" : ""}`;
       test(`capture ${file}`, async ({ page }) => {
         await page.setViewportSize({ width, height });

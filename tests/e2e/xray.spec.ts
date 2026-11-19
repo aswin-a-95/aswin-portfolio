@@ -1,15 +1,29 @@
 import { expect, test } from "@playwright/test";
 
 const toggle = (page: import("@playwright/test").Page) => page.getByRole("button", { name: /^X-ray/ });
-const theme = (page: import("@playwright/test").Page) => page.locator("html").getAttribute("data-theme");
+/** "xray" while X-ray is on (the head script and the toggle set `data-xray`), else null. */
+const theme = async (page: import("@playwright/test").Page) =>
+  (await page.locator("html").getAttribute("data-xray")) === null ? null : "xray";
+const LIGHT_BG = "rgb(246, 243, 236)";
 
-test("starts light, toggles to X-ray and updates aria-pressed", async ({ page }) => {
+test("toggles X-ray and aria-pressed; the page stays light and the toggle shows the state (update 3)", async ({ page }) => {
   await page.goto("/about");
   await expect(toggle(page)).toHaveAttribute("aria-pressed", "false");
+  await expect(toggle(page)).toHaveCSS("background-color", "rgb(255, 253, 248)");
   expect(await theme(page)).toBeNull();
   await toggle(page).click();
   await expect(toggle(page)).toHaveAttribute("aria-pressed", "true");
   expect(await theme(page)).toBe("xray");
+  await expect(page.locator("html")).not.toHaveAttribute("data-theme", /./);
+  await expect(page.locator("body")).toHaveCSS("background-color", LIGHT_BG);
+  await expect(page.locator("header").first()).toHaveCSS("background-color", LIGHT_BG);
+  await expect(toggle(page)).toHaveCSS("background-color", "rgb(16, 18, 20)");
+  await expect(toggle(page)).toHaveCSS("color", "rgb(233, 230, 223)");
+  await expect(toggle(page)).toHaveCSS("border-top-color", "rgb(16, 18, 20)");
+  const track = toggle(page).locator("span").first();
+  await expect(track).toHaveCSS("background-color", "rgb(141, 187, 242)");
+  await expect(track.locator("span")).toHaveCSS("left", "14px");
+  await expect(track.locator("span")).toHaveCSS("background-color", LIGHT_BG);
   await toggle(page).click();
   await expect(toggle(page)).toHaveAttribute("aria-pressed", "false");
   expect(await theme(page)).toBeNull();
@@ -66,7 +80,7 @@ test.describe("intro banner", () => {
     await expect(banner(page)).toHaveCount(0);
   });
 
-  test("'Turn on X-ray' switches the theme and hides the banner", async ({ page }) => {
+  test("'Turn on X-ray' turns X-ray on and hides the banner", async ({ page }) => {
     await page.goto("/");
     await banner(page).getByRole("button", { name: "Turn on X-ray" }).click();
     expect(await theme(page)).toBe("xray");
@@ -79,15 +93,19 @@ test.describe("intro banner", () => {
   test("uses the phone copy at 390px", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await expect(banner(page).getByText(/^It shows the sources, guardrails/)).toBeVisible();
-    await expect(banner(page).getByText(/^One switch shows/)).toBeHidden();
+    await expect(banner(page).getByText("It shows how the AI works in the fit check, Ask my work and the case studies.", { exact: true })).toBeVisible();
+    await expect(banner(page).getByText(/: the sources, guardrails, live traces/)).toBeHidden();
   });
 
   test("uses the desktop copy at 1440px", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
-    await expect(banner(page).getByText(/^One switch shows/)).toBeVisible();
-    await expect(banner(page).getByText(/^It shows the sources, guardrails/)).toBeHidden();
+    await expect(
+      banner(page).getByText(
+        "It shows how the AI works in the fit check, Ask my work and the case studies: the sources, guardrails, live traces, cost and eval results behind each answer.",
+      ),
+    ).toBeVisible();
+    await expect(banner(page).getByText("It shows how the AI works in the fit check, Ask my work and the case studies.", { exact: true })).toBeHidden();
   });
 });
 

@@ -94,11 +94,24 @@ test.describe("before a question", () => {
     });
   }
 
-  test("Break my AI chips and Jump to links", async ({ page }) => {
+  test("Break my AI chips show only in X-ray, in an X-ray panel; Jump to links always", async ({ page }) => {
     await open(page);
+    await expect(dialog(page).getByRole("button", { name: "prompt injection", exact: true })).toBeHidden();
+    await expect(dialog(page).getByText("Break my AI", { exact: true })).toBeHidden();
+    await expect(dialog(page).getByRole("link", { name: "Build log" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await open(page, "/?xray=1");
     for (const chip of ["prompt injection", "something he hasn't done", "conflicting info", "ambiguous ask"]) {
       await expect(dialog(page).getByRole("button", { name: chip, exact: true })).toBeVisible();
     }
+    const label = dialog(page).getByText("Break my AI", { exact: true });
+    await expect(label).toHaveCSS("color", "rgb(163, 169, 176)");
+    const panel = label.locator("xpath=..");
+    await expect(panel).toHaveCSS("background-color", "rgb(16, 18, 20)");
+    await expect(panel).toHaveCSS("border-top-left-radius", "10px");
+    await expect(panel.getByText("X-RAY", { exact: true })).toBeVisible();
+    // The dialog itself stays light; only the scrim darkens.
+    await expect(dialog(page)).toHaveCSS("background-color", "rgb(255, 253, 248)");
     await expect(dialog(page).getByRole("link", { name: "CloudEagle case study" })).toHaveAttribute("href", "/work/cloudeagle");
     await expect(dialog(page).getByRole("link", { name: "Build log" })).toHaveAttribute("href", "/log");
     await expect(dialog(page).getByRole("link", { name: "About · resume" })).toHaveAttribute("href", "/about");
@@ -235,7 +248,7 @@ test.describe("answers", () => {
   ];
   for (const [chip, label, style, width] of TONES) {
     test(`Break my AI: ${chip}`, async ({ page }) => {
-      await open(page);
+      await open(page, "/?xray=1");
       await dialog(page).getByRole("button", { name: chip, exact: true }).click();
       const labelEl = status(page).getByText(label, { exact: true });
       await expect(labelEl).toBeVisible();
@@ -281,10 +294,10 @@ test.describe("answers", () => {
     });
   }
 
-  test("X-ray trace line shows only in X-ray", async ({ page }) => {
+  test("X-ray trace panel shows only in X-ray", async ({ page }) => {
     await open(page);
-    await dialog(page).getByRole("button", { name: "prompt injection", exact: true }).click();
-    const line = status(page).getByText(/^kb\.search → 1 sources · guardrail fired: guard\.prompt_injection/);
+    await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
+    const line = status(page).getByText(/^kb\.search → 2 sources · guardrail fired:/);
     await expect(line).toBeHidden();
     await page.keyboard.press("Escape");
     await page.goto("/?xray=1");
@@ -295,6 +308,11 @@ test.describe("answers", () => {
         /^kb\.search → 2 sources · guardrail fired: none · answered from the knowledge base · trace run_[0-9a-f]{12} · live usage: cost \$0\.0000 · \d+ ms$/,
       ),
     ).toBeVisible();
+    const trace = status(page).getByText(/^kb\.search → 2 sources/);
+    await expect(trace).toHaveCSS("padding-right", "76px");
+    await expect(trace).toHaveCSS("border-top-left-radius", "8px");
+    await expect(trace).toHaveCSS("background-color", "rgb(16, 18, 20)");
+    await expect(trace.locator("xpath=..").getByText("X-RAY", { exact: true })).toBeVisible();
   });
 });
 
