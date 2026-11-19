@@ -1,5 +1,6 @@
 "use client";
 
+import type { Ref } from "react";
 import { XrayPanel } from "@/components/xray-panel";
 import type { ResultEvent } from "@/lib/fit-check/types";
 
@@ -33,7 +34,7 @@ const grid = "grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-x-6 gap-y-
  * is the run's own record, the same one written to the run log (SPEC §10), or build metadata.
  * Nothing here is estimated.
  */
-export function RunXray({ result, meta }: { result: ResultEvent; meta: BuildMeta }) {
+export function RunXray({ result, meta, ref }: { result: ResultEvent; meta: BuildMeta; ref?: Ref<HTMLDivElement> }) {
   const t = result.trace;
   const m = result.matches.length;
   const g = result.gaps.length;
@@ -67,7 +68,7 @@ export function RunXray({ result, meta }: { result: ResultEvent; meta: BuildMeta
     ["Red-team cases", meta.redTeam],
   ];
   return (
-    <XrayPanel className="flex flex-col gap-[18px] rounded-[14px] px-[22px] py-5 font-sans">
+    <XrayPanel ref={ref} className="flex flex-col gap-[18px] rounded-[14px] px-[22px] py-5 font-sans">
       <div className="flex flex-col gap-1">
         <h3 className="m-0 text-[18px] font-semibold">This run</h3>
         <p className="m-0 text-[14px] text-xr-muted">From the logged trace of the check you just ran.</p>

@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentProps } from "react";
 
 /** The X-RAY pill pinned top-right of every X-ray panel (design update 3, CHANGES.md §0). */
 export function XrayPill() {
@@ -19,7 +19,7 @@ export function XrayPanel({
   className = "",
   children,
   ...rest
-}: ComponentPropsWithoutRef<"div"> & { /** X-ray `paper` instead of `bg` (the Break my AI panel). */ paper?: boolean }) {
+}: ComponentProps<"div"> & { /** X-ray `paper` instead of `bg` (the Break my AI panel). */ paper?: boolean }) {
   return (
     <div {...rest} className={`relative border border-xr-rule text-xr-ink ${paper ? "bg-xr-paper" : "bg-xr-bg"} ${className}`}>
       <XrayPill />

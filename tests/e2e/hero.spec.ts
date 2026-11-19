@@ -249,6 +249,21 @@ test.describe("fit check", () => {
     await expect(hero(page).getByText(/^Honest note:/)).toBeVisible();
   });
 
+  test("result: the nudge's Turn on X-ray scrolls up to This run, clear of the sticky nav", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await sample(page, "Senior Platform PM");
+    const nudge = hero(page).getByRole("button", { name: "Turn on X-ray →" });
+    await nudge.scrollIntoViewIfNeeded();
+    await nudge.click();
+    const h = hero(page).getByRole("heading", { level: 3, name: "This run" });
+    await expect(h).toBeInViewport();
+    const navBottom = await page.locator("header").first().evaluate((el) => el.getBoundingClientRect().bottom);
+    const panelTop = await h.locator("xpath=../..").evaluate((el) => el.getBoundingClientRect().top);
+    expect(panelTop).toBeGreaterThanOrEqual(navBottom - 1);
+    expect(panelTop).toBeLessThan(navBottom + 40);
+  });
+
   test("a gap card opens Ask on that gap", async ({ page }) => {
     await page.goto("/");
     await sample(page, "Senior Platform PM");

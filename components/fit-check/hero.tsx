@@ -52,6 +52,9 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
   const [breakError, setBreakError] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
+  // The result nudge's "Turn on X-ray →" scrolls to "This run" once it renders (Aswin, 2026-11-19).
+  const runXrayRef = useRef<HTMLDivElement>(null);
+  const scrollToRun = useRef(false);
   const entryId = useRef(0);
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -150,6 +153,15 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
     };
     setLog((prev) => [entry, ...prev].slice(0, BREAK_LOG_MAX));
   };
+
+  useEffect(() => {
+    const el = runXrayRef.current;
+    if (!scrollToRun.current || !xray || !el) return;
+    scrollToRun.current = false;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // scroll-padding-top keeps it clear of the sticky nav.
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, [xray, result]);
 
   const talk = () => rolePrefill.send(role);
   const isResult = (phase === "result" || phase === "badfit") && result !== null;
@@ -262,7 +274,7 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
             </div>
           )}
 
-          {xray && isResult && <RunXray result={result} meta={buildMeta} />}
+          {xray && isResult && <RunXray ref={runXrayRef} result={result} meta={buildMeta} />}
 
           {isResult && (
             <Result
@@ -301,7 +313,10 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
               <span className="text-[15px]">{nudge}</span>
               <button
                 type="button"
-                onClick={() => setXray(true)}
+                onClick={() => {
+                  scrollToRun.current = isResult;
+                  setXray(true);
+                }}
                 className="min-h-10 cursor-pointer rounded-lg border border-accent bg-transparent px-3 py-[6px] font-mono text-[13px] text-accent"
               >
                 Turn on X-ray →
