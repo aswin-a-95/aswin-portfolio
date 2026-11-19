@@ -24,7 +24,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <sc-if value="{{showIntro}}" hint-placeholder-val="{{ true }}">
 <div role="region" aria-label="About X-ray mode" style="border-bottom: 1px solid {{t.rule}}; background: {{t.accentTint}}">
 <div style="max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 10px 24px; flex-wrap: wrap">
-<p style="margin: 0; font-size: 15px; line-height: 1.5"><b style="font-weight: 600">New here? Try X-ray.</b> One switch shows how this site works: the sources, guardrails, live traces, cost and eval results behind every answer.</p>
+<p style="margin: 0; font-size: 15px; line-height: 1.5"><b style="font-weight: 600">New here? Try X-ray.</b> It shows how the AI works in the fit check, Ask my work and the case studies: the sources, guardrails, live traces, cost and eval results behind each answer.</p>
 <div style="display: flex; gap: 8px">
 <button type="button" onClick="{{introOn}}" style="min-height: 40px; padding: 6px 14px; border-radius: 8px; border: 0; background: {{t.btnBg}}; color: {{t.btnInk}}; font-family: {{t.sans}}; font-size: 14px; font-weight: 600; cursor: pointer">Turn on X-ray</button>
 <button type="button" onClick="{{introDismiss}}" style="min-height: 40px; padding: 6px 14px; border-radius: 8px; border: 1px solid {{t.accent}}; background: transparent; color: {{t.accent}}; font-family: {{t.sans}}; font-size: 14px; cursor: pointer">Got it</button>
@@ -39,9 +39,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 
 <section aria-labelledby="uh-h" style="border-top: 1px solid {{t.rule}}; padding: 56px 24px">
 <div style="max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px 24px; flex-wrap: wrap">
-<h2 id="uh-h" style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 36px">Under the hood</h2>
-<p style="margin: 0; max-width: 560px; font-size: 15px; line-height: 1.5; color: {{t.muted}}">Eight parts of an AI product, each with where it's proven. Anything without proof yet is left out.</p>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.08em; color: {{t.muted}}">ACROSS ALL MY WORK</p>
+<h2 id="uh-h" style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 36px; line-height: 1.15">How I build agentic products, with proof</h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.5; color: {{t.muted}}">Each part links to where you can see it working: live on this site, in a case study, or on GitHub.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px">
 <sc-for list="{{hood}}" as="u" hint-placeholder-count="8">
@@ -110,9 +111,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <span style="padding: 4px 8px; border: 1px solid {{t.rule}}; border-radius: 6px; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">{{tag}}</span>
 </sc-for>
 </div>
-<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
-<p style="margin: 0; padding-top: 12px; border-top: 1px dashed {{t.rule}}; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">{{c.xr}}</p>
-</sc-if>
 </a>
 </sc-for>
 </div>
@@ -215,7 +213,7 @@ class Component extends DCLogic {
   }
   setField(k, v) { var f = Object.assign({}, this.state.form); f[k] = v; this.setState({ form: f }); }
   renderVals() {
-    var s = this.state, x = s.xray, t = mainTokens(x);
+    var s = this.state, x = s.xray, t = mainTokens(false);
     return {
       t: t, xray: x, askOpen: s.askOpen,
       notSent: !s.sent, sent: s.sent,

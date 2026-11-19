@@ -20,7 +20,7 @@ a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2p
 
 <sc-if value="{{showIntro}}" hint-placeholder-val="{{ true }}">
 <div role="region" aria-label="About X-ray mode" style="padding: 14px 20px; border-bottom: 1px solid {{t.rule}}; background: {{t.accentTint}}; display: flex; flex-direction: column; gap: 10px">
-<p style="margin: 0; font-size: 15px; line-height: 1.5"><b style="font-weight: 600">New here? Try X-ray.</b> It shows the sources, guardrails, live traces, cost and eval results behind every answer.</p>
+<p style="margin: 0; font-size: 15px; line-height: 1.5"><b style="font-weight: 600">New here? Try X-ray.</b> It shows how the AI works in the fit check, Ask my work and the case studies.</p>
 <div style="display: flex; gap: 8px">
 <button type="button" onClick="{{xrayOn}}" style="flex: 1; min-height: 44px; border-radius: 8px; border: 0; background: {{t.btnBg}}; color: {{t.btnInk}}; font-family: {{t.sans}}; font-size: 15px; font-weight: 600; cursor: pointer">Turn on X-ray</button>
 <button type="button" onClick="{{introDismiss}}" style="flex: 1; min-height: 44px; border-radius: 8px; border: 1px solid {{t.accent}}; background: transparent; color: {{t.accent}}; font-family: {{t.sans}}; font-size: 15px; cursor: pointer">Got it</button>
@@ -32,7 +32,9 @@ a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2p
 <dc-import name="Hero" initial="result" xray="{{xray}}" on-ask="{{openAsk}}" on-ask-gap="{{askGap}}" on-result="{{setCtx}}" on-xray="{{xrayOn}}" hint-size="390px,2500px"></dc-import>
 
 <section aria-labelledby="m-hood" style="border-top: 1px solid {{t.rule}}; padding: 36px 20px; display: flex; flex-direction: column; gap: 10px">
-<h2 id="m-hood" style="margin: 0 0 4px; font-family: {{t.serif}}; font-weight: 400; font-size: 30px">Under the hood</h2>
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.08em; color: {{t.muted}}">ACROSS ALL MY WORK</p>
+<h2 id="m-hood" style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 28px; line-height: 1.2">How I build agentic products, with proof</h2>
+<p style="margin: 0 0 4px; font-size: 15px; line-height: 1.5; color: {{t.muted}}">Each part links to where you can see it working.</p>
 <sc-for list="{{hood}}" as="u" hint-placeholder-count="8">
 <a href="{{u.href}}" onClick="{{u.click}}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; padding: 10px 14px; border: 1px solid {{t.rule}}; border-radius: 10px; background: {{t.paper}}; text-decoration: none; color: {{t.ink}}">
 <span style="font-family: {{t.mono}}; font-size: 14px">{{u.name}}</span>
@@ -65,7 +67,7 @@ var MOB_HOOD = [
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { xray: false, introSeen: false, askOpen: false, askCtx: null }; }
   renderVals() {
-    var s = this.state, x = s.xray, t = mobTokens(x);
+    var s = this.state, x = s.xray, t = mobTokens(false);
     return {
       t: t, xray: x, askOpen: s.askOpen, askCtx: s.askCtx,
       showIntro: !s.introSeen && !x,

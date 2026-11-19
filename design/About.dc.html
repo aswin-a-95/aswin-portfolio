@@ -35,9 +35,6 @@ a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2p
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">RESUME</p>
 <a href="#" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 18px; border-radius: 10px; background: {{t.btnBg}}; color: {{t.btnInk}}; font-size: 16px; font-weight: 600; text-decoration: none">Download resume (PDF)</a>
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; line-height: 1.6; color: {{t.muted}}">Built from the same master resume as the fit check, so the two never disagree. Updated [date].</p>
-<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
-<p style="margin: 0; padding-top: 10px; border-top: 1px dashed {{t.rule}}; font-family: {{t.mono}}; font-size: 12px; line-height: 1.6; color: {{t.muted}}">knowledge base: [N] roles · [N] projects · [N] not-done entries · synced [date]</p>
-</sc-if>
 </aside>
 </header>
 
@@ -137,7 +134,7 @@ class Component extends DCLogic {
     if (prev.startInXray !== this.props.startInXray) this.setState({ xray: !!this.props.startInXray });
   }
   renderVals() {
-    var s = this.state, x = s.xray, t = aboutTokens(x);
+    var s = this.state, x = s.xray, t = aboutTokens(false);
     var proj = ABOUT_PROJECTS.find((p) => p.id === s.sel) || ABOUT_PROJECTS[0];
     var used = proj.edges.map((e) => e[0]);
     var depLabel = (id) => (ABOUT_DEPS.find((d) => d.id === id) || {}).label;

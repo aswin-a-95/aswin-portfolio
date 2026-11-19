@@ -25,17 +25,15 @@
 <div style="display: flex; flex-direction: column; gap: 8px">
 <span style="align-self: flex-start; padding: 3px 9px; border-radius: 999px; background: {{t.accent}}; color: {{t.paper}}; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.08em">FIT CHECK · LIVE AI</span>
 <h2 id="fit-h" style="margin: 0; font-family: {{t.sans}}; font-size: clamp(24px, 3vw, 30px); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">Will I fit your role?</h2>
-</div>
 <span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">answers from my real record · gaps shown, not hidden</span>
+</div>
 </div>
 
 <sc-if value="{{isEmpty}}" hint-placeholder-val="{{ true }}">
 <div style="background: {{t.paper}}; border: 1.5px solid {{t.accent}}; box-shadow: 0 0 0 4px {{t.accentTint}}; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
 <div style="display: flex; flex-direction: column; gap: 10px">
-<label for="jd-input" style="font-family: {{t.sans}}; font-size: 21px; font-weight: 600; line-height: 1.35; color: {{t.ink}}">Paste a job description. This site will tell you honestly where I fit and where I don't.</label>
-<span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">text or a link · not stored</span>
-</div>
-<textarea id="jd-input" rows="5" value="{{jd}}" onChange="{{onJd}}" placeholder="Paste the role, or a link to it…" style="width: 100%; box-sizing: border-box; resize: vertical; border: 0; outline: none; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 17px; line-height: 1.5"></textarea>
+<label for="jd-input" style="font-family: {{t.sans}}; font-size: 21px; font-weight: 600; line-height: 1.35; color: {{t.ink}}">Paste a job description. This site will tell you honestly where I fit and where I don't.</label></div>
+<textarea id="jd-input" rows="5" value="{{jd}}" onChange="{{onJd}}" placeholder="Paste the job description or a link to the JD (data not stored)" style="width: 100%; box-sizing: border-box; resize: vertical; border: 0; outline: none; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 17px; line-height: 1.5"></textarea>
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; border-top: 1px solid {{t.rule}}; padding-top: 14px">
 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
 <span style="font-size: 14px; color: {{t.muted}}">No JD handy?</span>
@@ -44,53 +42,6 @@
 </sc-for>
 </div>
 <button type="button" onClick="{{check}}" disabled="{{noJd}}" style="min-height: 48px; padding: 12px 22px; border-radius: 10px; border: 0; background: {{t.btnBg}}; color: {{t.btnInk}}; font-family: {{t.sans}}; font-size: 16px; font-weight: 600; cursor: pointer; opacity: {{btnOpacity}}">Check fit</button>
-</div>
-</div>
-<div style="display: flex; flex-direction: column; gap: 10px">
-<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
-<span style="min-width: 150px; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Break my AI</span>
-<sc-for list="{{attacks}}" as="a" hint-placeholder-count="4">
-<button type="button" onClick="{{a.run}}" style="min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px solid {{t.rule}}; background: transparent; color: {{t.ink}}; font-family: {{t.mono}}; font-size: 13px; cursor: pointer">{{a.chip}}</button>
-</sc-for>
-</div>
-<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
-<span style="min-width: 150px; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Failure drills</span>
-<sc-for list="{{drills}}" as="d" hint-placeholder-count="2">
-<button type="button" onClick="{{d.run}}" style="min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px dashed {{t.rule}}; background: transparent; color: {{t.ink}}; font-family: {{t.mono}}; font-size: 13px; cursor: pointer">{{d.chip}}</button>
-</sc-for>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{isBreak}}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 16px; background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 14px; padding: 22px">
-<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
-<div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Break my AI · red-team mode</p>
-<h2 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 32px; line-height: 1.15">Try to make it overclaim.</h2>
-<p style="margin: 0; font-size: 15px; line-height: 1.5; color: {{t.muted}}">Pick an attack or write your own. Every reply says which guardrail held.</p>
-</div>
-<p role="status" aria-live="polite" style="margin: 0; display: flex; align-items: baseline; gap: 8px; font-family: {{t.mono}}"><span style="font-size: 36px; color: {{t.accent}}">{{held}}</span><span style="font-size: 13px; color: {{t.muted}}">held up of {{attempts}}</span></p>
-</div>
-<div style="display: flex; gap: 8px; flex-wrap: wrap">
-<sc-for list="{{attacks}}" as="a" hint-placeholder-count="4">
-<button type="button" onClick="{{a.run}}" style="min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px solid {{t.rule}}; background: {{t.bg}}; color: {{t.ink}}; font-family: {{t.mono}}; font-size: 13px; cursor: pointer">{{a.chip}}</button>
-</sc-for>
-</div>
-<form onSubmit="{{submitBreak}}" style="display: flex; gap: 8px; flex-wrap: wrap">
-<input type="text" value="{{breakText}}" onChange="{{onBreak}}" aria-label="Your own attempt" placeholder="Or write your own attempt…" style="flex: 1 1 260px; min-height: 44px; padding: 8px 12px; border: 1px solid {{t.rule}}; border-radius: 8px; background: {{t.bg}}; color: {{t.ink}}; font-family: {{t.mono}}; font-size: 14px">
-<button type="submit" style="min-height: 44px; padding: 8px 18px; border-radius: 8px; border: 0; background: {{t.btnBg}}; color: {{t.btnInk}}; font-family: {{t.sans}}; font-size: 15px; font-weight: 600; cursor: pointer">Run</button>
-</form>
-<sc-for list="{{breakLog}}" as="l" hint-placeholder-count="2">
-<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid {{t.rule}}">
-<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="padding: 2px 8px; border-radius: 6px; border: {{l.pillBorder}}; background: {{l.pillBg}}; color: {{l.pillInk}}; font-family: {{t.mono}}; font-size: 12px">{{l.verdict}}</span><span style="font-family: {{t.mono}}; font-size: 13px">“{{l.text}}”</span></div>
-<p style="margin: 0; font-size: 15px; line-height: 1.5">{{l.reply}}</p>
-<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">guardrail fired: {{l.guard}} · trace [run id] · [ms]</p></sc-if>
-</div>
-</sc-for>
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid {{t.rule}}">
-<a href="#" style="display: inline-flex; align-items: center; min-height: 44px; font-family: {{t.mono}}; font-size: 12px; color: {{t.accent}}">These cases ship with the public eval set · GitHub [link] →</a>
-<button type="button" onClick="{{reset}}" style="min-height: 44px; padding: 8px 14px; border-radius: 8px; border: 1px solid {{t.rule}}; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 14px; cursor: pointer">Back to the fit check</button>
 </div>
 </div>
 </sc-if>
@@ -110,12 +61,9 @@
 </div>
 </sc-if>
 
-<sc-if value="{{isRunning}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{showSteps}}" hint-placeholder-val="{{ false }}">
 <div role="status" aria-live="polite" style="background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 14px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px">
-<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap">
-<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Agent · streaming from the live run</p>
-<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">trace [run id] · logged</p></sc-if>
-</div>
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">{{stepsTitle}}</p>
 <sc-for list="{{steps}}" as="st" hint-placeholder-count="3">
 <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: {{t.mono}}; font-size: 14px; line-height: 1.5">
 <span style="color: {{st.textColor}}"><span style="color: {{st.statusColor}}">{{st.mark}} </span>{{st.text}}</span>
@@ -124,56 +72,117 @@
 </sc-for>
 </div>
 </sc-if>
+<sc-if value="{{showRunXray}}" hint-placeholder-val="{{ false }}">
+<div style="position: relative; display: flex; flex-direction: column; gap: 18px; padding: 20px 22px; border: 1px solid {{d.rule}}; border-radius: 14px; background: {{d.bg}}; color: {{d.ink}}; font-family: {{d.sans}}">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 600">This run</h3>
+<p style="margin: 0; font-size: 14px; color: {{d.muted}}">From the logged trace of the check you just ran.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px 24px">
+<sc-for list="{{runItems}}" as="ri" hint-placeholder-count="9">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: {{d.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{d.muted}}">{{ri.label}}</span>
+<span style="font-size: 15px; line-height: 1.4; color: {{ri.color}}">{{ri.value}}</span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px; padding-top: 16px; border-top: 1px solid {{d.rule}}">
+<h4 style="margin: 0; font-size: 15px; font-weight: 600">Build details</h4>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px 24px">
+<sc-for list="{{buildItems}}" as="bi" hint-placeholder-count="7">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: {{d.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{d.muted}}">{{bi.label}}</span>
+<sc-if value="{{bi.plain}}" hint-placeholder-val="{{ true }}"><span style="font-size: 15px; line-height: 1.4; color: {{d.ink}}">{{bi.value}}</span></sc-if>
+<sc-if value="{{bi.isLink}}" hint-placeholder-val="{{ false }}"><a href="{{bi.href}}" style="font-size: 15px; line-height: 1.4; color: {{d.accent}}">{{bi.value}}</a></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
 
 <sc-if value="{{isResult}}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 24px">
-<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="align-self: flex-start; padding: 3px 10px; border-radius: 999px; border: 1.5px solid {{t.ink}}; font-family: {{t.mono}}; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; color: {{t.ink}}">RESULT</span>
 <h2 style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 40px; line-height: 1.1; letter-spacing: -0.01em">{{data.verdict}}</h2>
 <p style="margin: 0; font-size: 16px; color: {{t.muted}}">{{data.note}}</p>
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 12px">
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.accent}}">Where I fit · {{matchCount}}</p>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+<div style="background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 12px; overflow: hidden">
+<sc-if value="{{wide}}" hint-placeholder-val="{{ true }}">
+<table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-family: {{t.sans}}">
+<thead><tr>
+<th scope="col" style="width: 32%; text-align: left; vertical-align: bottom; padding: 12px 20px; font-family: {{t.mono}}; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">The JD asks for</th>
+<th scope="col" style="width: 44%; text-align: left; vertical-align: bottom; padding: 12px 20px; font-family: {{t.mono}}; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.accent}}">✓ My relevant experience</th>
+<th scope="col" style="width: 24%; text-align: left; vertical-align: bottom; padding: 12px 20px; font-family: {{t.mono}}; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Proof</th>
+</tr></thead>
+<tbody>
 <sc-for list="{{data.matches}}" as="m" hint-placeholder-count="4">
-<article style="background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-<h3 style="margin: 0; font-size: 17px; font-weight: 600; line-height: 1.35">{{m.req}}</h3>
-<p style="margin: 0; font-size: 15px; line-height: 1.5; color: {{t.muted}}">{{m.evidence}}</p>
-<a href="{{m.href}}" style="align-self: flex-start; margin-top: auto; padding: 6px 10px; border-radius: 6px; background: {{t.accentTint}}; color: {{t.accent}}; font-family: {{t.mono}}; font-size: 12px; text-decoration: none">{{m.source}} →</a>
-</article>
+<tr>
+<th scope="row" style="vertical-align: top; padding: 18px 20px; border-top: 1px solid {{t.rule}}; text-align: left; font-size: 16px; font-weight: 600; line-height: 1.4">{{m.req}}</th>
+<td style="vertical-align: top; padding: 18px 20px; border-top: 1px solid {{t.rule}}; font-size: 15px; line-height: 1.55">{{m.evidence}}</td>
+<td style="vertical-align: top; padding: 18px 20px; border-top: 1px solid {{t.rule}}"><a href="{{m.href}}" style="font-family: {{t.mono}}; font-size: 12px; line-height: 1.5; color: {{t.accent}}">{{m.source}} →</a></td>
+</tr>
 </sc-for>
+</tbody>
+</table>
+</sc-if>
+<sc-if value="{{narrow}}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{data.matches}}" as="m" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border-bottom: 1px solid {{t.rule}}">
+<span style="font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">The JD asks for</span>
+<p style="margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4">{{m.req}}</p>
+<span style="margin-top: 4px; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.accent}}">✓ My relevant experience</span>
+<p style="margin: 0; font-size: 15px; line-height: 1.55">{{m.evidence}}</p>
+<a href="{{m.href}}" style="font-family: {{t.mono}}; font-size: 12px; color: {{t.accent}}">Proof: {{m.source}} →</a>
+</div>
+</sc-for>
+</sc-if>
 </div>
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 12px">
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.amberText}}">Where I don't (yet) · {{gapCount}}</p>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+<div style="background: {{t.amberBg}}; border: 1.5px dashed {{t.amberBorder}}; border-radius: 12px; overflow: hidden">
+<sc-if value="{{wide}}" hint-placeholder-val="{{ true }}">
+<table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-family: {{t.sans}}">
+<thead><tr>
+<th scope="col" style="width: 32%; text-align: left; vertical-align: bottom; padding: 12px 20px; font-family: {{t.mono}}; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.amberText}}">The JD asks for</th>
+<th scope="col" style="width: 34%; text-align: left; vertical-align: bottom; padding: 12px 20px; font-family: {{t.mono}}; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.amberText}}">Where I stand</th>
+<th scope="col" style="width: 34%; text-align: left; vertical-align: bottom; padding: 12px 20px; font-family: {{t.mono}}; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.amberText}}">How I'd close it</th>
+</tr></thead>
+<tbody>
 <sc-for list="{{gaps}}" as="g" hint-placeholder-count="2">
-<article style="background: {{t.amberBg}}; border: 1.5px dashed {{t.amberBorder}}; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-<h3 style="margin: 0; font-size: 17px; font-weight: 600; line-height: 1.35">{{g.req}}</h3>
-<p style="margin: 0; font-size: 15px; line-height: 1.5"><span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.amberText}}">CLOSEST </span>{{g.closest}}</p>
-<sc-if value="{{g.hasClose}}" hint-placeholder-val="{{ true }}">
-<p style="margin: 0; font-size: 15px; line-height: 1.5"><span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.amberText}}">HOW I'D CLOSE IT </span>{{g.close}}</p>
-</sc-if>
-<button type="button" onClick="{{g.ask}}" style="align-self: flex-start; margin-top: auto; min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px solid {{t.amberBorder}}; background: transparent; color: {{t.amberText}}; font-family: {{t.mono}}; font-size: 12px; cursor: pointer">Ask about this gap →</button>
-</article>
+<tr>
+<th scope="row" style="vertical-align: top; padding: 18px 20px; border-top: 1px solid {{t.amberBorder}}; text-align: left; font-size: 16px; font-weight: 600; line-height: 1.4">{{g.req}}</th>
+<td style="vertical-align: top; padding: 18px 20px; border-top: 1px solid {{t.amberBorder}}; font-size: 15px; line-height: 1.55">{{g.closest}}</td>
+<td style="vertical-align: top; padding: 18px 20px; border-top: 1px solid {{t.amberBorder}}; font-size: 15px; line-height: 1.55"><span style="display: block; margin-bottom: 10px; color: {{g.closeColor}}">{{g.closeText}}</span><button type="button" onClick="{{g.ask}}" style="min-height: 36px; padding: 4px 10px; border-radius: 8px; border: 1px solid {{t.amberBorder}}; background: transparent; color: {{t.amberText}}; font-family: {{t.mono}}; font-size: 12px; cursor: pointer">Ask about this gap →</button></td>
+</tr>
 </sc-for>
-</div>
-</div>
-
-<div style="display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; padding: 12px 0; border-top: 1px solid {{t.rule}}; border-bottom: 1px solid {{t.rule}}; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">
-<span><span style="color: {{t.ink}}">offline eval</span> · pass rate [measured] · last run [date]</span>
-<span><span style="color: {{t.ink}}">this run</span> · cost [logged] · [logged] s</span>
-<a href="#" style="color: {{t.accent}}">eval set on GitHub [link] →</a>
-</div>
-
-<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px dashed {{t.rule}}; border-radius: 10px; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">
-<div style="display: flex; flex-wrap: wrap; gap: 6px 20px"><span style="color: {{t.ink}}">THIS RUN · LIVE USAGE</span><span>trace [run id]</span><span>sources cited: {{matchCount}}</span><span>guardrails: 2/2 passed</span><span>branch: {{branchNote}}</span><span>retries: 0 of 1</span><span>model [provider · model]</span></div>
-<div style="display: flex; flex-wrap: wrap; gap: 6px 20px"><span style="color: {{t.ink}}">OFFLINE EVAL</span><span>pass rate [measured]</span><span>red-team cases held [measured]</span><span>eval set: [N] cases, public on GitHub</span></div>
-<p style="margin: 0">Eval numbers and live-usage numbers are labelled and never combined.</p>
-</div>
+</tbody>
+</table>
 </sc-if>
+<sc-if value="{{narrow}}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{gaps}}" as="g" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border-bottom: 1px dashed {{t.amberBorder}}">
+<span style="font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.amberText}}">The JD asks for</span>
+<p style="margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4">{{g.req}}</p>
+<span style="margin-top: 4px; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.amberText}}">Where I stand</span>
+<p style="margin: 0; font-size: 15px; line-height: 1.55">{{g.closest}}</p>
+<sc-if value="{{g.hasClose}}" hint-placeholder-val="{{ true }}">
+<span style="margin-top: 4px; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.amberText}}">How I'd close it</span>
+<p style="margin: 0; font-size: 15px; line-height: 1.55">{{g.close}}</p>
+</sc-if>
+<button type="button" onClick="{{g.ask}}" style="align-self: flex-start; min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px solid {{t.amberBorder}}; background: transparent; color: {{t.amberText}}; font-family: {{t.mono}}; font-size: 12px; cursor: pointer">Ask about this gap →</button>
+</div>
+</sc-for>
+</sc-if>
+</div>
+</div>
 
 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
 <a href="#contact" onClick="{{talk}}" style="display: inline-flex; align-items: center; min-height: 48px; padding: 12px 22px; border-radius: 10px; background: {{t.btnBg}}; color: {{t.btnInk}}; font-size: 16px; font-weight: 600; text-decoration: none">{{ctaLabel}}</a>
@@ -197,8 +206,9 @@
 </div>
 </div>
 <sc-if value="{{showDrillTrace}}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px dashed {{t.rule}}; border-radius: 10px; font-family: {{t.mono}}; font-size: 13px">
-<p style="margin: 0; font-size: 12px; color: {{t.muted}}">X-RAY · FALLBACK TRACE · drill run [run id]</p>
+<div style="position: relative; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid {{d.rule}}; border-radius: 10px; background: {{d.bg}}; color: {{d.ink}}; font-family: {{d.mono}}; font-size: 13px">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<p style="margin: 0; font-size: 12px; color: {{d.muted}}">FALLBACK TRACE · drill run [run id]</p>
 <sc-for list="{{drillTrace}}" as="dt" hint-placeholder-count="4">
 <p style="margin: 0; color: {{dt.color}}">{{dt.mark}} {{dt.text}}</p>
 </sc-for>
@@ -217,6 +227,47 @@
 </div>
 </sc-if>
 
+<sc-if value="{{showBreak}}" hint-placeholder-val="{{ false }}">
+<div style="position: relative; display: flex; flex-direction: column; gap: 16px; background: {{d.paper}}; color: {{d.ink}}; border: 1px solid {{d.rule}}; border-radius: 14px; padding: 38px 22px 22px">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="margin: 0; font-family: {{d.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{d.muted}}">Break my AI · red-team mode</p>
+<h2 style="margin: 0; font-family: {{d.serif}}; font-weight: 400; font-size: 32px; line-height: 1.15">Try to make it overclaim.</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: {{d.muted}}">Pick an attack or write your own. Every reply says which guardrail held. The fit check above keeps working as normal.</p>
+</div>
+<p role="status" aria-live="polite" style="margin: 0; display: flex; align-items: baseline; gap: 8px; font-family: {{d.mono}}"><span style="font-size: 36px; color: {{d.accent}}">{{held}}</span><span style="font-size: 13px; color: {{d.muted}}">held up of {{attempts}}</span></p>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{attacks}}" as="a" hint-placeholder-count="4">
+<button type="button" onClick="{{a.run}}" style="min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px solid {{d.rule}}; background: {{d.bg}}; color: {{d.ink}}; font-family: {{d.mono}}; font-size: 13px; cursor: pointer">{{a.chip}}</button>
+</sc-for>
+</div>
+<form onSubmit="{{submitBreak}}" style="display: flex; gap: 8px; flex-wrap: wrap">
+<input type="text" value="{{breakText}}" onChange="{{onBreak}}" aria-label="Your own attempt" placeholder="Or write your own attempt…" style="flex: 1 1 260px; min-height: 44px; padding: 8px 12px; border: 1px solid {{d.rule}}; border-radius: 8px; background: {{d.bg}}; color: {{d.ink}}; font-family: {{d.mono}}; font-size: 14px">
+<button type="submit" style="min-height: 44px; padding: 8px 18px; border-radius: 8px; border: 0; background: {{d.btnBg}}; color: {{d.btnInk}}; font-family: {{d.sans}}; font-size: 15px; font-weight: 600; cursor: pointer">Run</button>
+</form>
+<sc-for list="{{breakLog}}" as="l" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid {{d.rule}}">
+<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="padding: 2px 8px; border-radius: 6px; border: {{l.pillBorder}}; background: {{l.pillBg}}; color: {{l.pillInk}}; font-family: {{d.mono}}; font-size: 12px">{{l.verdict}}</span><span style="font-family: {{d.mono}}; font-size: 13px">“{{l.text}}”</span></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5">{{l.reply}}</p>
+<p style="margin: 0; font-family: {{d.mono}}; font-size: 12px; color: {{d.muted}}">guardrail fired: {{l.guard}} · trace [run id] · [ms]</p>
+</div>
+</sc-for>
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid {{d.rule}}">
+<p style="margin: 0; font-family: {{d.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{d.muted}}">Failure drills · runs the real fallback in the fit check above</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{drills}}" as="dr" hint-placeholder-count="2">
+<button type="button" onClick="{{dr.run}}" style="min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px dashed {{d.rule}}; background: {{d.bg}}; color: {{d.ink}}; font-family: {{d.mono}}; font-size: 13px; cursor: pointer">{{dr.chip}}</button>
+</sc-for>
+</div>
+</div>
+<div style="padding-top: 12px; border-top: 1px solid {{d.rule}}">
+<a href="#" style="display: inline-flex; align-items: center; min-height: 44px; font-family: {{d.mono}}; font-size: 12px; color: {{d.accent}}">These cases ship with the public eval set · GitHub [link] →</a>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{showNudge}}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; padding: 10px 14px; border: 1px dashed {{t.accent}}; border-radius: 10px; background: {{t.accentTint}}">
 <span style="font-size: 15px">{{nudgeText}}</span>
@@ -224,36 +275,37 @@
 </div>
 </sc-if>
 
-<div style="border-top: 1px solid {{t.rule}}; padding-top: 16px; display: flex; flex-direction: column; gap: 16px">
-<button type="button" onClick="{{toggleHow}}" aria-expanded="{{showHow}}" style="align-self: flex-start; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: {{t.accent}}; font-family: {{t.mono}}; font-size: 13px; cursor: pointer">{{howLabel}}</button>
+<div style="display: flex; flex-direction: column; gap: 16px">
 <sc-if value="{{showHow}}" hint-placeholder-val="{{ false }}">
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; font-family: {{t.mono}}; font-size: 13px; line-height: 1.6; color: {{t.ink}}">
-<p style="grid-column: 1 / -1; margin: 0; padding: 12px 14px; border: 1px solid {{t.rule}}; border-radius: 8px; background: {{t.paper}}; font-family: {{t.sans}}; font-size: 15px; line-height: 1.55"><b style="font-weight: 600">Honest note:</b> the fit check is a fixed pipeline with one branch (link or text) and one retry. The model doesn't choose its tools here. For model-chosen tool calls, see the <a href="Work.dc.html" style="color: {{t.accent}}">job-search agent</a>.</p>
+<div style="position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; padding: 20px; border-radius: 14px; background: {{d.bg}}; border: 1px solid {{d.rule}}; font-family: {{d.mono}}; font-size: 13px; line-height: 1.6; color: {{d.ink}}">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<h3 style="grid-column: 1 / -1; margin: 0; font-family: {{d.sans}}; font-size: 22px; font-weight: 600; line-height: 1.3; color: {{d.ink}}">How I built this</h3>
+<p style="grid-column: 1 / -1; margin: 0; padding: 12px 14px; border: 1px solid {{d.rule}}; border-radius: 8px; background: {{d.paper}}; font-family: {{d.sans}}; font-size: 15px; line-height: 1.55"><b style="font-weight: 600">Honest note:</b> the fit check is a fixed pipeline with one branch (link or text) and one retry. The model doesn't choose its tools here. For model-chosen tool calls, see the <a href="Work.dc.html" style="color: {{d.accent}}">job-search agent</a>.</p>
 <div style="display: flex; flex-direction: column; gap: 8px">
-<p style="margin: 0; color: {{t.muted}}">ARCHITECTURE</p>
+<p style="margin: 0; color: {{d.muted}}">ARCHITECTURE</p>
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
 <sc-for list="{{pipeline}}" as="p" hint-placeholder-count="6">
-<span style="padding: 4px 8px; border: 1px solid {{p.border}}; border-radius: 6px; background: {{t.paper}}">{{p.label}}</span><span style="color: {{t.muted}}">{{p.sep}}</span>
+<span style="padding: 4px 8px; border: 1px solid {{p.border}}; border-radius: 6px; background: {{d.paper}}">{{p.label}}</span><span style="color: {{d.muted}}">{{p.sep}}</span>
 </sc-for>
 </div>
-<p style="margin: 0; color: {{t.muted}}">One endpoint, one knowledge base, two prompts (fit check and Ask my work). Dashed box: the only branch.</p>
+<p style="margin: 0; color: {{d.muted}}">One endpoint, one knowledge base, two prompts (fit check and Ask my work). Dashed box: the only branch.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{t.muted}}">GUARDRAILS</p>
+<p style="margin: 0; color: {{d.muted}}">GUARDRAILS</p>
 <p style="margin: 0">› answers only from the knowledge base</p>
 <p style="margin: 0">› every claim links to a source</p>
 <p style="margin: 0">› gaps stated, score never inflated</p>
 <p style="margin: 0">› off-topic and prompt injection refused</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{t.muted}}">EVALS · COST</p>
+<p style="margin: 0; color: {{d.muted}}">EVALS · COST</p>
 <p style="margin: 0">› [N] test JDs, bad-fit and red-team cases, public on GitHub</p>
 <p style="margin: 0">› offline eval: pass rate [measured] · failed first: [what broke]</p>
 <p style="margin: 0">› live usage: [cost per run] · [response time], logged</p>
 <p style="margin: 0">› the steps on screen stream from the real run, never a script</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{t.muted}}">MEMORY · PRODUCTION</p>
+<p style="margin: 0; color: {{d.muted}}">MEMORY · PRODUCTION</p>
 <p style="margin: 0">› session memory: role and gaps carry into Ask my work</p>
 <p style="margin: 0">› held for this session only; pasted JDs aren't stored</p>
 <p style="margin: 0">› per-visitor rate limit · monthly budget cap</p>
@@ -261,7 +313,7 @@
 <p style="margin: 0">› limits: [what breaks first at scale]</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{t.muted}}">TRADE-OFFS · NEXT</p>
+<p style="margin: 0; color: {{d.muted}}">TRADE-OFFS · NEXT</p>
 <p style="margin: 0">› evidence cards over a % dial: slower to skim, easier to trust</p>
 <p style="margin: 0">› fixed pipeline over open tool choice: predictable and testable</p>
 <p style="margin: 0">› next: [what you'll improve]</p>
@@ -378,8 +430,9 @@ var HERO_STEP_COUNT = 7;
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = this.stateFor(props.initial || 'empty');
+    this.state = Object.assign(this.stateFor(props.initial || 'empty'), { narrow: typeof window !== 'undefined' && window.innerWidth < 640 });
     this.timer = null;
+    this.onResize = () => { var n = window.innerWidth < 640; if (n !== this.state.narrow) this.setState({ narrow: n }); };
   }
   stateFor(initial) {
     var p = HERO_SAMPLES[0], b = HERO_SAMPLES[3];
@@ -387,10 +440,11 @@ class Component extends DCLogic {
     if (initial === 'running') { base.jd = p.jd; base.step = 3; }
     if (initial === 'result' || initial === 'error' || initial === 'limited') { base.jd = p.jd; base.step = HERO_STEP_COUNT; }
     if (initial === 'badfit') { base.jd = b.jd; base.role = b.role; base.kind = 'bad'; base.step = HERO_STEP_COUNT; }
-    if (initial === 'break') { base.log = [heroEntry(HERO_ATTACKS[2]), heroEntry(HERO_ATTACKS[0])]; }
+    if (initial === 'break') { base.phase = 'empty'; base.localX = true; base.log = [heroEntry(HERO_ATTACKS[2]), heroEntry(HERO_ATTACKS[0])]; }
     return base;
   }
   componentDidMount() {
+    if (typeof window !== 'undefined') window.addEventListener('resize', this.onResize);
     if (this.state.phase === 'running' && !this.props.still) { this.setState({ step: 0 }); this.startTimer(); }
     if (this.state.phase === 'result' || this.state.phase === 'badfit') this.report(null);
   }
@@ -400,7 +454,7 @@ class Component extends DCLogic {
       this.setState(this.stateFor(this.props.initial || 'empty'));
     }
   }
-  componentWillUnmount() { this.stopTimer(); }
+  componentWillUnmount() { this.stopTimer(); if (typeof window !== 'undefined') window.removeEventListener('resize', this.onResize); }
   stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
   context(focus) {
     var data = this.state.kind === 'bad' ? HERO_BAD : HERO_FIT;
@@ -428,7 +482,9 @@ class Component extends DCLogic {
   renderVals() {
     var s = this.state;
     var x = !!this.props.xray || !!s.localX;
-    var t = heroTokens(x);
+    var t = heroTokens(false);
+    var d = heroTokens(true);
+    var sp = x ? d : t;
     var phase = s.phase;
     var isResult = phase === 'result' || phase === 'badfit';
     var data = phase === 'badfit' ? HERO_BAD : HERO_FIT;
@@ -437,8 +493,8 @@ class Component extends DCLogic {
       var done = i < s.step;
       var skipped = done && st.skip;
       return {
-        text: x ? st.xr : st.tool + ' · ' + st.label,
-        status: done ? (x && !st.skip ? st.detail + ' · [ms]' : st.detail) : 'running…',
+        text: st.tool + ' · ' + st.label,
+        status: done ? st.detail : 'running…',
         statusColor: skipped ? t.muted : (done ? t.accent : t.muted),
         textColor: skipped ? t.muted : t.ink,
         mark: skipped ? '–' : (done ? '✓' : '›'),
@@ -452,13 +508,12 @@ class Component extends DCLogic {
       pick: () => this.run(sm.jd, sm.role, sm.kind)
     }));
     var pipe = [['input', false], ['link? fetch_url', true], ['jd.parse', false], ['kb.search', false], ['evidence.map', false], ['guardrails', false], ['compose + cite', false]];
-    var showHow = s.howOpen || x;
+    var showHow = x;
     var log = s.log || [];
     var drill = s.drill;
     var showFallback = phase === 'error' || phase === 'limited';
     var nudgeText = '';
     if (isResult) nudgeText = 'See the trace, sources and cost behind this result.';
-    else if (phase === 'break' && log.length) nudgeText = 'See which guardrail fired on each attempt.';
     else if (showFallback && drill) nudgeText = 'See the fallback path this drill just ran.';
     var fbTag = phase === 'error' ? 'Fit check · error' : 'Fit check · daily limit reached';
     var fbTitle = phase === 'error' ? "The fit check couldn't finish this time." : "That's today's limit for live checks.";
@@ -472,10 +527,31 @@ class Component extends DCLogic {
     }
     if (drill === 'rate') fbTag = 'Failure drill · rate limit';
     return {
-      t: t, xray: x,
+      t: t, d: d, sp: sp, xray: x,
+      wide: !s.narrow, narrow: !!s.narrow,
       isEmpty: phase === 'empty', isRunning: phase === 'running', isResult: isResult,
+      showSteps: phase === 'running' || isResult,
+      showRunXray: x && isResult,
+      runItems: [
+        ['Run ID', '[run id]'], ['Time', '[timestamp]'],
+        ['Input', s.isLink ? 'Link · fetch_url called' : 'Text · fetch_url skipped'],
+        ['Retries', '0 of 1 used'],
+        ['Requirements found', (s.kind === 'bad' ? 5 : 6) + ' in the JD'],
+        ['Sources', '[N] retrieved · ' + data.matches.length + ' cited'],
+        ['Result', data.matches.length + ' matches · ' + data.gaps.length + ' gaps'],
+        ['Guardrails', 'citations ✓ · honesty ✓', true],
+        ['Fallback', 'Not needed'],
+        ['Response time', '[logged] s total'],
+        ['Tokens', '[in] in · [out] out'],
+        ['Cost', '[logged]']
+      ].map((r) => ({ label: r[0], value: r[1], color: r[2] ? d.accent : d.ink })),
+      buildItems: [
+        ['Build', '[version · date]'], ['Model', '[provider · model]'], ['Prompt', '[fit-check prompt version]'],
+        ['Knowledge base', 'Synced from master resume [date]'], ['Offline eval', '[passed]/[total] cases · [date]'], ['Red-team cases', '[held]/[total] held'], ['Eval set', 'View on GitHub [link] →', '#']
+      ].map((b) => ({ label: b[0], value: b[1], href: b[2] || '#', isLink: !!b[2], plain: !b[2] })),
+      stepsTitle: phase === 'running' ? 'Agent · streaming from the live run' : 'Agent · done · ' + HERO_STEP_COUNT + ' steps from the live run',
       isError: phase === 'error' && !drill, showFallback: showFallback,
-      showCompact: phase !== 'empty' && phase !== 'break',
+      showCompact: phase !== 'empty',
       compactLabel: drill ? 'Drill running against' : (phase === 'running' ? 'Checking against' : 'Checked against'),
       notRunning: phase !== 'running',
       stepNum: Math.min(s.step + 1, HERO_STEP_COUNT), stepTotal: HERO_STEP_COUNT,
@@ -483,24 +559,24 @@ class Component extends DCLogic {
       resetLabel: drill ? 'Back to the fit check' : 'Try another role',
       jd: s.jd, role: s.role, noJd: noJd, btnOpacity: noJd ? 0.45 : 1,
       steps: steps, samples: samples, data: data,
-      gaps: data.gaps.map((g, i) => ({ req: g.req, closest: g.closest, close: g.close, hasClose: !!g.close, ask: () => { if (this.props.onAskGap) this.props.onAskGap(this.context(i)); } })),
+      gaps: data.gaps.map((g, i) => ({ req: g.req, closest: g.closest, close: g.close, hasClose: !!g.close, closeText: g.close || '—', closeColor: g.close ? t.ink : t.muted, ask: () => { if (this.props.onAskGap) this.props.onAskGap(this.context(i)); } })),
       matchCount: data.matches.length, gapCount: data.gaps.length,
       branchNote: s.isLink ? 'link → fetch_url' : 'text → fetch skipped',
       ctaLabel: phase === 'badfit' ? 'Talk to Aswin anyway' : 'Talk to Aswin about this role',
       fallback: HERO_FALLBACK,
       fallbackTag: fbTag, fallbackTitle: fbTitle, fallbackText: fbText,
       showDrillTrace: x && !!drill,
-      drillTrace: (HERO_DRILL_TRACE[drill] || []).map((r) => ({ mark: r[0], text: r[1], color: r[2] === 'bad' ? t.amberText : t.ink })),
+      drillTrace: (HERO_DRILL_TRACE[drill] || []).map((r) => ({ mark: r[0], text: r[1], color: r[2] === 'bad' ? d.amberText : d.ink })),
       drills: HERO_DRILLS.map((d) => ({ chip: d.chip, run: () => { this.stopTimer(); this.setState({ phase: d.phase, drill: d.id, jd: HERO_SAMPLES[0].jd, role: HERO_SAMPLES[0].role, kind: 'fit' }); } })),
       showNudge: !x && !!nudgeText, nudgeText: nudgeText,
       xrayOn: () => this.xrayOn(),
-      isBreak: phase === 'break',
-      attacks: HERO_ATTACKS.map((a) => ({ chip: a.chip, run: () => this.setState({ phase: 'break', log: [heroEntry(a)].concat(this.state.log).slice(0, 6) }) })),
+      showBreak: x,
+      attacks: HERO_ATTACKS.map((a) => ({ chip: a.chip, run: () => this.setState({ log: [heroEntry(a)].concat(this.state.log).slice(0, 6) }) })),
       breakLog: log.map((l) => ({
         text: l.text, verdict: l.verdict, reply: l.reply, guard: l.guard,
-        pillBg: l.tone === 'held' ? t.accentTint : (l.tone === 'gap' ? t.amberBg : 'transparent'),
-        pillInk: l.tone === 'held' ? t.accent : (l.tone === 'gap' ? t.amberText : t.ink),
-        pillBorder: l.tone === 'held' ? '1px solid ' + t.accent : (l.tone === 'gap' ? '1.5px dashed ' + t.amberBorder : '1px solid ' + t.rule)
+        pillBg: l.tone === 'held' ? d.accentTint : (l.tone === 'gap' ? d.amberBg : 'transparent'),
+        pillInk: l.tone === 'held' ? d.accent : (l.tone === 'gap' ? d.amberText : d.ink),
+        pillBorder: l.tone === 'held' ? '1px solid ' + d.accent : (l.tone === 'gap' ? '1.5px dashed ' + d.amberBorder : '1px solid ' + d.rule)
       })),
       attempts: log.length,
       held: log.filter((l) => l.verdict !== 'ANSWERED').length,
@@ -512,7 +588,7 @@ class Component extends DCLogic {
         if (!txt) return;
         this.setState({ breakText: '', log: [heroEntry(heroClassify(txt), txt)].concat(this.state.log).slice(0, 6) });
       },
-      pipeline: pipe.map((p, i) => ({ label: p[0], border: p[1] ? '1px dashed ' + t.accent : '1px solid ' + t.rule, sep: i < pipe.length - 1 ? '›' : '' })),
+      pipeline: pipe.map((p, i) => ({ label: p[0], border: p[1] ? '1px dashed ' + d.accent : '1px solid ' + d.rule, sep: i < pipe.length - 1 ? '›' : '' })),
       showHow: showHow,
       howLabel: showHow ? '− How I built this' : '+ How I built this',
       onJd: (e) => this.setState({ jd: e.target.value }),

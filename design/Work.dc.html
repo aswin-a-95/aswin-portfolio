@@ -95,10 +95,11 @@ html{scroll-behavior:smooth}
 </div>
 <p style="margin: 0; font-size: 15px; color: {{t.muted}}">Boxes outlined in blue are where safeguards run.</p>
 <sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 10px; padding: 20px; border: 1px dashed {{t.rule}}; border-radius: 14px; font-family: {{t.mono}}; font-size: 13px">
-<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: {{t.muted}}"><span>X-RAY · LOGGED TRACE · run [run id]</span><span>real run, never a simulation</span></div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 20px; position: relative; border: 1px solid {{d.rule}}; border-radius: 14px; background: {{d.bg}}; color: {{d.ink}}; font-family: {{d.mono}}; font-size: 13px">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<p style="margin: 0; color: {{d.muted}}">LOGGED TRACE · run [run id] · real run, never a simulation</p>
 <sc-for list="{{arch}}" as="a" hint-placeholder-count="6">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid {{t.rule}}"><span><span style="color: {{t.accent}}">✓ </span>{{a.fn}}</span><span style="color: {{t.muted}}">[ms]</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid {{d.rule}}"><span><span style="color: {{d.accent}}">✓ </span>{{a.fn}}</span><span style="color: {{d.muted}}">[ms]</span></div>
 </sc-for>
 </div>
 </sc-if>
@@ -152,7 +153,7 @@ html{scroll-behavior:smooth}
 <sc-for list="{{log}}" as="l" hint-placeholder-count="0">
 <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; padding: 12px 0 2px; border-top: 1px solid {{t.rule}}; font-family: {{t.mono}}; font-size: 13px; line-height: 1.5">
 <span style="flex: 0 0 auto; padding: 2px 8px; border-radius: 6px; background: {{l.pillBg}}; color: {{l.pillInk}}; border: {{l.pillBorder}}">{{l.verdict}}</span>
-<span style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 2px"><span>“{{l.text}}”</span><span style="color: {{t.muted}}">{{l.reason}}</span><sc-if value="{{xray}}" hint-placeholder-val="{{ false }}"><span style="color: {{t.muted}}">guardrail fired: {{l.guard}} · trace [run id] · [ms]</span></sc-if></span>
+<span style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 2px"><span>“{{l.text}}”</span><span style="color: {{t.muted}}">{{l.reason}}</span><sc-if value="{{xray}}" hint-placeholder-val="{{ false }}"><span style="align-self: flex-start; margin-top: 4px; padding: 3px 8px; border-radius: 6px; background: {{d.bg}}; color: {{d.muted}}">guardrail fired: {{l.guard}} · trace [run id] · [ms]</span></sc-if></span>
 </div>
 </sc-for>
 <a href="#" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 40px; padding-top: 6px; border-top: 1px solid {{t.rule}}; font-family: {{t.mono}}; font-size: 12px; color: {{t.accent}}">These red-team cases ship with the public eval set · GitHub [link] →</a>
@@ -183,19 +184,20 @@ html{scroll-behavior:smooth}
 </sc-for>
 </div>
 <sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 12px; padding: 20px; border: 1px dashed {{t.rule}}; border-radius: 14px; font-family: {{t.mono}}; font-size: 13px">
-<span style="color: {{t.muted}}">X-RAY · OFFLINE EVAL SET · [N] cases incl. red-team</span>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 20px; position: relative; border: 1px solid {{d.rule}}; border-radius: 14px; background: {{d.bg}}; color: {{d.ink}}; font-family: {{d.mono}}; font-size: 13px">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<span style="color: {{d.muted}}">OFFLINE EVAL SET · [N] cases incl. red-team</span>
 <div style="overflow-x: auto">
 <table style="width: 100%; min-width: 520px; border-collapse: collapse; font-size: 13px">
-<thead><tr><th scope="col" style="text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid {{t.rule}}; color: {{t.muted}}; font-weight: 500">eval case</th><th scope="col" style="text-align: left; padding: 8px 10px; border-bottom: 1px solid {{t.rule}}; color: {{t.muted}}; font-weight: 500">expected</th><th scope="col" style="text-align: left; padding: 8px 0 8px 10px; border-bottom: 1px solid {{t.rule}}; color: {{t.muted}}; font-weight: 500">result</th></tr></thead>
+<thead><tr><th scope="col" style="text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid {{d.rule}}; color: {{d.muted}}; font-weight: 500">eval case</th><th scope="col" style="text-align: left; padding: 8px 10px; border-bottom: 1px solid {{d.rule}}; color: {{d.muted}}; font-weight: 500">expected</th><th scope="col" style="text-align: left; padding: 8px 0 8px 10px; border-bottom: 1px solid {{d.rule}}; color: {{d.muted}}; font-weight: 500">result</th></tr></thead>
 <tbody>
 <sc-for list="{{evals}}" as="e" hint-placeholder-count="6">
-<tr><td style="padding: 8px 10px 8px 0; border-bottom: 1px solid {{t.rule}}">{{e.case}}</td><td style="padding: 8px 10px; border-bottom: 1px solid {{t.rule}}">{{e.expected}}</td><td style="padding: 8px 0 8px 10px; border-bottom: 1px solid {{t.rule}}; color: {{t.muted}}">[pass / fail]</td></tr>
+<tr><td style="padding: 8px 10px 8px 0; border-bottom: 1px solid {{d.rule}}">{{e.case}}</td><td style="padding: 8px 10px; border-bottom: 1px solid {{d.rule}}">{{e.expected}}</td><td style="padding: 8px 0 8px 10px; border-bottom: 1px solid {{d.rule}}; color: {{d.muted}}">[pass / fail]</td></tr>
 </sc-for>
 </tbody>
 </table>
 </div>
-<span style="color: {{t.muted}}">failed first: [what broke, and the fix]</span>
+<span style="color: {{d.muted}}">failed first: [what broke, and the fix]</span>
 </div>
 </sc-if>
 </section>
@@ -305,7 +307,7 @@ class Component extends DCLogic {
     this.setState({ log: [entry].concat(this.state.log).slice(0, 8), attackText: '' });
   }
   renderVals() {
-    var s = this.state, x = s.xray, t = workTokens(x);
+    var s = this.state, x = s.xray, t = workTokens(false), d = workTokens(true);
     var sections = [
       ['s-demo', 'Demo'], ['s-problem', 'Users & problem'], ['s-decisions', 'Decisions'], ['s-arch', 'Architecture'],
       ['s-built', 'What I built'], ['s-safeguards', 'Safeguards'], ['s-break', 'Try to break it'], ['s-measure', 'Success'],
@@ -333,7 +335,7 @@ class Component extends DCLogic {
       return { bg: 'transparent', ink: t.ink, border: '1px solid ' + t.rule };
     };
     return {
-      t: t, xray: x, askOpen: s.askOpen,
+      t: t, d: d, xray: x, askOpen: s.askOpen,
       xrayLink: x ? 'Close How I built this' : 'How I built this (X-ray)',
       rail: sections.map((sec, i) => ({ href: '#' + sec[0], label: sec[1], num: (i < 9 ? '0' : '') + (i + 1) })),
       arch: arch.map((a, i) => ({ label: a[0], fn: a[1], sep: i < arch.length - 1 ? '›' : '', border: a[2] ? t.accent : t.rule })),

@@ -54,14 +54,17 @@
 <button type="button" onClick="{{q.pick}}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; padding: 8px 10px; margin: 0 -10px; border: 0; border-radius: 8px; background: transparent; color: {{t.ink}}; font-family: {{t.sans}}; font-size: 16px; text-align: left; cursor: pointer">{{q.text}}<span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">ask ↵</span></button>
 </sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 8px">
-<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Break my AI</p>
+<sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
+<div style="position: relative; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 10px; background: {{d.bg}}; border: 1px solid {{d.rule}}">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<p style="margin: 0; font-family: {{d.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{d.muted}}">Break my AI</p>
 <div style="display: flex; gap: 8px; flex-wrap: wrap">
 <sc-for list="{{attacks}}" as="a" hint-placeholder-count="4">
-<button type="button" onClick="{{a.pick}}" style="min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px solid {{t.rule}}; background: transparent; color: {{t.ink}}; font-family: {{t.mono}}; font-size: 13px; cursor: pointer">{{a.chip}}</button>
+<button type="button" onClick="{{a.pick}}" style="min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 1px solid {{d.rule}}; background: transparent; color: {{d.ink}}; font-family: {{d.mono}}; font-size: 13px; cursor: pointer">{{a.chip}}</button>
 </sc-for>
 </div>
 </div>
+</sc-if>
 <div style="display: flex; flex-direction: column; gap: 6px">
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.muted}}">Jump to</p>
 <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -91,7 +94,10 @@
 </sc-for>
 </div>
 <sc-if value="{{xray}}" hint-placeholder-val="{{ false }}">
-<p style="margin: 0; padding-top: 10px; border-top: 1px dashed {{t.rule}}; font-family: {{t.mono}}; font-size: 12px; line-height: 1.6; color: {{t.muted}}">kb.search → {{answer.sourceCount}} sources · guardrail fired: {{answer.guard}} · trace [run id] · live usage: cost [logged] · [logged] ms</p>
+<div style="position: relative">
+<span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
+<p style="margin: 0; padding: 10px 76px 10px 12px; border-radius: 8px; background: {{d.bg}}; border: 1px solid {{d.rule}}; font-family: {{d.mono}}; font-size: 12px; line-height: 1.6; color: {{d.muted}}">kb.search → {{answer.sourceCount}} sources · guardrail fired: {{answer.guard}} · trace [run id] · live usage: cost [logged] · [logged] ms</p>
+</div>
 </sc-if>
 <button type="button" onClick="{{again}}" style="align-self: flex-start; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: {{t.accent}}; font-family: {{t.mono}}; font-size: 13px; cursor: pointer">← Ask another</button>
 </div>
@@ -189,7 +195,8 @@ class Component extends DCLogic {
   }
   renderVals() {
     var x = !!this.props.xray;
-    var t = askTokens(x);
+    var t = askTokens(false);
+    var d = askTokens(true);
     var sheet = !!this.props.sheet;
     var page = this.props.page || 'home';
     var open = this.props.open === undefined ? true : !!this.props.open;
@@ -214,7 +221,7 @@ class Component extends DCLogic {
       if (tone === 'accent') { answerBorder = '1px solid ' + t.accent; answerBg = t.accentTint; }
     }
     return {
-      t: t, xray: x, open: open,
+      t: t, d: d, xray: x, open: open,
       position: sheet ? 'absolute' : 'fixed',
       minH: sheet ? '100%' : '0px',
       align: sheet ? 'flex-end' : 'flex-start',
