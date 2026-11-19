@@ -14,7 +14,6 @@ export const CaseStudySchema = z.object({
   angle: z.string(),
   built: z.string(),
   tags: z.array(z.string()),
-  xr: z.string(),
   flow: z.array(z.object({ label: z.string(), approval: z.boolean() })).optional(),
   /** Phone home layout lists the study (Mobile.dc.html leaves Platform & API out). */
   onPhone: z.boolean(),

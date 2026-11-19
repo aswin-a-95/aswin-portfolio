@@ -64,9 +64,6 @@ export function PostList({ posts }: { posts: Post[] }) {
             >
               {p.study.label} →
             </Link>
-            <p className="xray-only m-0 font-mono text-[12px] text-muted">
-              written by Aswin · AI used for editing only · cross-posted to LinkedIn
-            </p>
           </article>
         ))}
         {shown.length === 0 && (

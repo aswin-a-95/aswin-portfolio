@@ -3,7 +3,7 @@ import type { CaseStudy } from "@/lib/schemas/content";
 
 type CardFields = Pick<
   CaseStudy,
-  "slug" | "num" | "status" | "cardLabel" | "cardTitle" | "angle" | "built" | "tags" | "xr" | "flow" | "onPhone"
+  "slug" | "num" | "status" | "cardLabel" | "cardTitle" | "angle" | "built" | "tags" | "flow" | "onPhone"
 >;
 
 /**

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { BeforeAfterTabs } from "@/components/case-study/before-after-tabs";
 import { Sandbox } from "@/components/case-study/sandbox";
 import { XrayLinkButton } from "@/components/case-study/xray-link";
+import { XrayPanel } from "@/components/xray-panel";
 import { siteMeta } from "@/content/site-meta";
 import { hrefOf, isTodo, withTodo } from "@/lib/content";
 import type { CaseStudy, Post } from "@/lib/schemas/content";
@@ -172,21 +173,18 @@ export function CaseStudyPage({ cs, next, related }: { cs: CaseStudy; next: Case
               </div>
               <p className="m-0 text-[15px] text-muted">Boxes outlined in blue are where safeguards run.</p>
               <div className="xray-only">
-                <div className="flex flex-col gap-[10px] rounded-[14px] border border-dashed border-rule p-5 font-mono text-[13px]">
-                  <div className="flex flex-wrap justify-between gap-3 text-muted">
-                    <span>X-RAY · LOGGED TRACE · run {cs.arch.runId}</span>
-                    <span>real run, never a simulation</span>
-                  </div>
+                <XrayPanel className="flex flex-col gap-[10px] rounded-[14px] p-5 font-mono text-[13px]">
+                  <p className="m-0 text-xr-muted">LOGGED TRACE · run {cs.arch.runId} · real run, never a simulation</p>
                   {cs.arch.steps.map((a) => (
-                    <div key={a.fn} className="flex justify-between gap-3 border-t border-rule py-[6px]">
+                    <div key={a.fn} className="flex justify-between gap-3 border-t border-xr-rule py-[6px]">
                       <span>
-                        <span className="text-accent">✓ </span>
+                        <span className="text-xr-accent">✓ </span>
                         {a.fn}
                       </span>
-                      <span className="text-muted">{a.ms}</span>
+                      <span className="text-xr-muted">{a.ms}</span>
                     </div>
                   ))}
-                </div>
+                </XrayPanel>
               </div>
             </Section>
           )}
@@ -271,19 +269,19 @@ export function CaseStudyPage({ cs, next, related }: { cs: CaseStudy; next: Case
                 ))}
               </div>
               <div className="xray-only">
-                <div className="flex flex-col gap-3 rounded-[14px] border border-dashed border-rule p-5 font-mono text-[13px]">
-                  <span className="text-muted">X-RAY · OFFLINE EVAL SET · {cs.perf.evalCount} cases incl. red-team</span>
+                <XrayPanel className="flex flex-col gap-3 rounded-[14px] p-5 font-mono text-[13px]">
+                  <span className="text-xr-muted">OFFLINE EVAL SET · {cs.perf.evalCount} cases incl. red-team</span>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[520px] border-collapse text-[13px]">
                       <thead>
                         <tr>
-                          <th scope="col" className="border-b border-rule py-2 pr-[10px] text-left font-medium text-muted">
+                          <th scope="col" className="border-b border-xr-rule py-2 pr-[10px] text-left font-medium text-xr-muted">
                             eval case
                           </th>
-                          <th scope="col" className="border-b border-rule px-[10px] py-2 text-left font-medium text-muted">
+                          <th scope="col" className="border-b border-xr-rule px-[10px] py-2 text-left font-medium text-xr-muted">
                             expected
                           </th>
-                          <th scope="col" className="border-b border-rule py-2 pl-[10px] text-left font-medium text-muted">
+                          <th scope="col" className="border-b border-xr-rule py-2 pl-[10px] text-left font-medium text-xr-muted">
                             result
                           </th>
                         </tr>
@@ -291,16 +289,16 @@ export function CaseStudyPage({ cs, next, related }: { cs: CaseStudy; next: Case
                       <tbody>
                         {cs.perf.evals.map((e) => (
                           <tr key={e.case}>
-                            <td className="border-b border-rule py-2 pr-[10px]">{e.case}</td>
-                            <td className="border-b border-rule px-[10px] py-2">{e.expected}</td>
-                            <td className="border-b border-rule py-2 pl-[10px] text-muted">{e.result}</td>
+                            <td className="border-b border-xr-rule py-2 pr-[10px]">{e.case}</td>
+                            <td className="border-b border-xr-rule px-[10px] py-2">{e.expected}</td>
+                            <td className="border-b border-xr-rule py-2 pl-[10px] text-xr-muted">{e.result}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                  <span className="text-muted">failed first: {cs.perf.failedFirst}</span>
-                </div>
+                  <span className="text-xr-muted">failed first: {cs.perf.failedFirst}</span>
+                </XrayPanel>
               </div>
             </Section>
           )}

@@ -1,4 +1,5 @@
 import { AskLink } from "@/components/ask/ask-link";
+import { XrayPanel } from "@/components/xray-panel";
 import {
   ASK_ATTACKS,
   ASK_BY_PAGE,
@@ -72,20 +73,23 @@ export function AskStart({
           </button>
         ))}
       </div>
-      <div className="flex flex-col gap-2">
-        <p className={LABEL}>Break my AI</p>
-        <div className="flex flex-wrap gap-2">
-          {ASK_ATTACKS.map(([id, chip]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onAsk(ASK_QUESTIONS[id])}
-              className="min-h-10 cursor-pointer rounded-[8px] border border-rule bg-transparent px-3 py-[6px] font-mono text-[13px] text-ink"
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
+      {/* X-ray only, in an X-ray panel (design update 3). */}
+      <div className="xray-only">
+        <XrayPanel className="flex flex-col gap-2 rounded-[10px] px-[14px] py-3">
+          <p className="m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-xr-muted">Break my AI</p>
+          <div className="flex flex-wrap gap-2">
+            {ASK_ATTACKS.map(([id, chip]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onAsk(ASK_QUESTIONS[id])}
+                className="min-h-10 cursor-pointer rounded-[8px] border border-xr-rule bg-transparent px-3 py-[6px] font-mono text-[13px] text-xr-ink"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        </XrayPanel>
       </div>
       <div className="flex flex-col gap-[6px]">
         <p className={LABEL}>Jump to</p>

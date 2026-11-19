@@ -45,9 +45,6 @@ export default async function PostPage({ params }: Props) {
         >
           {meta.study.label} →
         </Link>
-        <p className="xray-only m-0 font-mono text-[12px] text-muted">
-          written by Aswin · AI used for editing only · cross-posted to LinkedIn
-        </p>
       </main>
       <Footer maxWidth={880} />
     </div>

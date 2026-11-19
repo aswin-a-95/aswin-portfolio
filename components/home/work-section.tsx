@@ -70,7 +70,6 @@ export function WorkSection({ studies, headingLevel = 2 }: { studies: CaseStudy[
                     </span>
                   ))}
                 </div>
-                <p className="xray-only m-0 border-t border-dashed border-rule pt-3 font-mono text-[12px] text-muted">{c.xr}</p>
               </Link>
             ))}
           </div>

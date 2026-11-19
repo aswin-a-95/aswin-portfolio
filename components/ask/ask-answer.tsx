@@ -1,4 +1,5 @@
 import { AskLink } from "@/components/ask/ask-link";
+import { XrayPill } from "@/components/xray-panel";
 import { ASK_BUDGET, ASK_ERROR, ASK_LABELS, ASK_LIMITED, CONTACT_SOURCE } from "@/lib/ask/copy";
 import type { AskAnswer, AskResult, AskSource } from "@/lib/ask/types";
 
@@ -71,9 +72,14 @@ export function AskAnswerView({
         ))}
       </div>
       {result.status === "ok" && (
-        <p className="xray-only m-0 border-t border-dashed border-rule pt-[10px] font-mono text-[12px] leading-[1.6] text-muted">
-          {traceLine(result.answer)}
-        </p>
+        <div className="xray-only">
+          <div className="relative">
+            <XrayPill />
+            <p className="m-0 rounded-[8px] border border-xr-rule bg-xr-bg py-[10px] pr-[76px] pl-3 font-mono text-[12px] leading-[1.6] text-xr-muted">
+              {traceLine(result.answer)}
+            </p>
+          </div>
+        </div>
       )}
       <button
         type="button"

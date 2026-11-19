@@ -18,11 +18,11 @@ export function IntroBanner() {
         <p className="m-0 text-[15px] leading-[1.5]">
           <b className="font-semibold">New here? Try X-ray.</b>{" "}
           <span className="max-[640px]:hidden">
-            One switch shows how this site works: the sources, guardrails, live traces, cost and eval results behind
-            every answer.
+            It shows how the AI works in the fit check, Ask my work and the case studies: the sources, guardrails, live
+            traces, cost and eval results behind each answer.
           </span>
           <span className="hidden max-[640px]:inline">
-            It shows the sources, guardrails, live traces, cost and eval results behind every answer.
+            It shows how the AI works in the fit check, Ask my work and the case studies.
           </span>
         </p>
         <div className="flex gap-2">

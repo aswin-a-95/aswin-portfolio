@@ -121,7 +121,8 @@ export function Sandbox({ attacks, evalSet }: { attacks: Attack[]; evalSet: { hr
             <span className="flex flex-[1_1_300px] flex-col gap-[2px]">
               <span>“{l.text}”</span>
               <span className="text-muted">{l.reason}</span>
-              <span className="xray-only text-muted">
+              {/* X-ray only: a small dark chip (design update 3). */}
+              <span className="xray-only mt-1 self-start rounded-md bg-xr-bg px-2 py-[3px] text-xr-muted">
                 guardrail fired: {l.guard} · trace {l.trace?.runId ?? "[run id]"} · {l.trace ? `${l.trace.ms} ms` : "[ms]"}
               </span>
             </span>

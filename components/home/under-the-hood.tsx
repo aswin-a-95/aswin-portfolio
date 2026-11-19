@@ -22,12 +22,13 @@ export function UnderTheHood() {
     <>
       <section aria-labelledby="uh-h" className="border-t border-rule px-6 py-14 max-[640px]:hidden">
         <div className="mx-auto flex max-w-[1040px] flex-col gap-5">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-            <h2 id="uh-h" className="m-0 font-serif text-[36px] font-normal">
-              Under the hood
+          <div className="flex flex-col gap-[10px]">
+            <p className="m-0 font-mono text-[12px] tracking-[0.08em] text-muted">ACROSS ALL MY WORK</p>
+            <h2 id="uh-h" className="m-0 font-serif text-[36px] font-normal leading-[1.15]">
+              How I build agentic products, with proof
             </h2>
-            <p className="m-0 max-w-[560px] text-[15px] leading-[1.5] text-muted">
-              Eight parts of an AI product, each with where it&apos;s proven. Anything without proof yet is left out.
+            <p className="m-0 text-[16px] leading-[1.5] text-muted">
+              Each part links to where you can see it working: live on this site, in a case study, or on GitHub.
             </p>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-3">
@@ -55,9 +56,11 @@ export function UnderTheHood() {
       </section>
 
       <section aria-labelledby="m-hood" className="hidden flex-col gap-[10px] border-t border-rule px-5 py-9 max-[640px]:flex">
-        <h2 id="m-hood" className="m-0 mb-1 font-serif text-[30px] font-normal">
-          Under the hood
+        <p className="m-0 font-mono text-[11px] tracking-[0.08em] text-muted">ACROSS ALL MY WORK</p>
+        <h2 id="m-hood" className="m-0 font-serif text-[28px] font-normal leading-[1.2]">
+          How I build agentic products, with proof
         </h2>
+        <p className="m-0 mb-1 text-[15px] leading-[1.5] text-muted">Each part links to where you can see it working.</p>
         {cards.map((u) => (
           <CardLink
             key={u.name}
