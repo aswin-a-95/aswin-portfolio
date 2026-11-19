@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AskDialog, type AskFocus } from "@/components/ask/ask-dialog";
 import { makeFlagStore } from "@/lib/flag-store";
-import { applyTheme, INTRO_KEY, XRAY_KEY } from "@/lib/xray";
+import { applyXray, INTRO_KEY, XRAY_KEY } from "@/lib/xray";
 
 // X-ray lives in sessionStorage; the intro banner's dismissal in localStorage (SPEC §5).
 const xrayStore = makeFlagStore(() => window.sessionStorage, XRAY_KEY);
@@ -31,7 +31,7 @@ export function XrayProvider({ children }: { children: ReactNode }) {
   const setXray = useCallback((on: boolean) => {
     xrayStore.set(on);
     introStore.set(true);
-    applyTheme(on);
+    applyXray(on);
   }, []);
   const toggleXray = useCallback(() => setXray(!xrayStore.get()), [setXray]);
   const dismissIntro = useCallback(() => introStore.set(true), []);

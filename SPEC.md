@@ -198,7 +198,11 @@ create table runs (
   input_tokens int, output_tokens int, cached_tokens int,
   cost_usd numeric(10,5),
   latency_ms int,
-  prompt_version text
+  prompt_version text,
+  requirement_count int,          -- fit only: requirements jd.parse found
+  sources_retrieved int,          -- fit only: entries kb.search returned
+  sources_cited int,              -- fit only: distinct sources the matches cite
+  fallback text                   -- null | error | limited | budget
 );
 create table ai_crawls (id bigserial primary key, created_at timestamptz default now(), bot text, path text);
 ```

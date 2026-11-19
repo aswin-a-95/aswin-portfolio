@@ -6,12 +6,19 @@ import type { ServerEnv } from "@/lib/server/env";
 export type RunRecord = {
   runId: string;
   startedAt: number;
+  /** Wall-clock start, ISO 8601 (the "Time" in X-ray's "This run"). */
+  startedAtIso: string;
   mode: "fit" | "ask" | "sandbox";
   drill: "kb" | "rate" | null;
   branch: "link" | "text" | null;
   steps: { tool: string; status: string; ms: number }[];
   guardFired: string[];
   retries: number;
+  /** Fit check only: requirements found, sources retrieved and cited, fallback used (SPEC §10). */
+  requirements: number | null;
+  sourcesRetrieved: number | null;
+  sourcesCited: number | null;
+  fallback: "error" | "limited" | "budget" | null;
   /** Model id for pricing and the log. Empty until a model is resolved. */
   model: string;
   tokens: Tokens;
@@ -37,12 +44,17 @@ export function newRecord(mode: RunRecord["mode"], now: () => number): RunRecord
   return {
     runId: newRunId(),
     startedAt: now(),
+    startedAtIso: new Date().toISOString(),
     mode,
     drill: null,
     branch: null,
     steps: [],
     guardFired: [],
     retries: 0,
+    requirements: null,
+    sourcesRetrieved: null,
+    sourcesCited: null,
+    fallback: null,
     model: "",
     tokens: NO_TOKENS,
     log: true,

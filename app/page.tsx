@@ -8,6 +8,7 @@ import { WorkSection } from "@/components/home/work-section";
 import { IntroBanner } from "@/components/intro-banner";
 import { Nav } from "@/components/nav";
 import { siteMeta } from "@/content/site-meta";
+import { PROMPT_VERSION } from "@/lib/ai/prompts";
 import { hrefOf, isTodo } from "@/lib/content";
 import { caseStudies } from "@/lib/case-studies";
 import { posts } from "@/lib/posts";
@@ -30,11 +31,12 @@ export default async function Home() {
             whatBreaksFirstAtScale: siteMeta.whatBreaksFirstAtScale,
             next: siteMeta.next,
           }}
-          resultMeta={{
-            evalPassRate: siteMeta.evalPassRate,
-            evalLastRun: siteMeta.evalLastRun,
-            evalRedTeamHeld: siteMeta.evalRedTeamHeld,
-            evalCaseCount: siteMeta.evalCaseCount,
+          buildMeta={{
+            build: `${process.env.BUILD_SHA} · ${process.env.BUILD_DATE}`,
+            prompt: PROMPT_VERSION,
+            kbSynced: `Synced from master resume ${siteMeta.resumeUpdated}`,
+            offlineEval: `${siteMeta.evalPassed}/${siteMeta.evalTotal} cases · ${siteMeta.evalLastRun}`,
+            redTeam: `${siteMeta.evalRedTeamPassed}/${siteMeta.evalRedTeamTotal} held`,
             // Placeholder links render as "#" with the design's " [link]" after the label.
             evalSet: { href: hrefOf(siteMeta.evalSetLink), todo: isTodo(siteMeta.evalSetLink) ? " [link]" : "" },
           }}

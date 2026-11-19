@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BreakPanel, resetButton, type BreakEntry } from "@/components/fit-check/break-panel";
+import { RunXray, type BuildMeta } from "@/components/fit-check/run-xray";
 import { Fallback } from "@/components/fit-check/fallback";
 import { FitInput } from "@/components/fit-check/fit-input";
 import { HowBuilt, type HowIBuiltMeta } from "@/components/fit-check/how-built";
-import { Result, type ResultMeta } from "@/components/fit-check/result";
+import { Result } from "@/components/fit-check/result";
 import { useSite } from "@/components/xray-provider";
 import { ASK_BUDGET, ASK_ERROR, ASK_LIMITED } from "@/lib/ask/copy";
 import { sessionMemory } from "@/lib/ask/session-memory";
@@ -24,25 +25,25 @@ import {
 import { rolePrefill } from "@/lib/fit-check/role-prefill";
 import { FIT_TOOLS, FitEventSchema, type Drill, type FallbackEvent, type ResultEvent, type StepEvent } from "@/lib/fit-check/types";
 
-export type { HowIBuiltMeta };
+export type { BuildMeta, HowIBuiltMeta };
 
-type Phase = "empty" | "running" | "result" | "badfit" | "break" | "error" | "limited" | "budget";
+/** "break" is no longer a state (design update 3): Break my AI is an X-ray panel below the fit check. */
+type Phase = "empty" | "running" | "result" | "badfit" | "error" | "limited" | "budget";
 
 const statusLabel = "m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-muted";
 
 /**
- * The fit-check hero (Hero.dc.html, all 7 states in HeroStates.dc.html). Every state change
+ * The fit-check hero (Hero.dc.html, the states in HeroStates.dc.html). Every state change
  * comes from the run's event stream (SPEC §7): `step` rows while running, then `result` or
  * `fallback`. Nothing here is timed or scripted.
  */
-export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: ResultMeta }) {
+export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: BuildMeta }) {
   const { xray, setXray, openAsk } = useSite();
 
   const [phase, setPhase] = useState<Phase>("empty");
   const [jd, setJd] = useState("");
   const [role, setRole] = useState("");
   const [drill, setDrill] = useState<Drill | null>(null);
-  const [runId, setRunId] = useState<string | null>(null);
   const [steps, setSteps] = useState<StepEvent[]>([]);
   const [result, setResult] = useState<ResultEvent | null>(null);
   const [fallback, setFallback] = useState<FallbackEvent | null>(null);
@@ -72,7 +73,6 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
     setJd(text);
     setRole(runRole);
     setDrill(runDrill);
-    setRunId(null);
     setSteps([]);
     setResult(null);
     setFallback(null);
@@ -89,8 +89,8 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
         const parsed = FitEventSchema.safeParse(raw);
         if (!parsed.success) return fail();
         const ev = parsed.data;
-        if (ev.type === "start") setRunId(ev.runId);
-        else if (ev.type === "step") {
+        if (ev.type === "start") continue;
+        if (ev.type === "step") {
           setSteps((prev) => {
             const i = prev.findIndex((s) => s.tool === ev.tool);
             return i === -1 ? [...prev, ev] : prev.map((s, j) => (j === i ? ev : s));
@@ -127,9 +127,8 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
     setSteps([]);
   };
 
+  // Attempts run beside the fit check and never interrupt it (design update 3).
   const attack = async (text: string) => {
-    abortRef.current?.abort();
-    setPhase("break");
     setPending((n) => n + 1);
     setBreakError(null);
     const r = await breakAttempt(text);
@@ -156,12 +155,12 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
   const isResult = (phase === "result" || phase === "badfit") && result !== null;
   const showFallback = (phase === "error" || phase === "limited" || phase === "budget") && fallback !== null;
   const linkRun = isLink(jd);
+  const showSteps = (phase === "running" && !drill) || isResult;
   // "Checking… step n of 7": the step running now, counted from the real step events.
   const stepNum = Math.min(steps.filter((st) => st.status !== "running").length + 1, FIT_TOOLS.length);
 
   let nudge = "";
   if (isResult) nudge = NUDGE.result;
-  else if (phase === "break" && log.length) nudge = NUDGE.break;
   else if (showFallback && drill) nudge = NUDGE.drill;
 
   return (
@@ -189,8 +188,8 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
               <h2 id="fit-h" className="m-0 font-sans text-[clamp(24px,3vw,30px)] font-semibold leading-[1.2] tracking-[-0.01em]">
                 Will I fit your role?
               </h2>
+              <span className="font-mono text-[12px] text-muted">answers from my real record · gaps shown, not hidden</span>
             </div>
-            <span className="font-mono text-[12px] text-muted">answers from my real record · gaps shown, not hidden</span>
           </div>
 
           {phase === "empty" && (
@@ -201,26 +200,11 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
                 if (jd.trim()) run(jd, heroSummary(jd));
               }}
               onSample={(s) => run(s.jd, s.role)}
-              onAttack={attack}
-              onDrill={(d) => run(HERO_SAMPLES[0].jd, HERO_SAMPLES[0].role, d)}
               inputRef={setFocusTarget}
             />
           )}
 
-          {phase === "break" && (
-            <BreakPanel
-              log={log}
-              pending={pending > 0}
-              error={breakError}
-              xray={xray}
-              evalSet={resultMeta.evalSet}
-              onAttack={attack}
-              onReset={reset}
-              headingRef={setFocusTarget}
-            />
-          )}
-
-          {phase !== "empty" && phase !== "break" && (
+          {phase !== "empty" && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-rule bg-paper px-[18px] py-[14px]">
               <p className="m-0 min-w-0 flex-[1_1_320px] text-[15px] leading-[1.45]">
                 <span className="font-mono text-[12px] uppercase tracking-[0.06em] text-muted">
@@ -249,48 +233,41 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
             </div>
           )}
 
-          {phase === "running" && !drill && (
+          {showSteps && (
             <div
-              ref={setFocusTarget}
+              ref={phase === "running" ? setFocusTarget : undefined}
               tabIndex={-1}
               role="status"
               aria-live="polite"
               className="flex flex-col gap-3 rounded-[14px] border border-rule bg-paper px-[22px] py-5 outline-none"
             >
-              <div className="flex flex-wrap justify-between gap-3">
-                <p className={statusLabel}>Agent · streaming from the live run</p>
-                {xray && <p className="m-0 font-mono text-[12px] text-muted">trace {runId ?? "[run id]"} · logged</p>}
-              </div>
+              <p className={statusLabel}>
+                {phase === "running" ? "Agent · streaming from the live run" : `Agent · done · ${steps.length} steps from the live run`}
+              </p>
               {steps.map((st) => {
                 const done = st.status !== "running";
                 const skipped = st.status === "skipped";
-                const copy = st.tool === "fetch_url" && !linkRun ? SKIPPED_FETCH : STEP_COPY[st.tool];
-                const status = !done
-                  ? "running…"
-                  : xray && !skipped
-                    ? `${st.detail ?? ""} · ${st.ms !== undefined ? `${st.ms} ms` : "[ms]"}`
-                    : (st.detail ?? "");
+                const label = st.tool === "fetch_url" && !linkRun ? SKIPPED_FETCH : STEP_COPY[st.tool];
                 const statusColor = done && !skipped ? "text-accent" : "text-muted";
                 return (
                   <div key={st.tool} className="flex flex-wrap justify-between gap-4 font-mono text-[14px] leading-[1.5]">
                     <span className={skipped ? "text-muted" : "text-ink"}>
                       <span className={statusColor}>{skipped ? "–" : done ? "✓" : "›"} </span>
-                      {xray ? copy.xr : `${st.tool} · ${copy.label}`}
+                      {st.tool} · {label}
                     </span>
-                    <span className={statusColor}>{status}</span>
+                    <span className={statusColor}>{done ? (st.detail ?? "") : "running…"}</span>
                   </div>
                 );
               })}
             </div>
           )}
 
+          {xray && isResult && <RunXray result={result} meta={buildMeta} />}
+
           {isResult && (
             <Result
               result={result}
               bad={phase === "badfit"}
-              linkBranch={linkRun}
-              xray={xray}
-              meta={resultMeta}
               onAskGap={(i) => openAsk(i)}
               onAsk={() => openAsk()}
               onTalk={talk}
@@ -308,6 +285,17 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
             />
           )}
 
+          {xray && (
+            <BreakPanel
+              log={log}
+              pending={pending > 0}
+              error={breakError}
+              evalSet={buildMeta.evalSet}
+              onAttack={attack}
+              onDrill={(d) => run(HERO_SAMPLES[0].jd, HERO_SAMPLES[0].role, d)}
+            />
+          )}
+
           {!xray && nudge && (
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-[10px] border border-dashed border-accent bg-accent-tint px-[14px] py-[10px]">
               <span className="text-[15px]">{nudge}</span>
@@ -321,7 +309,7 @@ export function Hero({ meta, resultMeta }: { meta: HowIBuiltMeta; resultMeta: Re
             </div>
           )}
 
-          <HowBuilt meta={meta} xray={xray} />
+          <HowBuilt meta={meta} />
         </section>
       </div>
     </section>

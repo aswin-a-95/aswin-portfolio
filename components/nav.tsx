@@ -69,10 +69,12 @@ export function Nav({ current }: { current: NavCurrent }) {
             type="button"
             onClick={toggleXray}
             aria-pressed={xray}
-            className="inline-flex min-h-11 cursor-pointer items-center gap-[10px] rounded-full border border-rule bg-paper px-3 py-[6px] font-mono text-[13px] text-ink"
+            className={`inline-flex min-h-11 cursor-pointer items-center gap-[10px] rounded-full border px-3 py-[6px] font-mono text-[13px] ${
+              xray ? "border-xr-bg bg-xr-bg text-xr-ink" : "border-rule bg-paper text-ink"
+            }`}
           >
             <span
-              className={`relative inline-block h-[18px] w-[30px] rounded-full ${xray ? "bg-accent" : "bg-rule"}`}
+              className={`relative inline-block h-[18px] w-[30px] rounded-full ${xray ? "bg-xr-accent" : "bg-rule"}`}
             >
               <span
                 className={`absolute top-[2px] h-[14px] w-[14px] rounded-full ${

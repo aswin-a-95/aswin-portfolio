@@ -13,6 +13,11 @@ export type RunRow = {
   steps: { tool: string; status: string; ms: number }[];
   guard_fired: string | null;
   retries: number;
+  /** Fit check only (null otherwise): the "This run" fields in X-ray (SPEC §10). */
+  requirement_count: number | null;
+  sources_retrieved: number | null;
+  sources_cited: number | null;
+  fallback: "error" | "limited" | "budget" | null;
   model: string;
   input_tokens: number;
   output_tokens: number;

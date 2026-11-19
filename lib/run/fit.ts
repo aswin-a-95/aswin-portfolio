@@ -60,13 +60,16 @@ export async function* runFit(req: FitRun, ctx: RunContext, rec: RunRecord, deps
   const { env, signal, now } = ctx;
   rec.drill = req.drill ?? null;
 
-  const fallback = (reason: FallbackEvent["reason"], trace?: TraceLine[]): FallbackEvent => ({
+  const fallback = (reason: FallbackEvent["reason"], trace?: TraceLine[]): FallbackEvent => {
+    rec.fallback = reason;
+    return {
     type: "fallback",
     reason,
     ...(rec.drill ? { drill: rec.drill } : {}),
     ...(rec.steps.length || rec.drill ? { runId: rec.runId } : {}),
     ...(trace ? { trace } : {}),
-  });
+    };
+  };
 
   const timed = <T>(fn: () => Promise<T>) => {
     const t0 = now();
@@ -162,6 +165,7 @@ export async function* runFit(req: FitRun, ctx: RunContext, rec: RunRecord, deps
       return r.output;
     });
     const { role, requirements } = parsed.value;
+    rec.requirements = requirements.length;
     yield step("jd.parse", "done", `${requirements.length} requirements`, parsed.ms);
 
     // 3. kb.search (deterministic). The kb drill takes the knowledge base offline.
@@ -171,6 +175,7 @@ export async function* runFit(req: FitRun, ctx: RunContext, rec: RunRecord, deps
     try {
       const found = await retryOnce(search);
       sources = found.value;
+      rec.sourcesRetrieved = sources.length;
       yield step("kb.search", "done", sources.length ? "sources found" : "no sources found", found.ms);
     } catch (e) {
       // guard.no_sources: stop rather than answer without sources (SPEC §7).
@@ -239,6 +244,7 @@ export async function* runFit(req: FitRun, ctx: RunContext, rec: RunRecord, deps
     // 7. verdict.compose
     yield step("verdict.compose", "running");
     const { matches, gaps } = g2.value;
+    rec.sourcesCited = new Set(matches.map((m) => m.href + "\u0000" + m.source)).size;
     const v = await timed(async () => composeVerdict(matches.length, gaps.length));
     yield step("verdict.compose", "done", "done", v.ms);
 
@@ -250,12 +256,26 @@ export async function* runFit(req: FitRun, ctx: RunContext, rec: RunRecord, deps
       matches,
       gaps,
       retries: rec.retries,
-      trace: { runId: rec.runId, costUsd: displayCost(runCost(rec)), ms: Math.round(now() - rec.startedAt), model: model.label },
+      trace: {
+        runId: rec.runId,
+        costUsd: displayCost(runCost(rec)),
+        ms: Math.round(now() - rec.startedAt),
+        model: model.label,
+        startedAt: rec.startedAtIso,
+        branch: link ? "link" : "text",
+        requirements: requirements.length,
+        sourcesRetrieved: sources.length,
+        sourcesCited: rec.sourcesCited,
+        tokensIn: rec.tokens.input + rec.tokens.cacheWrite + rec.tokens.cacheRead,
+        tokensOut: rec.tokens.output,
+        guards: { citations: true, honesty: true },
+      },
     };
   } catch (e) {
     if (signal.aborted) return;
     console.error("fit check failed:", e instanceof Error ? e.message : e);
     // The plain error state: only kb.search failing is the drill's "knowledge base offline" story.
+    rec.fallback = "error";
     yield { type: "fallback", reason: "error", runId: rec.runId };
   }
 }

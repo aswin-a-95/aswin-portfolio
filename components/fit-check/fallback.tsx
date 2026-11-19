@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Ref } from "react";
+import { XrayPanel } from "@/components/xray-panel";
 import { fallback as precomputed } from "@/content/kb/fallback";
 import { FALLBACK_COPY } from "@/lib/fit-check/copy";
 import type { FallbackEvent } from "@/lib/fit-check/types";
@@ -50,15 +51,15 @@ export function Fallback({
         </div>
       </div>
       {xray && event.drill && (
-        <div className="flex flex-col gap-[6px] rounded-[10px] border border-dashed border-rule px-4 py-[14px] font-mono text-[13px]">
-          <p className="m-0 text-[12px] text-muted">X-RAY · FALLBACK TRACE · drill run {event.runId ?? "[run id]"}</p>
+        <XrayPanel className="flex flex-col gap-[6px] rounded-[10px] px-4 py-[14px] font-mono text-[13px]">
+          <p className="m-0 text-[12px] text-xr-muted">FALLBACK TRACE · drill run {event.runId ?? "[run id]"}</p>
           {(event.trace ?? []).map((l, i) => (
-            <p key={i} className={`m-0 ${l.bad ? "text-amber-text" : "text-ink"}`}>
+            <p key={i} className={`m-0 ${l.bad ? "text-xr-amber-text" : "text-xr-ink"}`}>
               {l.mark} {l.text}
               {l.timed && ` · ${l.ms !== undefined ? `${l.ms} ms` : "[ms]"}`}
             </p>
           ))}
-        </div>
+        </XrayPanel>
       )}
       <p className="m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-accent">Precomputed matches · same knowledge base</p>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-[14px]">

@@ -21,5 +21,9 @@ export const siteMeta = {
   evalPassRate: todo("[measured]"),
   evalFailedFirst: todo("[what broke]"),
   evalLastRun: todo("[date]"),
-  evalRedTeamHeld: todo("[measured]"),
+  // X-ray "Build details" (design update 3): "[passed]/[total] cases" and "[held]/[total] held".
+  evalPassed: todo("[passed]"),
+  evalTotal: todo("[total]"),
+  evalRedTeamPassed: todo("[held]"),
+  evalRedTeamTotal: todo("[total]"),
 } as const;

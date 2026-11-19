@@ -61,18 +61,18 @@ export const HERO_DRILLS: { id: Drill; chip: string }[] = [
   { id: "rate", chip: "hit the rate limit" },
 ];
 
-/** heroSteps(): the normal label and the X-ray call text for each tool. */
-export const STEP_COPY: Record<FitTool, { label: string; xr: string }> = {
-  fetch_url: { label: "Fetching the job post", xr: "fetch_url(url) → page text" },
-  "jd.parse": { label: "Reading the job description", xr: "jd.parse(text) → requirements[]" },
-  "kb.search": { label: "Searching roles, projects and the not-done list", xr: 'kb.search(scope=["roles","projects","not_done"])' },
-  "evidence.map": { label: "Matching each requirement to evidence", xr: "evidence.map(requirements, sources)" },
-  "guard.citations": { label: "Every claim cites a source", xr: "guard.citations(cards)" },
-  "guard.honesty": { label: "Gaps stated, score not inflated", xr: "guard.honesty(verdict, gaps)" },
-  "verdict.compose": { label: "Writing the verdict", xr: "verdict.compose(cards)" },
+/** heroSteps(): the label for each tool. Step lines always read `{tool} · {label}` (design update 3). */
+export const STEP_COPY: Record<FitTool, string> = {
+  fetch_url: "Fetching the job post",
+  "jd.parse": "Reading the job description",
+  "kb.search": "Searching roles, projects and the not-done list",
+  "evidence.map": "Matching each requirement to evidence",
+  "guard.citations": "Every claim cites a source",
+  "guard.honesty": "Gaps stated, score not inflated",
+  "verdict.compose": "Writing the verdict",
 };
 /** The only branch: pasted text skips fetch_url. */
-export const SKIPPED_FETCH = { label: "skipped: text was pasted", xr: "branch: input is text → skip fetch_url" };
+export const SKIPPED_FETCH = "skipped: text was pasted";
 
 /** The pipeline's one branch rule (heroIsLink). */
 export function isLink(jd: string): boolean {
@@ -112,7 +112,6 @@ export const FALLBACK_COPY: { error: FallbackCopy; limited: FallbackCopy; budget
 
 export const NUDGE = {
   result: "See the trace, sources and cost behind this result.",
-  break: "See which guardrail fired on each attempt.",
   drill: "See the fallback path this drill just ran.",
 };
 

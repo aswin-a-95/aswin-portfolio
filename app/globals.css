@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Design tokens, SPEC.md §3. Light is the default; X-ray is the dark theme. */
+/* Design tokens, SPEC.md §3. Light is the only page theme. */
 :root {
   --bg: #f6f3ec;
   --panel: #efeae0;
@@ -26,20 +26,25 @@
   --video-caption: #c9c3b8;
 }
 
-:root[data-theme="xray"] {
-  --bg: #101214;
-  --panel: #14171a;
-  --paper: #171a1d;
-  --ink: #e9e6df;
-  --muted: #a3a9b0;
-  --rule: #2b3036;
-  --accent: #8dbbf2;
-  --accent-tint: #17283d;
-  --amber-text: #edb65e;
-  --amber-border: #b8862f;
-  --amber-bg: #241c10;
-  --btn-bg: #e9e6df;
-  --btn-ink: #101214;
+:root {
+  /* X-ray panel tokens (SPEC §3): only inside X-ray panels and on the active X-ray toggle. */
+  --xr-bg: #101214;
+  --xr-panel: #14171a;
+  --xr-paper: #171a1d;
+  --xr-ink: #e9e6df;
+  --xr-muted: #a3a9b0;
+  --xr-rule: #2b3036;
+  --xr-accent: #8dbbf2;
+  --xr-accent-tint: #17283d;
+  --xr-amber-text: #edb65e;
+  --xr-amber-border: #b8862f;
+  --xr-amber-bg: #241c10;
+  --xr-btn-bg: #e9e6df;
+  --xr-btn-ink: #101214;
+}
+
+/* X-ray never re-themes the page; only the Ask scrim darkens (Ask.dc.html). */
+:root[data-xray] {
   --scrim: rgba(0, 0, 0, 0.6);
 }
 
@@ -58,6 +63,19 @@
   --color-btn-bg: var(--btn-bg);
   --color-btn-ink: var(--btn-ink);
   --color-scrim: var(--scrim);
+  --color-xr-bg: var(--xr-bg);
+  --color-xr-panel: var(--xr-panel);
+  --color-xr-paper: var(--xr-paper);
+  --color-xr-ink: var(--xr-ink);
+  --color-xr-muted: var(--xr-muted);
+  --color-xr-rule: var(--xr-rule);
+  --color-xr-accent: var(--xr-accent);
+  --color-xr-accent-tint: var(--xr-accent-tint);
+  --color-xr-amber-text: var(--xr-amber-text);
+  --color-xr-amber-border: var(--xr-amber-border);
+  --color-xr-amber-bg: var(--xr-amber-bg);
+  --color-xr-btn-bg: var(--xr-btn-bg);
+  --color-xr-btn-ink: var(--xr-btn-ink);
   --color-video-bg: var(--video-bg);
   --color-video-btn: var(--video-btn);
   --color-video-btn-border: var(--video-btn-border);
@@ -116,11 +134,11 @@
   }
 }
 
-/* Blocks that only show with X-ray on. Server-renderable: no client JS needed. */
+/* Blocks that only show with X-ray on. Server-renderable: no client JS needed, no flash on reload. */
 .xray-only {
   display: none;
 }
-:root[data-theme="xray"] .xray-only {
+:root[data-xray] .xray-only {
   display: revert;
 }
 

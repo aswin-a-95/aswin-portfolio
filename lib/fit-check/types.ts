@@ -58,6 +58,19 @@ export const RunTraceSchema = z.object({
   ms: z.number().nonnegative(),
   /** "provider · model", e.g. "Anthropic · claude-sonnet-5-5". */
   model: z.string(),
+  /** The rest feeds X-ray's "This run" (design update 3); every value is the logged row's (SPEC §10). */
+  /** When the run started, ISO 8601. */
+  startedAt: z.string(),
+  branch: z.enum(["link", "text"]),
+  /** Requirements jd.parse found. */
+  requirements: z.number().int().nonnegative(),
+  sourcesRetrieved: z.number().int().nonnegative(),
+  sourcesCited: z.number().int().nonnegative(),
+  /** All input tokens, cached included. */
+  tokensIn: z.number().int().nonnegative(),
+  tokensOut: z.number().int().nonnegative(),
+  /** Each guard ran and the cards it returned pass it. */
+  guards: z.object({ citations: z.boolean(), honesty: z.boolean() }),
 });
 export type RunTrace = z.infer<typeof RunTraceSchema>;
 
