@@ -58,12 +58,14 @@ export function PostList({ posts }: { posts: Post[] }) {
             <p className="m-0 rounded-lg border border-dotted border-muted px-3 py-[10px] font-mono text-[13px] leading-[1.55] text-muted">
               {p.summary}
             </p>
-            <Link
-              href={`/work/${p.study.slug}`}
-              className="self-start rounded-md bg-accent-tint px-[10px] py-[6px] font-mono text-[12px] text-accent no-underline"
-            >
-              {p.study.label} →
-            </Link>
+            {p.study && (
+              <Link
+                href={`/work/${p.study.slug}`}
+                className="self-start rounded-md bg-accent-tint px-[10px] py-[6px] font-mono text-[12px] text-accent no-underline"
+              >
+                {p.study.label} →
+              </Link>
+            )}
           </article>
         ))}
         {shown.length === 0 && (

@@ -17,9 +17,9 @@ export const HERO_FIT: ResultBody = {
   note: "Each match links to the role or project behind it. Gaps are listed, not hidden.",
   matches: [
     { req: "Own a public API and partner integrations", evidence: "Platform PM for APIs and integrations, including healthcare integrations.", source: "Role · About", href: "/about" },
-    { req: "Ship AI agent features with clear guardrails", evidence: "Designed an AI integration builder with safeguards as the centrepiece (CloudEagle.ai take-home concept).", source: "Case study · CloudEagle concept", href: "/work/cloudeagle" },
+    { req: "Ship AI agent features with clear guardrails", evidence: "Designed an AI integration builder with safeguards as the centrepiece (CloudEagle.ai take-home concept).", source: "Case study · CloudEagle concept", href: "/work/integration-builder" },
     { req: "Design human-in-the-loop workflows", evidence: "Built a job-search agent that never applies to a role without explicit approval.", source: "Case study · Job-search agent", href: "/work/job-search-agent" },
-    { req: "Work with business stakeholders on adoption", evidence: "Ran Dhee's, a fresh dog-food brand, and is building an Instagram competitor agent for it.", source: "Case study · Dhee's agent", href: "/work/dhees-instagram-agent" },
+    { req: "Work with business stakeholders on adoption", evidence: "Ran Dhee's, a fresh dog-food brand, and built an Instagram competitor agent for it.", source: "Case study · Dhee's agent", href: "/work/instagram-agent" },
   ],
   gaps: [
     {

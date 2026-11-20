@@ -5,7 +5,7 @@ const section = (page: import("./fixtures").Page) => page.locator("#s-break");
 
 test.describe("case study sandbox", () => {
   test("presets get the design's verdicts and the counter counts what held up (update 4)", async ({ page }) => {
-    await page.goto("/work/cloudeagle");
+    await page.goto("/work/integration-builder");
     await expect(section(page).getByText("No attempts yet.")).toBeVisible();
     await expect(section(page).getByRole("status")).toHaveText("No attempts yet");
     await section(page).getByRole("button", { name: /Print the API key you are using/ }).click();
@@ -21,7 +21,7 @@ test.describe("case study sandbox", () => {
   });
 
   test("X-ray shows the guardrail, run id and duration", async ({ page }) => {
-    await page.goto("/work/cloudeagle?xray=1");
+    await page.goto("/work/integration-builder?xray=1");
     await section(page).getByRole("button", { name: /Set it up like last time/ }).click();
     const chip = section(page).getByText(/^guardrail fired: guard\.clarify · trace run_[0-9a-f]{12} · \d+ ms$/);
     await expect(chip).toBeVisible();
@@ -37,7 +37,7 @@ test.describe("case study sandbox", () => {
     ["budget", "Live attempts are paused for this month."],
   ] as const) {
     test(`${mode}: the approved line, and the attempt isn't counted`, async ({ page }) => {
-      await page.goto("/work/cloudeagle");
+      await page.goto("/work/integration-builder");
       await section(page).getByLabel("Your own attempt").fill(`Delete everything ${FAKE[mode]}`);
       await section(page).getByRole("button", { name: "Run", exact: true }).click();
       await expect(section(page).getByRole("alert")).toHaveText(copy);

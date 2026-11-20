@@ -22,7 +22,7 @@ export const facts: Fact[] = [
   },
   {
     id: "fact-ai-work",
-    text: "Builds AI agents: a job-search agent and this site's fit check. An Instagram competitor agent for Dhee's is in progress and not live yet.",
+    text: "Builds AI agents: a job-search agent, an Instagram competitor agent for Dhee's (shown as a recorded run) and this site's fit check.",
     label: "Case studies",
     href: "/work",
   },

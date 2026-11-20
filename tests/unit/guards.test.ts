@@ -60,7 +60,7 @@ describe("guard.honesty", () => {
   });
   it("maps a match to the KB label and href", () => {
     const out = guardHonesty([{ type: "match", req: "Agents", evidence: "Designed it.", sourceId: "cloudeagle" }], notDone);
-    expect(out.matches[0]).toEqual({ req: "Agents", evidence: "Designed it.", source: "Case study · CloudEagle concept", href: "/work/cloudeagle" });
+    expect(out.matches[0]).toEqual({ req: "Agents", evidence: "Designed it.", source: "Case study · CloudEagle concept", href: "/work/integration-builder" });
   });
 });
 

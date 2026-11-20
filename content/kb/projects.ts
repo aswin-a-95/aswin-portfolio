@@ -21,7 +21,7 @@ export const projects: Project[] = [
     summary: "Safeguards as the centrepiece. A small sandbox lets you try to break it.",
     evidence: [todo("[evidence]")], // TODO(aswin)
     label: "Case study · CloudEagle concept",
-    href: "/work/cloudeagle",
+    href: "/work/integration-builder",
     tags: ["ai agent", "guardrails", "safeguards", "integrations", "evals"],
   },
   {
@@ -42,22 +42,13 @@ export const projects: Project[] = [
   },
   {
     id: "dhees-instagram-agent",
-    title: "Dhee's Instagram competitor agent",
-    status: "IN PROGRESS · NOT LIVE YET",
-    summary: "What competitors post, what performs, and what Dhee’s should make next.",
+    title: "Instagram content intelligence agent",
+    status: "IN USE · RECORDED RUN",
+    summary: "Reads what competing pet-food brands post, finds what performs and what’s trending, and suggests what Dhee’s should post next.",
     evidence: [todo("[evidence]")], // TODO(aswin)
     label: "Case study · Dhee's agent",
-    href: "/work/dhees-instagram-agent",
+    href: "/work/instagram-agent",
     tags: ["ai agent", "business stakeholders", "adoption"],
-  },
-  {
-    id: "platform-api-work",
-    title: "Platform & API work",
-    status: todo("PRE-AI · [STATUS]"), // TODO(aswin)
-    summary: todo("Why integrations experience is agent experience. [Project to be chosen]"), // TODO(aswin)
-    evidence: [todo("[evidence]")], // TODO(aswin)
-    label: "Case study · Platform & API work",
-    href: "/work/platform-api-work",
   },
 
   // Resume-backed entries (from the master resume and the public CV, Nov 2026). They give the fit check

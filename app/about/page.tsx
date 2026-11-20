@@ -28,9 +28,9 @@ export default function About() {
                 part of software is the seams between systems.
               </p>
               <p className="m-0">
-                {/* Design copy changed (Aswin, Nov 2026): Dhee's has ended and the Instagram agent is not live yet. */}
-                Now I build AI agents: a job-search agent, this site, and an Instagram competitor agent for Dhee&apos;s, the fresh
-                dog-food brand I ran, which is still in progress. Agents live at those same seams.
+                {/* Design copy, past tense because Dhee's has ended (Aswin, Nov 2026); the agent is in use (Aswin, 2026-11-20). */}
+                Now I build AI agents: a job-search agent, an Instagram competitor agent for Dhee&apos;s, the fresh dog-food brand I
+                ran, and this site. Agents live at those same seams.
               </p>
               <p className="m-0 text-muted">
                 I don&apos;t claim years of professional LLM experience. I claim built and shipped, and every project here can be

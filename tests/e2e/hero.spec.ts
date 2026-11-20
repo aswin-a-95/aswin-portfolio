@@ -180,7 +180,7 @@ test.describe("fit check", () => {
     await expect(gaps.getByRole("rowheader")).toHaveCount(2);
     await expect(fits.getByRole("columnheader").first()).toHaveCSS("padding-left", "20px");
     await expect(fits.getByRole("cell").first()).toHaveCSS("padding-top", "18px");
-    await expect(hero(page).getByRole("link", { name: "Case study · CloudEagle concept →" })).toHaveAttribute("href", "/work/cloudeagle");
+    await expect(hero(page).getByRole("link", { name: "Case study · CloudEagle concept →" })).toHaveAttribute("href", "/work/integration-builder");
     await expect(gaps.getByRole("button", { name: "Ask about this gap →" }).first()).toHaveCSS("min-height", "36px");
     await expect(hero(page).getByText("CLOSEST", { exact: true })).toHaveCount(0);
 

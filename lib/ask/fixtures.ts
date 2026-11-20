@@ -19,7 +19,7 @@ export const ASK_ANSWERS: Record<AskQuestionId | "unknown", AskFixture> = {
     kind: "fit",
     text: "Yes. His platform PM work is APIs and integrations, including healthcare integrations. Agents run on the same plumbing: a tool call is an API call with judgment attached.",
     todo: "",
-    sources: [ABOUT, { label: "Case study · Platform & API work", href: "/work/platform-api-work" }],
+    sources: [ABOUT], // The Platform & API work case study was removed (Aswin, 2026-11-20).
   },
   win: {
     kind: "fit",
@@ -29,7 +29,7 @@ export const ASK_ANSWERS: Record<AskQuestionId | "unknown", AskFixture> = {
   },
   llm: {
     kind: "gap",
-    text: "Not in a professional role yet. He has built and shipped AI agents on his own projects: a job-search agent with an approval step and the fit check on this site. An Instagram competitor agent for Dhee's is in progress.",
+    text: "Not in a professional role yet. He has built and shipped AI agents on his own projects: a job-search agent with an approval step, an Instagram competitor agent for Dhee's, and the fit check on this site.",
     todo: "",
     sources: [STUDIES, LOG],
   },
@@ -65,19 +65,19 @@ export const ASK_ANSWERS: Record<AskQuestionId | "unknown", AskFixture> = {
     kind: "fit",
     text: "An AI that writes integrations can touch production systems. The study treats what the model may do on its own, and what needs a person, as the core product decision.",
     todo: "",
-    sources: [{ label: "Case study · Safeguards", href: "/work/cloudeagle" }],
+    sources: [{ label: "Case study · Safeguards", href: "/work/integration-builder" }],
   },
   failed: {
     kind: "fit",
     text: "From the eval log:",
     todo: "[What the first eval run got wrong, and the fix]",
-    sources: [{ label: "Case study · v2 & lessons", href: "/work/cloudeagle" }],
+    sources: [{ label: "Case study · v2 & lessons", href: "/work/integration-builder" }],
   },
   isce: {
     kind: "fit",
     text: "No. It's a take-home concept from his interview with CloudEagle.ai, shared with their permission. It isn't their product and shows no internal details.",
     todo: "",
-    sources: [{ label: "Case study · CloudEagle concept", href: "/work/cloudeagle" }],
+    sources: [{ label: "Case study · CloudEagle concept", href: "/work/integration-builder" }],
   },
   health: {
     kind: "fit",

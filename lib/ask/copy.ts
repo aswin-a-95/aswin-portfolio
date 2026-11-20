@@ -46,7 +46,7 @@ export const ASK_LABELS: Partial<Record<AskKind, [string, AskTone]>> = {
 };
 
 export const ASK_JUMP_TO = [
-  { label: "CloudEagle case study", href: "/work/cloudeagle" },
+  { label: "CloudEagle case study", href: "/work/integration-builder" },
   { label: "Build log", href: "/log" },
   { label: "About · resume", href: "/about" },
 ];

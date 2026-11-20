@@ -6,7 +6,7 @@ import { ASK_ATTACKS, ASK_QUESTIONS } from "@/lib/ask/copy";
 import { HERO_SAMPLES } from "@/lib/fit-check/copy";
 
 // Not assertions: full-page captures for the side-by-side check against /design/screenshots.
-const PAGES = ["/", "/work", "/work/cloudeagle", "/work/job-search-agent", "/work/fit-check", "/log", "/log/integrations-experience-is-agent-experience", "/about"];
+const PAGES = ["/", "/work", "/work/integration-builder", "/work/job-search-agent", "/work/fit-check", "/log", "/log/integrations-experience-is-agent-experience", "/about"];
 const SIZES = [
   ["1440", 1440, 900],
   ["390", 390, 844],

@@ -16,7 +16,7 @@ describe("askPageFor", () => {
   it.each([
     ["/", "home"],
     ["/work", "work"],
-    ["/work/cloudeagle", "work"],
+    ["/work/integration-builder", "work"],
     ["/log", "log"],
     ["/log/some-post", "log"],
     ["/about", "about"],

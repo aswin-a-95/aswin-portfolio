@@ -7,7 +7,7 @@ for (const width of [1440, 390]) {
   test.describe(`sticky nav at ${width}px`, () => {
     test.use({ viewport: { width, height: 800 } });
 
-    for (const path of ["/", "/work", "/work/cloudeagle", "/log", "/about"]) {
+    for (const path of ["/", "/work", "/work/integration-builder", "/log", "/about"]) {
       test(`stays at the top while ${path} scrolls`, async ({ page }) => {
         await page.goto(path);
         const scrolls = await page.evaluate(() => document.documentElement.scrollHeight > window.innerHeight);
@@ -33,7 +33,7 @@ test.describe("case-study rail", () => {
   test.use({ viewport: { width: 1440, height: 800 } });
 
   test("rail links land below the nav; the rail sticks 24px under it", async ({ page }) => {
-    await page.goto("/work/cloudeagle");
+    await page.goto("/work/integration-builder");
     const rail = page.getByRole("navigation", { name: "Case study sections" });
     const last = rail.getByRole("link").last();
     const id = (await last.getAttribute("href"))!.slice(1);

@@ -2,9 +2,8 @@ import type { ComponentType } from "react";
 import { published } from "@/lib/content";
 import { CaseStudySchema, type CaseStudy } from "@/lib/schemas/content";
 
-// Page order for the "Next" card. `fit-check` is new in design update 4; `platform-api-work` is no
-// longer a home product and stays until Aswin decides (SPEC §4).
-export const CASE_STUDY_SLUGS = ["cloudeagle", "job-search-agent", "fit-check", "dhees-instagram-agent", "platform-api-work"] as const;
+// The 4 products' case studies, in their home order 01–04 (design update 4). The "Next" card follows it.
+export const CASE_STUDY_SLUGS = ["job-search-agent", "fit-check", "integration-builder", "instagram-agent"] as const;
 
 type MdxModule = { default: ComponentType; meta: unknown };
 

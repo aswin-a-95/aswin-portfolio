@@ -42,6 +42,10 @@ describe("design update 4 content", async () => {
     expect(hood.find((h) => h.name === "evals")?.proof).toBe("[25] test JDs and red-team cases, run before every change.");
   });
 
+  it("case studies are exactly the 4 products, in their order", () => {
+    expect([...CASE_STUDY_SLUGS]).toEqual(products.map((p) => p.slug));
+  });
+
   it("products: 4 products, each with its own case study and five steps", () => {
     expect(products.map((p) => p.num)).toEqual(["01", "02", "03", "04"]);
     for (const p of products) {

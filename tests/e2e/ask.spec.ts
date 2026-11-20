@@ -81,7 +81,7 @@ test.describe("open, close and focus", () => {
 test.describe("before a question", () => {
   const SUGGESTIONS: [string, string[]][] = [
     ["/", ["Has he worked on APIs?", "What's his biggest platform win?", "Has he shipped LLM features at a company?", "Has he led a hardware launch?"]],
-    ["/work/cloudeagle", ["Why are safeguards the centrepiece?", "What failed first?", "Is this CloudEagle's product?", "Has he shipped LLM features at a company?"]],
+    ["/work/integration-builder", ["Why are safeguards the centrepiece?", "What failed first?", "Is this CloudEagle's product?", "Has he shipped LLM features at a company?"]],
     ["/work", ["Why are safeguards the centrepiece?", "What failed first?", "Is this CloudEagle's product?", "Has he shipped LLM features at a company?"]],
     ["/log/integrations-experience-is-agent-experience", ["What's he building now?", "Has he worked on APIs?", "Has he shipped LLM features at a company?"]],
     ["/about", ["Has he worked on APIs?", "What's his healthcare experience?", "What's his biggest platform win?", "Has he led a hardware launch?"]],
@@ -112,7 +112,7 @@ test.describe("before a question", () => {
     await expect(panel.getByText("X-RAY", { exact: true })).toBeVisible();
     // The dialog itself stays light; only the scrim darkens.
     await expect(dialog(page)).toHaveCSS("background-color", "rgb(255, 253, 248)");
-    await expect(dialog(page).getByRole("link", { name: "CloudEagle case study" })).toHaveAttribute("href", "/work/cloudeagle");
+    await expect(dialog(page).getByRole("link", { name: "CloudEagle case study" })).toHaveAttribute("href", "/work/integration-builder");
     await expect(dialog(page).getByRole("link", { name: "Build log" })).toHaveAttribute("href", "/log");
     await expect(dialog(page).getByRole("link", { name: "About · resume" })).toHaveAttribute("href", "/about");
   });
@@ -218,7 +218,7 @@ test.describe("answers", () => {
     await expect(dialog(page).getByRole("button", { name: "Ask", exact: true })).toBeEnabled();
     await expect(input(page)).toBeFocused();
     await expect(status(page).getByRole("link", { name: "About · career →" })).toHaveAttribute("href", "/about");
-    await expect(status(page).getByRole("link", { name: "Case study · Platform & API work →" })).toBeVisible();
+    await expect(status(page).getByRole("link", { name: /Platform & API work/ })).toHaveCount(0);
     await status(page).getByRole("button", { name: "← Ask another" }).click();
     await expect(dialog(page).getByText("Suggested for this page")).toBeVisible();
     await expect(input(page)).toBeFocused();
@@ -226,7 +226,7 @@ test.describe("answers", () => {
 
   test("todo box for content Aswin still has to supply", async ({ page }) => {
     // The CloudEagle KB entry still has an [evidence] placeholder; the dotted box lists it.
-    await open(page, "/work/cloudeagle");
+    await open(page, "/work/integration-builder");
     await dialog(page).getByRole("button", { name: /Is this CloudEagle's product\?/ }).click();
     const todoBox = status(page).getByText("[evidence]", { exact: true });
     await expect(todoBox).toBeVisible();

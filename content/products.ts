@@ -63,9 +63,9 @@ export const products: Product[] = [
   },
   {
     num: "03",
-    slug: "cloudeagle",
+    slug: "integration-builder",
     status: "CONCEPT",
-    name: "AI integration builder for long-tail apps",
+    name: "AI integration builder",
     pitch: "Lets AI draft connectors for the long tail of SaaS apps, with safeguards so nothing reaches production unreviewed. A CloudEagle.ai take-home, shared with permission.",
     built: todo("[e.g. the spec, Figma flows and the clickable prototype]"), // TODO(aswin)
     flow: [
@@ -77,11 +77,11 @@ export const products: Product[] = [
     ],
     tags: ["integrations", "guardrails"],
     primary: { label: "Run it locally", href: todo("[link]") }, // TODO(aswin): how to run the prototype locally
-    secondary: { label: "Read the case study →", href: "/work/cloudeagle" },
+    secondary: { label: "Read the case study →", href: "/work/integration-builder" },
   },
   {
     num: "04",
-    slug: "dhees-instagram-agent",
+    slug: "instagram-agent",
     status: "IN USE · RECORDED RUN",
     name: "Instagram content intelligence agent",
     pitch: "Reads what competing pet-food brands post, finds what performs and what’s trending, and suggests what Dhee’s should post next.",
@@ -94,7 +94,7 @@ export const products: Product[] = [
       { text: "Suggest Dhee’s next posts" },
     ],
     tags: ["agents", "tools"],
-    primary: { label: "Watch the recorded run", href: "/work/dhees-instagram-agent" },
-    secondary: { label: "Read the case study →", href: "/work/dhees-instagram-agent" },
+    primary: { label: "Watch the recorded run", href: "/work/instagram-agent" },
+    secondary: { label: "Read the case study →", href: "/work/instagram-agent" },
   },
 ];

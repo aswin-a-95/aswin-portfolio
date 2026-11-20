@@ -50,7 +50,7 @@ test("?xray=1 turns X-ray on before first paint and sticks", async ({ page }) =>
 });
 
 test("current page link is marked, including case studies", async ({ page }) => {
-  await page.goto("/work/cloudeagle");
+  await page.goto("/work/integration-builder");
   const main = page.getByRole("navigation", { name: "Main" });
   await expect(main.getByRole("link", { name: "Case studies" })).toHaveAttribute("aria-current", "page");
   await expect(main.getByRole("link", { name: "About" })).not.toHaveAttribute("aria-current", "page");
@@ -110,7 +110,7 @@ test.describe("intro banner", () => {
 });
 
 test("footer line is on every page", async ({ page }) => {
-  for (const path of ["/", "/work", "/work/cloudeagle", "/log", "/about"]) {
+  for (const path of ["/", "/work", "/work/integration-builder", "/log", "/about"]) {
     await page.goto(path);
     await expect(page.getByText("This site is an AI product. Turn on X-ray to see how it works.")).toBeVisible();
   }

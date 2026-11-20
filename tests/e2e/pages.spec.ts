@@ -67,7 +67,7 @@ test("home: Products I've built, with How it works and the human step in amber (
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "AI job search and apply agent",
     "Job-fit AI on this site",
-    "AI integration builder for long-tail apps",
+    "AI integration builder",
     "Instagram content intelligence agent",
   ]);
   const first = cards.first();
@@ -91,12 +91,12 @@ test("home: Products I've built, with How it works and the human step in amber (
   await expect(cards.nth(1).getByRole("link", { name: "Read the case study →" })).toHaveAttribute("href", "/work/fit-check");
   await expect(cards.nth(2).getByText("[e.g. the spec, Figma flows and the clickable prototype]")).toBeVisible();
   await expect(cards.nth(2).getByRole("link", { name: "Run it locally" })).toHaveAttribute("href", "#");
-  await expect(cards.nth(2).getByRole("link", { name: "Read the case study →" })).toHaveAttribute("href", "/work/cloudeagle");
+  await expect(cards.nth(2).getByRole("link", { name: "Read the case study →" })).toHaveAttribute("href", "/work/integration-builder");
 });
 
 test("footer: build date on every page; the phone home footer is one line (update 4)", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  for (const path of ["/", "/work/cloudeagle", "/log", "/about"]) {
+  for (const path of ["/", "/work/integration-builder", "/log", "/about"]) {
     await page.goto(path);
     await expect(page.getByRole("contentinfo")).toContainText(/Updated \d{1,2} [A-Z][a-z]{2} \d{4} · © 2026 Aswin · \[domain\]/);
   }
@@ -171,7 +171,7 @@ test("about: picking a project updates the dependency panel", async ({ page }) =
 });
 
 test("case study: before/after tabs and the X-ray link button", async ({ page }) => {
-  await page.goto("/work/cloudeagle");
+  await page.goto("/work/integration-builder");
   const manual = page.getByRole("button", { name: "Manual", exact: true });
   await manual.click();
   await expect(manual).toHaveAttribute("aria-pressed", "true");
@@ -191,7 +191,7 @@ test("case study: before/after tabs and the X-ray link button", async ({ page })
 
 test("case study: rail is sticky from 900px only", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/work/cloudeagle");
+  await page.goto("/work/integration-builder");
   const rail = page.getByRole("navigation", { name: "Case study sections" });
   await expect(rail).toHaveCSS("position", "sticky");
   await page.setViewportSize({ width: 800, height: 900 });
@@ -199,21 +199,31 @@ test("case study: rail is sticky from 900px only", async ({ page }) => {
 });
 
 test("case study: only CloudEagle has 'Try to break it'", async ({ page }) => {
-  await page.goto("/work/cloudeagle");
+  await page.goto("/work/integration-builder");
   await expect(page.getByRole("heading", { name: "Try to break it" })).toBeVisible();
   await page.goto("/work/job-search-agent");
   await expect(page.getByRole("heading", { name: "Try to break it" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Job-search agent", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "AI job search and apply agent", level: 1 })).toBeVisible();
 });
 
 test("case study: CASE STUDIES breadcrumb, LAST UPDATED and the counter before and after an attempt (update 4)", async ({ page }) => {
-  await page.goto("/work/cloudeagle");
-  await expect(page.getByText("CASE STUDIES / 01 · CLOUDEAGLE.AI")).toBeVisible();
+  await page.goto("/work/integration-builder");
+  await expect(page.getByText("CASE STUDIES / 03 · CLOUDEAGLE.AI")).toBeVisible();
+  // Numbering and order follow the home products 01–04 (Aswin, 2026-11-20).
+  await expect(page.getByRole("link", { name: /^NEXT · 04 · IN USE · RECORDED RUN/ })).toHaveAttribute("href", "/work/instagram-agent");
   await expect(page.getByRole("link", { name: "CASE STUDIES", exact: true })).toHaveAttribute("href", "/work");
   await expect(page.getByText("LAST UPDATED", { exact: true })).toBeVisible();
   const counter = page.locator("#s-break").getByRole("status");
   await expect(counter).toHaveText("No attempts yet");
   await expect(counter.getByText("No attempts yet")).toHaveCSS("font-size", "14px");
+  for (const gone of ["/work/cloudeagle", "/work/dhees-instagram-agent", "/work/platform-api-work"]) {
+    expect((await page.goto(gone))?.status()).toBe(404);
+  }
+  await page.goto("/work/instagram-agent");
+  await expect(page.getByText("STATUS · IN USE · RECORDED RUN")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Instagram content intelligence agent", level: 1 })).toBeVisible();
+  await page.goto("/work/instagram-agent");
+  await expect(page.getByRole("link", { name: /^NEXT · 01 · IN USE · RECORDED RUN/ })).toHaveAttribute("href", "/work/job-search-agent");
   expect((await page.goto("/work/fit-check"))?.status()).toBe(200);
   await expect(page.getByRole("heading", { name: "Job-fit AI on this site", level: 1 })).toBeVisible();
 });

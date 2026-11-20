@@ -71,6 +71,7 @@ export const PostSchema = z.object({
   date: z.string(),
   readTime: z.string(),
   summary: z.string(),
-  study: z.object({ label: z.string(), slug: z.string() }),
+  /** The related case study. Optional since Platform & API work was removed (Aswin, 2026-11-20). */
+  study: z.object({ label: z.string(), slug: z.string() }).optional(),
 });
 export type Post = z.infer<typeof PostSchema>;

@@ -60,9 +60,9 @@ function jdParse(user: string): JdParse {
 /** Fixture hrefs → KB ids (content/kb). */
 const SOURCE_IDS: Record<string, string> = {
   "/about": "platform-api",
-  "/work/cloudeagle": "cloudeagle",
+  "/work/integration-builder": "cloudeagle",
   "/work/job-search-agent": "job-search-agent",
-  "/work/dhees-instagram-agent": "dhees-instagram-agent",
+  "/work/instagram-agent": "dhees-instagram-agent",
 };
 const NOT_DONE_IDS: Record<string, string> = {
   "Hardware roadmaps from prototype to mass production": "hardware-roadmaps",
@@ -100,7 +100,6 @@ const ASK_SOURCE_IDS: Record<string, string> = {
   "Case study · CloudEagle concept": "cloudeagle",
   "Case study · Safeguards": "cloudeagle",
   "Case study · v2 & lessons": "cloudeagle",
-  "Case study · Platform & API work": "platform-api-work",
   "Your fit check": "memory",
 };
 

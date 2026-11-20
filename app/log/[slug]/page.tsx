@@ -39,12 +39,14 @@ export default async function PostPage({ params }: Props) {
         <article className="flex flex-col gap-4">
           <Body />
         </article>
-        <Link
-          href={`/work/${meta.study.slug}`}
-          className="self-start rounded-md bg-accent-tint px-[10px] py-[6px] font-mono text-[12px] text-accent no-underline"
-        >
-          {meta.study.label} →
-        </Link>
+        {meta.study && (
+          <Link
+            href={`/work/${meta.study.slug}`}
+            className="self-start rounded-md bg-accent-tint px-[10px] py-[6px] font-mono text-[12px] text-accent no-underline"
+          >
+            {meta.study.label} →
+          </Link>
+        )}
       </main>
       <Footer maxWidth={880} />
     </div>
