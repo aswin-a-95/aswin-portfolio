@@ -209,7 +209,7 @@ test("case study: only CloudEagle has 'Try to break it'", async ({ page }) => {
 test("case study: CASE STUDIES breadcrumb, LAST UPDATED and the counter before and after an attempt (update 4)", async ({ page }) => {
   await page.goto("/work/cloudeagle");
   await expect(page.getByText("CASE STUDIES / 01 · CLOUDEAGLE.AI")).toBeVisible();
-  await expect(page.getByRole("link", { name: "CASE STUDIES" })).toHaveAttribute("href", "/work");
+  await expect(page.getByRole("link", { name: "CASE STUDIES", exact: true })).toHaveAttribute("href", "/work");
   await expect(page.getByText("LAST UPDATED", { exact: true })).toBeVisible();
   const counter = page.locator("#s-break").getByRole("status");
   await expect(counter).toHaveText("No attempts yet");
