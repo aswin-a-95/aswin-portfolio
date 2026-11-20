@@ -16,9 +16,9 @@ Scope: **v1 only.** No vector database, no embeddings.
 | `Main.dc.html` | Home page, 1440 wide | `/` |
 | `Hero.dc.html` | Fit-check hero component (all logic + copy) | `components/fit-check/*` |
 | `HeroStates.dc.html` | The hero's states side by side: empty, running, result, badfit, error, limited, plus "X-ray on: Break my AI" (the empty fit check with the X-ray red-team panel below it) | Acceptance reference for the hero |
-| `Nav.dc.html` | Header with Work / Build log / About, X-ray toggle, Ask my work ⌘K | `components/nav.tsx` |
+| `Nav.dc.html` | Header with Case studies / Build log / About, X-ray toggle, Ask my work ⌘K | `components/nav.tsx` |
 | `Ask.dc.html` | "Ask my work" command bar (desktop modal; `sheet` prop = mobile bottom sheet) | `components/ask/*` |
-| `Work.dc.html` | CloudEagle case study, the PRD template for all case studies | `/work/[slug]` |
+| `Work.dc.html` | CloudEagle case study, the PRD template for every product's case study | `/work/[slug]` |
 | `BuildLog.dc.html` | Build log index with category filters | `/log` |
 | `About.dc.html` | About: intro, resume card, career dependency graph, roles, certificates | `/about` |
 | `Mobile.dc.html` | Home at 390 px (recruiter arriving from LinkedIn) | Responsive behaviour of `/` |
@@ -74,6 +74,8 @@ Check the current docs for each library before using its API.
 | `btnBg` | `#1B1A17` | `#E9E6DF` |
 | `btnInk` | `#FFFDF8` | `#101214` |
 
+Home uses `amberText`, `amberBorder` and `amberBg` too (design update 4: the human step in "Products I've built"), with the same values.
+
 Also: focus ring `2px solid #4F7FC0`, offset 2px; Ask scrim `rgba(27,26,23,0.38)` light / `rgba(0,0,0,0.6)` X-ray; Ask shadow `0 24px 60px rgba(20,18,15,0.22)`.
 Font roles: `serif` = Newsreader (headlines, ledes), `sans` = IBM Plex Sans (body, buttons), `mono` = IBM Plex Mono (labels, metadata, traces).
 Implement both sets as CSS variables (the panel set under its own names), so every component reads tokens and never hard-codes hex. There is no `data-theme="xray"` whole-page switch. Provide an `XrayPanel` component (X-ray panel tokens, `border: 1px solid` panel `rule`, the X-RAY pill pinned top-right: `top 10px; right 12px; padding 2px 8px; radius 999px; 1px solid #8DBBF2`, IBM Plex Mono 10px, `letter-spacing 0.1em`) and an `xray` flag in React context that X-ray-only content reads.
@@ -84,9 +86,9 @@ Global rules seen in every artboard: touch targets ≥ 44 px, `prefers-reduced-m
 
 | Route | Source | Notes |
 | --- | --- | --- |
-| `/` | `Main.dc.html` + `Hero.dc.html`, mobile per `Mobile.dc.html` | Sections in order: Nav, X-ray intro banner, fit-check hero, Under the hood, Before / after AI, Work, From the build log, Contact, footer, Ask overlay |
-| `/work/[slug]` | `Work.dc.html` | Same PRD template for all case studies: `cloudeagle`, `job-search-agent`, `dhees-instagram-agent`, `platform-api-work` |
-| `/work` | Not designed | **Gap:** default to the Work section of `Main.dc.html` (heading "Proof, one click away." + the 4 cards) as a standalone page with Nav and footer. Flag it to Aswin |
+| `/` | `Main.dc.html` + `Hero.dc.html`, mobile per `Mobile.dc.html` | Sections in order (design update 4): Nav, X-ray intro banner, Hero (fit check), "How I build agentic products, with proof" (12 cards), "Products I've built" (4 products), From the build log, Contact, footer, Ask overlay. Before / after AI is no longer on home (it stays inside the case study) |
+| `/work/[slug]` | `Work.dc.html` | The nav label is "Case studies"; the route stays `/work`. Each of the 4 products in `content/products.ts` has its own case-study page, all from the same PRD template: `job-search-agent` (01), `fit-check` (02), `cloudeagle` (03, the integration builder), `dhees-instagram-agent` (04). Products 01 and 04 show a recorded run (video or trace replay), not a live agent. `platform-api-work` is not one of the 4 products; its page is kept until Aswin decides (open question, design update 4) |
+| `/work` | Not designed | **Gap:** default to the "Products I've built" section of `Main.dc.html` (the 4 product cards) as a standalone page with Nav and footer. Flag it to Aswin |
 | `/log` | `BuildLog.dc.html` | Filters: All, Build notes, Teardowns, Essays, TIL, with counts |
 | `/log/[slug]` | Not designed | **Gap:** simple article page in the build-log type styles (serif title, mono meta line, 880 px column). Flag it to Aswin |
 | `/about` | `About.dc.html` | |
@@ -101,8 +103,8 @@ Global rules seen in every artboard: touch targets ≥ 44 px, `prefers-reduced-m
 - X-ray-only content: the "This run" and "Build details" panels, the Break my AI panel (hero) and its chips (Ask), "How I built this" (hero), drill traces, the Ask answer trace, the case-study logged trace, the eval table, and the guard chips.
 - It persists across page navigation and reloads within the session (sessionStorage), and can be set by `?xray=1`.
 - Intro banner on home: "New here? Try X-ray." with "Turn on X-ray" and "Got it". Shown until dismissed or X-ray is turned on; the Nav shows a "NEW" pill while the banner is showing. Remember dismissal in localStorage.
-- "Under the hood" cards marked "live here" turn X-ray on and scroll to the hero (`#top`).
-- Footer line on every page: "This site is an AI product. Turn on X-ray to see how it works."
+- "How I build agentic products, with proof" cards marked "live here" turn X-ray on and scroll to their anchor: the hero (`#top`) or the Break my AI panel (`#break-my-ai`). That panel only exists while X-ray is on, so X-ray turns on first, then the page scrolls. The "planned" card has no link.
+- Footer on every page: "This site is an AI product. Turn on X-ray to see how it works." and "Updated {date} · © 2026 Aswin · {domain}". On the phone home page (`Mobile.dc.html`) the footer is one line: "Updated {date} · © 2026 Aswin". `{date}` is filled at build time (the build's date, `BUILD_DATE`, formatted like "20 Nov 2026"), never hard-coded.
 
 **Ask my work** (`Ask.dc.html`, `MobileAsk.dc.html`)
 - Opens from the Nav button, the hero's "Ask my work" button, gap cards, and the keyboard shortcut ⌘K / Ctrl+K. Esc closes it. Focus is trapped while open and returns to the trigger on close.
@@ -161,13 +163,16 @@ The design's honest note is a requirement: **"the fit check is a fixed pipeline 
 
 - One prompt over the same knowledge base (whole KB in context with prompt caching; it's small) plus session memory if present.
 - **Steps (approved 2026-11-18, design update 2), streamed in this order as they happen:** `kb.search` (deterministic §6 search of the question over every scope; its entry ids go to the model as `<likely_sources>`, and the whole KB stays in context), `compose` (the model call), `guardrails` (the citation and honesty check on the written answer, `guardAsk`). The design lists `guardrails` before `compose`; the real order is kept because the check needs the answer. Ask's thinking state shows these lines: "kb.search · searching the knowledge base", "compose · writing the answer", "guardrails · checking the answer cites a source".
-- **Transport:** NDJSON, like the fit check: `{type:"step", tool, status: "running"|"done", ms?}` events, then exactly one `{type:"result", status:"ok", answer}` or `{type:"result", status:"error"|"limited"|"budget"}`. The limit and budget checks run before any step, so a blocked question gets only the result. Zod schemas: `lib/ask/types.ts`. Break my AI reads the same stream and uses only the result.
+- **Transport:** NDJSON, like the fit check: `{type:"step", tool, status: "running"|"done", ms?}` events, then exactly one `{type:"result", status:"ok", answer}` or `{type:"result", status:"error"|"limited"|"budget"}`. The limit and budget checks run before any step, so a blocked question gets only the result. Zod schemas: `lib/ask/types.ts`. Break my AI reads the same stream (design update 4: this is its "`/api/break` or equivalent" endpoint): the step events drive the attempt's pending state, the result fills it in.
 - Structured output: `{ kind: "fit"|"gap"|"none"|"refuse"|"conflict"|"clarify"|"unknown", text, sources: [{label, href}], guard }`.
 - `kind` → label and colour exactly as `ASK_LABELS`: gap "PARTIAL · STATED PLAINLY" (amber), none "NOT SOMETHING ASWIN HAS DONE" (amber), refuse "REFUSED · PROMPT INJECTION" (accent), conflict "CONFLICT FLAGGED · GOING WITH THE RECORD" (amber), clarify "NEEDS CLARIFYING" (muted). `unknown` → "The knowledge base doesn't cover that, so there's no answer to give. Try a suggested question, or ask Aswin directly." with a Contact chip.
 - Guard names shown in X-ray: `guard.prompt_injection`, `guard.not_done`, `guard.conflicting_info`, `guard.ambiguous_ask`, `guard.gap_stated`, or "none · answered from the knowledge base".
 - Every factual answer cites ≥ 1 KB source; a server check drops uncited claims to `unknown`.
-- **Break my AI on the hero** is an X-ray panel shown whenever X-ray is on, in every hero state, below the fit check (which stays usable). It uses the same mode. The UI shows the verdicts from the design: REFUSED / STATED / FLAGGED / CLARIFIED / ANSWERED (mapping: refuse→REFUSED, none→STATED, conflict→FLAGGED, clarify→CLARIFIED, others→ANSWERED), the "{held} held up of {attempts}" counter (session only, last 6 attempts) and the guard line, which always shows (the panel is already X-ray). A failed, rate-limited or budget-stopped attempt isn't logged or counted; it shows Ask's error, limit or budget line below the input. Ask's budget line: "Ask my work is paused for this month: the AI budget is spent. Aswin is one message away."
-- **Case study "Try to break it"** (`Work.dc.html`) uses `mode: "sandbox"` with a prompt that plays the CloudEagle integration builder and returns `{verdict: BLOCKED|FLAGGED|CLARIFIED|DRAFTED, reason, guard}`. The six preset attacks and their expected verdicts are `WORK_ATTACKS`; they are also eval cases. The verdict and guard must agree, or the attempt fails closed as an error. States the design doesn't show (approved M5), one line under the input; a failed attempt isn't logged or counted:
+- **Break my AI on the hero** (`id="break-my-ai"`) is an X-ray panel shown whenever X-ray is on, in every hero state, below the fit check (which stays usable). It uses the same mode. The UI shows the verdicts from the design: REFUSED / STATED / FLAGGED / CLARIFIED / ANSWERED (mapping: refuse→REFUSED, none→STATED, conflict→FLAGGED, clarify→CLARIFIED, others→ANSWERED), the ATTEMPTS row ("None yet. Your attempts appear here, newest first.", or a tally of squares plus "{held} of {attempts} held up"; session only, last 6 entries) and the guard line, which always shows (the panel is already X-ray).
+  - **Pending state (design update 4):** while an attempt runs, its entry shows `RUNNING…`, "Checking the guardrails… {step}", a progress bar and "guardrail: … · trace: …"; the input, chips and drills are disabled and the button reads "Running…". `{step}` and the bar come from the real step events of the run (`kb.search`, `compose`, `guardrails`), never a timer.
+  - **Drills are logged:** each failure drill adds a `DRILL` entry (its reply, "See the fallback above ↑" and "fallback path: {path} · trace {run id}") once the drill's real fallback event arrives. DRILL entries are not counted in attempts, held or the tally.
+  - A failed, rate-limited or budget-stopped attempt isn't logged or counted; its pending entry is removed and it shows Ask's error, limit or budget line below the input. Ask's budget line: "Ask my work is paused for this month: the AI budget is spent. Aswin is one message away."
+- **Case study "Try to break it"** (`Work.dc.html`) uses `mode: "sandbox"` with a prompt that plays the CloudEagle integration builder and returns `{verdict: BLOCKED|FLAGGED|CLARIFIED|DRAFTED, reason, guard}`. The six preset attacks and their expected verdicts are `WORK_ATTACKS`; they are also eval cases. Its counter reads "No attempts yet" before the first attempt, then "{stopped} held up of {attempts}" (design update 4). The verdict and guard must agree, or the attempt fails closed as an error. States the design doesn't show (approved M5), one line under the input; a failed attempt isn't logged or counted:
   - Loading: "Running against the builder…"
   - Error: "The builder couldn't answer this time. Try again."
   - Limit: "That's the limit for attempts this hour. Aswin is one message away."
@@ -221,13 +226,16 @@ Metadata and OG images per page; JSON-LD `Person` + `ProfilePage` (home, about),
 Create these files with `TODO(aswin)` values and a clear comment, and build a `pnpm check:content` script that fails the production build while any `TODO(aswin)` or `[` placeholder text would render:
 
 - `content/kb/*` (roles, projects, not-done list, facts, fallback)
-- `content/case-studies/*.mdx` (PRD template fields for all 4 studies: what I built, time spent, users/problem, 3 decisions, 4 safeguards, success metrics, before/after steps and times, v2, lessons, links, video)
-- `content/before-after.ts` (3 tasks with measured manual vs agent times)
+- `content/case-studies/*.mdx` (PRD template fields for every product's study: what I built, time spent, last updated, users/problem, 3 decisions, 4 safeguards, success metrics, before/after steps and times, v2, lessons, links, video)
+- `content/hood.ts`: the 12 "How I build agentic products, with proof" items, typed `{ name, status: 'live here'|'case study'|'GitHub'|'shipped'|'prototype'|'planned', proof, cta, href?, live? }` (design update 4)
+- `content/products.ts`: the 4 "Products I've built" items, typed `{ num, slug, status, name, pitch, built, flow: {text, human?: boolean}[], tags, primary: {label, href}, secondary: {label, href} }`. `status` is data only; no status pill renders on the desktop cards (design update 4)
 - `content/site-meta.ts` (years of experience, eval set link, GitHub, LinkedIn, domain, response time, posting cadence, "what breaks first at scale", "next", cost per run, 90-day plan line)
 - `content/posts/*.mdx` (3 designed posts)
 - `content/certificates.ts`, `public/resume.pdf`
 
-Under the hood rule from the design: "Anything without proof yet is left out." A card or case study whose proof isn't filled in is hidden, not shown with placeholders.
+Under the hood rule from the design: "Anything without proof yet is left out." A card or case study whose proof isn't filled in is hidden in production, not shown with placeholders.
+
+Placeholders such as `[25]`, `[e.g. …]` and the `#` links in `content/hood.ts` and `content/products.ts` are content to fill (design update 4). Until Aswin fills them they stay visible as placeholders in dev and preview builds, exactly as the artboards show them; never invent the values.
 
 ## 13. Environment variables
 
