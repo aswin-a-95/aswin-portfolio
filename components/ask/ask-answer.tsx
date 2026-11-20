@@ -22,12 +22,12 @@ function cardFor(result: AskResult): Card {
   return { tone, label, text: a.text, todo: a.todo, sources: a.sources };
 }
 
-/** The X-ray line. Live numbers only come from a real run; until then the design's placeholders show. */
+/** The X-ray line. Live numbers only come from a real run; until then the design's placeholders show. "1 source" is singular (Aswin, 2026-11-20). */
 function traceLine(a: AskAnswer): string {
   const live = a.trace
     ? `trace ${a.trace.runId} · live usage: cost $${a.trace.costUsd.toFixed(4)} · ${a.trace.ms} ms`
     : "trace [run id] · live usage: cost [logged] · [logged] ms";
-  return `kb.search → ${a.sources.length} sources · guardrail fired: ${a.guard} · ${live}`;
+  return `kb.search → ${a.sources.length} ${a.sources.length === 1 ? "source" : "sources"} · guardrail fired: ${a.guard} · ${live}`;
 }
 
 /** Ask.dc.html after a question: the "›" line, the answer card, sources, X-ray trace, "← Ask another". */

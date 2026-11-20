@@ -2,6 +2,49 @@
 
 The files in this folder are always the latest approved design. This log says what changed in each update, so code can be brought in line without re-reading every artboard.
 
+## 2026-11-20 (update 5): Hero only. "How I built this" rewritten as plain-language lists; failure drills hidden
+
+Changed artboard: `Hero.dc.html` only. All other artboards and board sizes are unchanged since update 4.
+
+### 1. "How I built this" X-ray panel rewritten
+- The panel is now a flex column (gap 20px, padding 20px 22px), in **sans** type (it used to be all mono). It keeps the `X-RAY` pill.
+- Header: H3 `How I built this` (18px 600), then the sub-line "The design behind the fit check. Numbers for a run and the current build appear in Build details after a check." (14px muted). `padding-right: 64px` keeps the header clear of the pill.
+- **Removed** the "Honest note" box. Its point now lives in the Trade-offs list.
+- **Architecture:** H4 `Architecture` (15px 600), then the pipeline chips (mono 13px), then a caption: "Seven steps, one branch and one retry, on one endpoint and one knowledge base. Ask my work uses the same engine with its own prompt. The steps you see stream from the real run." (14px muted).
+  - The pipeline now has **8 chips** that match the real step names: `JD or link` › `fetch_url · links only` (dashed accent border: the only branch) › `jd.parse` › `kb.search` › `evidence.map` › `guard.citations` › `guard.honesty` › `verdict.compose`.
+- Below it is a top-bordered grid (`repeat(auto-fit, minmax(360px, 1fr))`, gap 22px 32px) of four H4 + bulleted `<ul>` groups (14px, line-height 1.5, gap 6px). The old `›` mono lines are gone. The groups:
+  - **Guardrails:**
+    - Answers only from the knowledge base, built from my master resume
+    - Every claim links to its source
+    - Gaps are stated plainly and the verdict is never inflated
+    - Refuses injected instructions, flags conflicting info and asks when a question is vague. Try it in Break my AI
+  - **Evals:**
+    - [25] test JDs and questions, including bad-fit roles and red-team cases
+    - Run before every change goes live; the set is public on GitHub
+    - What failed first: [what broke, and the fix]
+    - Results for the current build are in Build details
+  - **Memory and production:**
+    - Session memory: your role and gaps carry into Ask my work
+    - Nothing is kept after the session, and pasted JDs aren’t stored
+    - A per-visitor rate limit and a monthly budget cap
+    - A precomputed fallback if the AI or knowledge base is down
+    - Limits: [what breaks first at scale]
+  - **Trade-offs and what’s next:**
+    - A fixed pipeline over open tool choice: predictable and testable. The job-search agent is where the model picks its own tools
+    - Evidence tables over a % score: slower to skim, easier to trust
+    - No vector DB in v1, on purpose: [your reason]
+    - Next: `kb.search` (in mono) as an MCP server you can add to Claude
+- The cost line ("live usage: [cost per run]…") is gone from this panel. Run numbers now live only in "This run" and "Build details".
+
+### 2. Failure drills hidden in Break my AI
+- The "Failure drills" block is now wrapped in `sc-if showDrills`, and `showDrills` is hard-coded to `false`. **Do not render the drill buttons in v1.**
+- Keep the fallback UI itself (error and limited states, precomputed matches, drill trace). It's still needed for real outages and rate limits. Only the buttons that trigger drills from the panel are removed.
+- Home still has the `production` card with "Run the failure drills →" linking to `#break-my-ai`. That's a mismatch with this change: ask Aswin whether to reword that CTA (for example to "Try Break my AI →") or bring the drills back. Don't guess.
+
+### Spec impact
+- SPEC.md's failure-drills feature (a visitor-triggered fallback demo) is **out of v1 UI scope**. Keep the server-side fallback path and its tests.
+- The pipeline labels shown in X-ray must match the step names the API streams (`jd.parse`, `kb.search`, `evidence.map`, `guard.citations`, `guard.honesty`, `verdict.compose`).
+
 ## 2026-11-20 (update 4): Home "Products I've built" section, 12-part proof grid, Break my AI redesign, "Case studies" naming
 
 Changed artboards: `Main.dc.html`, `Mobile.dc.html`, `Hero.dc.html`, `Work.dc.html`, `Nav.dc.html`, `About.dc.html`, `BuildLog.dc.html`, plus `canvas.json` (sizes only). `Ask`, `MobileAsk` and `HeroStates` are unchanged.

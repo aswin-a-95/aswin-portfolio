@@ -297,7 +297,7 @@ test.describe("answers", () => {
   test("X-ray trace panel shows only in X-ray", async ({ page }) => {
     await open(page);
     await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
-    const line = status(page).getByText(/^kb\.search → 1 sources · guardrail fired:/);
+    const line = status(page).getByText(/^kb\.search → 1 source · guardrail fired:/);
     await expect(line).toBeHidden();
     await page.keyboard.press("Escape");
     await page.goto("/?xray=1");
@@ -305,10 +305,10 @@ test.describe("answers", () => {
     await dialog(page).getByRole("button", { name: /Has he worked on APIs\?/ }).click();
     await expect(
       status(page).getByText(
-        /^kb\.search → 1 sources · guardrail fired: none · answered from the knowledge base · trace run_[0-9a-f]{12} · live usage: cost \$0\.0000 · \d+ ms$/,
+        /^kb\.search → 1 source · guardrail fired: none · answered from the knowledge base · trace run_[0-9a-f]{12} · live usage: cost \$0\.0000 · \d+ ms$/,
       ),
     ).toBeVisible();
-    const trace = status(page).getByText(/^kb\.search → 1 sources/);
+    const trace = status(page).getByText(/^kb\.search → 1 source/);
     await expect(trace).toHaveCSS("padding-right", "76px");
     await expect(trace).toHaveCSS("border-top-left-radius", "8px");
     await expect(trace).toHaveCSS("background-color", "rgb(16, 18, 20)");

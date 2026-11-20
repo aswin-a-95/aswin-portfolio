@@ -285,6 +285,7 @@
 </div>
 </sc-for>
 
+<sc-if value="{{showDrills}}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid {{d.rule}}">
 <p style="margin: 0; font-family: {{d.mono}}; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: {{d.muted}}">Failure drills · runs the real fallback in the fit check above</p>
 <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -293,6 +294,7 @@
 </sc-for>
 </div>
 </div>
+</sc-if>
 </div>
 </sc-if>
 
@@ -305,46 +307,59 @@
 
 <div style="display: flex; flex-direction: column; gap: 16px">
 <sc-if value="{{showHow}}" hint-placeholder-val="{{ false }}">
-<div style="position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; padding: 20px; border-radius: 14px; background: {{d.bg}}; border: 1px solid {{d.rule}}; font-family: {{d.mono}}; font-size: 13px; line-height: 1.6; color: {{d.ink}}">
+<div style="position: relative; display: flex; flex-direction: column; gap: 20px; padding: 20px 22px; border-radius: 14px; background: {{d.bg}}; border: 1px solid {{d.rule}}; font-family: {{d.sans}}; color: {{d.ink}}">
 <span style="position: absolute; top: 10px; right: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid {{d.accent}}; font-family: {{d.mono}}; font-size: 10px; letter-spacing: 0.1em; color: {{d.accent}}">X-RAY</span>
-<h3 style="grid-column: 1 / -1; margin: 0; font-family: {{d.sans}}; font-size: 22px; font-weight: 600; line-height: 1.3; color: {{d.ink}}">How I built this</h3>
-<p style="grid-column: 1 / -1; margin: 0; padding: 12px 14px; border: 1px solid {{d.rule}}; border-radius: 8px; background: {{d.paper}}; font-family: {{d.sans}}; font-size: 15px; line-height: 1.55"><b style="font-weight: 600">Honest note:</b> the fit check is a fixed pipeline with one branch (link or text) and one retry. The model doesn't choose its tools here. For model-chosen tool calls, see the <a href="Work.dc.html" style="color: {{d.accent}}">job-search agent</a>.</p>
-<div style="display: flex; flex-direction: column; gap: 8px">
-<p style="margin: 0; color: {{d.muted}}">ARCHITECTURE</p>
-<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
-<sc-for list="{{pipeline}}" as="p" hint-placeholder-count="6">
+<div style="display: flex; flex-direction: column; gap: 4px; padding-right: 64px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 600">How I built this</h3>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: {{d.muted}}">The design behind the fit check. Numbers for a run and the current build appear in Build details after a check.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h4 style="margin: 0; font-size: 15px; font-weight: 600">Architecture</h4>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-family: {{d.mono}}; font-size: 13px">
+<sc-for list="{{pipeline}}" as="p" hint-placeholder-count="8">
 <span style="padding: 4px 8px; border: 1px solid {{p.border}}; border-radius: 6px; background: {{d.paper}}">{{p.label}}</span><span style="color: {{d.muted}}">{{p.sep}}</span>
 </sc-for>
 </div>
-<p style="margin: 0; color: {{d.muted}}">One endpoint, one knowledge base, two prompts (fit check and Ask my work). Dashed box: the only branch.</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: {{d.muted}}">Seven steps, one branch and one retry, on one endpoint and one knowledge base. Ask my work uses the same engine with its own prompt. The steps you see stream from the real run.</p>
 </div>
-<div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{d.muted}}">GUARDRAILS</p>
-<p style="margin: 0">› answers only from the knowledge base</p>
-<p style="margin: 0">› every claim links to a source</p>
-<p style="margin: 0">› gaps stated, score never inflated</p>
-<p style="margin: 0">› off-topic and prompt injection refused</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px 32px; padding-top: 16px; border-top: 1px solid {{d.rule}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h4 style="margin: 0; font-size: 15px; font-weight: 600">Guardrails</h4>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; color: {{d.ink}}">
+<li>Answers only from the knowledge base, built from my master resume</li>
+<li>Every claim links to its source</li>
+<li>Gaps are stated plainly and the verdict is never inflated</li>
+<li>Refuses injected instructions, flags conflicting info and asks when a question is vague. Try it in Break my AI</li>
+</ul>
 </div>
-<div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{d.muted}}">EVALS · COST</p>
-<p style="margin: 0">› [N] test JDs, bad-fit and red-team cases, public on GitHub</p>
-<p style="margin: 0">› offline eval: pass rate [measured] · failed first: [what broke]</p>
-<p style="margin: 0">› live usage: [cost per run] · [response time], logged</p>
-<p style="margin: 0">› the steps on screen stream from the real run, never a script</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h4 style="margin: 0; font-size: 15px; font-weight: 600">Evals</h4>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; color: {{d.ink}}">
+<li>[25] test JDs and questions, including bad-fit roles and red-team cases</li>
+<li>Run before every change goes live; the set is public on GitHub</li>
+<li>What failed first: [what broke, and the fix]</li>
+<li>Results for the current build are in Build details</li>
+</ul>
 </div>
-<div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{d.muted}}">MEMORY · PRODUCTION</p>
-<p style="margin: 0">› session memory: role and gaps carry into Ask my work</p>
-<p style="margin: 0">› held for this session only; pasted JDs aren't stored</p>
-<p style="margin: 0">› per-visitor rate limit · monthly budget cap</p>
-<p style="margin: 0">› precomputed fallback if the AI or knowledge base is down</p>
-<p style="margin: 0">› limits: [what breaks first at scale]</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h4 style="margin: 0; font-size: 15px; font-weight: 600">Memory and production</h4>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; color: {{d.ink}}">
+<li>Session memory: your role and gaps carry into Ask my work</li>
+<li>Nothing is kept after the session, and pasted JDs aren’t stored</li>
+<li>A per-visitor rate limit and a monthly budget cap</li>
+<li>A precomputed fallback if the AI or knowledge base is down</li>
+<li>Limits: [what breaks first at scale]</li>
+</ul>
 </div>
-<div style="display: flex; flex-direction: column; gap: 6px">
-<p style="margin: 0; color: {{d.muted}}">TRADE-OFFS · NEXT</p>
-<p style="margin: 0">› evidence cards over a % dial: slower to skim, easier to trust</p>
-<p style="margin: 0">› fixed pipeline over open tool choice: predictable and testable</p>
-<p style="margin: 0">› next: [what you'll improve]</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h4 style="margin: 0; font-size: 15px; font-weight: 600">Trade-offs and what’s next</h4>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; color: {{d.ink}}">
+<li>A fixed pipeline over open tool choice: predictable and testable. The job-search agent is where the model picks its own tools</li>
+<li>Evidence tables over a % score: slower to skim, easier to trust</li>
+<li>No vector DB in v1, on purpose: [your reason]</li>
+<li>Next: <code style="font-family: {{d.mono}}; font-size: 13px">kb.search</code> as an MCP server you can add to Claude</li>
+</ul>
+</div>
 </div>
 </div>
 </sc-if>
@@ -549,7 +564,7 @@ class Component extends DCLogic {
       color: sm.kind === 'bad' ? t.amberText : t.ink,
       pick: () => this.run(sm.jd, sm.role, sm.kind)
     }));
-    var pipe = [['input', false], ['link? fetch_url', true], ['jd.parse', false], ['kb.search', false], ['evidence.map', false], ['guardrails', false], ['compose + cite', false]];
+    var pipe = [['JD or link', false], ['fetch_url · links only', true], ['jd.parse', false], ['kb.search', false], ['evidence.map', false], ['guard.citations', false], ['guard.honesty', false], ['verdict.compose', false]];
     var showHow = x;
     var log = s.log || [];
     var done = log.filter((l) => l.verdict !== 'DRILL' && !l.pending);
@@ -614,6 +629,7 @@ class Component extends DCLogic {
       showNudge: !x && !!nudgeText, nudgeText: nudgeText,
       xrayOn: () => this.xrayOn(),
       showBreak: x,
+      showDrills: false,
       attacks: HERO_ATTACKS.map((a) => ({ chip: a.chip, run: () => this.runAttack(a, a.text) })),
       breakLog: log.map((l) => ({
         text: l.text, verdict: l.pending ? 'RUNNING…' : l.verdict, reply: l.reply, guard: l.guard, isDrill: l.verdict === 'DRILL', isPending: !!l.pending, isDone: !l.pending,
