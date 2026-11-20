@@ -15,7 +15,7 @@ a{color:inherit}
 a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2px}
 </style>
 </helmet>
-<div style="width: 390px; min-height: 3900px; box-sizing: border-box; position: relative; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: {{t.sans}}">
+<div style="width: 390px; min-height: 4300px; box-sizing: border-box; position: relative; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: {{t.sans}}">
 <dc-import name="Nav" current="home" xray="{{xray}}" is-new="{{showIntro}}" on-toggle-xray="{{toggleXray}}" on-ask="{{openAsk}}" hint-size="390px,180px"></dc-import>
 
 <sc-if value="{{showIntro}}" hint-placeholder-val="{{ true }}">
@@ -35,7 +35,7 @@ a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2p
 <p style="margin: 0; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.08em; color: {{t.muted}}">ACROSS ALL MY WORK</p>
 <h2 id="m-hood" style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 28px; line-height: 1.2">How I build agentic products, with proof</h2>
 <p style="margin: 0 0 4px; font-size: 15px; line-height: 1.5; color: {{t.muted}}">Each part links to where you can see it working.</p>
-<sc-for list="{{hood}}" as="u" hint-placeholder-count="8">
+<sc-for list="{{hood}}" as="u" hint-placeholder-count="12">
 <a href="{{u.href}}" onClick="{{u.click}}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; padding: 10px 14px; border: 1px solid {{t.rule}}; border-radius: 10px; background: {{t.paper}}; text-decoration: none; color: {{t.ink}}">
 <span style="font-family: {{t.mono}}; font-size: 14px">{{u.name}}</span>
 <span style="padding: 2px 8px; border-radius: 999px; border: 1px solid {{u.statusBorder}}; background: {{u.statusBg}}; font-family: {{t.mono}}; font-size: 11px; color: {{u.statusInk}}">{{u.status}}</span>
@@ -44,15 +44,18 @@ a:focus-visible,button:focus-visible{outline:2px solid #4F7FC0;outline-offset:2p
 </section>
 
 <section aria-labelledby="m-work" style="border-top: 1px solid {{t.rule}}; padding: 36px 20px 56px; display: flex; flex-direction: column; gap: 12px">
-<h2 id="m-work" style="margin: 0 0 4px; font-family: {{t.serif}}; font-weight: 400; font-size: 30px">Proof, one tap away.</h2>
-<a href="Work.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid {{t.rule}}; border-radius: 12px; background: {{t.paper}}; text-decoration: none"><span style="font-family: {{t.mono}}; font-size: 11px; color: {{t.muted}}">CONCEPT · integrations · guardrails</span><span style="font-size: 16px">CloudEagle.ai — AI integration builder</span></a>
-<a href="Work.dc.html" style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid {{t.rule}}; border-radius: 12px; background: {{t.paper}}; text-decoration: none"><span style="font-family: {{t.mono}}; font-size: 11px; color: {{t.accent}}">IN USE · RECORDED RUN · agents · tools</span><span style="font-size: 16px">Job-search agent</span><span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">search → tailor → <span style="color: {{t.amberText}}">wait for your approval</span> → apply</span></a>
-<a href="Work.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid {{t.rule}}; border-radius: 12px; background: {{t.paper}}; text-decoration: none"><span style="font-family: {{t.mono}}; font-size: 11px; color: {{t.accent}}">IN USE · RECORDED RUN · agents · tools</span><span style="font-size: 16px">Dhee's Instagram competitor agent</span></a>
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.08em; color: {{t.muted}}">CASE STUDIES</p>
+<h2 id="m-work" style="margin: 0 0 4px; font-family: {{t.serif}}; font-weight: 400; font-size: 30px">Products I've built</h2>
+<a href="Work.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid {{t.rule}}; border-radius: 12px; background: {{t.paper}}; text-decoration: none"><span style="font-family: {{t.mono}}; font-size: 11px; color: {{t.accent}}">IN USE · RECORDED RUN</span><span style="font-size: 16px">AI job search and apply agent</span><span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">search → tailor → <span style="color: {{t.amberText}}">wait for my approval</span> → apply</span></a>
+<a href="#fit-h" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid {{t.rule}}; border-radius: 12px; background: {{t.paper}}; text-decoration: none"><span style="font-family: {{t.mono}}; font-size: 11px; color: {{t.accent}}">LIVE HERE</span><span style="font-size: 16px">Job-fit AI on this site</span><span style="font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">Try it above ↑</span></a>
+<a href="Work.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid {{t.rule}}; border-radius: 12px; background: {{t.paper}}; text-decoration: none"><span style="font-family: {{t.mono}}; font-size: 11px; color: {{t.muted}}">CONCEPT</span><span style="font-size: 16px">AI integration builder for long-tail apps</span></a>
+<a href="Work.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid {{t.rule}}; border-radius: 12px; background: {{t.paper}}; text-decoration: none"><span style="font-family: {{t.mono}}; font-size: 11px; color: {{t.accent}}">IN USE · RECORDED RUN</span><span style="font-size: 16px">Instagram content intelligence agent</span></a>
 </section>
+<footer style="border-top: 1px solid {{t.rule}}; padding: 20px; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">Updated [date, set on deploy] · © 2026 Aswin</footer>
 <dc-import name="Ask" open="{{askOpen}}" xray="{{xray}}" page="home" context="{{askCtx}}" on-close="{{closeAsk}}" on-forget="{{forgetCtx}}" hint-size="0px,0px"></dc-import>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":3900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":4300}}'>
 function mobTokens(x) {
   var c = x
     ? { bg: '#101214', paper: '#171A1D', ink: '#E9E6DF', muted: '#A3A9B0', rule: '#2B3036', accent: '#8DBBF2', accentTint: '#17283D', amberText: '#EDB65E', btnBg: '#E9E6DF', btnInk: '#101214' }
@@ -61,8 +64,10 @@ function mobTokens(x) {
   return c;
 }
 var MOB_HOOD = [
-  ['agents', 'case study', 'Work.dc.html'], ['tools', 'live here'], ['orchestration', 'live here'], ['memory', 'live here'],
-  ['evals', 'GitHub', '#'], ['guardrails', 'live here'], ['integrations', 'case study', 'Work.dc.html'], ['production', 'live here']
+  ['agents', 'case study', 'Work.dc.html'], ['skills', 'GitHub', '#'], ['tools', 'live here', '#top'],
+  ['orchestration', 'live here', '#top'], ['memory', 'live here', '#top'], ['production', 'live here', '#break-my-ai'],
+  ['guardrails', 'live here', '#break-my-ai'], ['evals', 'GitHub', '#'], ['human in loop', 'shipped', '#'],
+  ['data privacy', 'shipped', '#'], ['rag', 'prototype', '#'], ['mcp server', 'planned']
 ];
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { xray: false, introSeen: false, askOpen: false, askCtx: null }; }
@@ -72,9 +77,9 @@ class Component extends DCLogic {
       t: t, xray: x, askOpen: s.askOpen, askCtx: s.askCtx,
       showIntro: !s.introSeen && !x,
       hood: MOB_HOOD.map((h) => {
-        var live = h[1] === 'live here';
-        return { name: h[0], status: h[1], href: live ? '#top' : h[2], click: live ? () => this.setState({ xray: true, introSeen: true }) : undefined,
-          statusBg: live ? t.accentTint : 'transparent', statusBorder: live ? t.accent : t.rule, statusInk: live ? t.accent : t.muted };
+        var live = h[1] === 'live here', shipped = h[1].indexOf('shipped') === 0;
+        return { name: h[0], status: h[1], href: h[2], click: live ? () => this.setState({ xray: true, introSeen: true }) : undefined,
+          statusBg: live ? t.accentTint : 'transparent', statusBorder: live ? t.accent : (shipped ? t.ink : t.rule), statusInk: live ? t.accent : (shipped ? t.ink : t.muted) };
       }),
       toggleXray: () => this.setState({ xray: !this.state.xray, introSeen: true }),
       xrayOn: () => this.setState({ xray: true, introSeen: true }),

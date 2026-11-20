@@ -25,7 +25,7 @@ html{scroll-behavior:smooth}
 <main style="max-width: 1200px; margin: 0 auto; padding: 56px 24px 96px; display: flex; flex-direction: column; gap: 48px">
 
 <header style="display: flex; flex-direction: column; gap: 20px; max-width: 880px">
-<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; color: {{t.muted}}"><a href="Main.dc.html" style="text-decoration: none">WORK</a> / 01 · CLOUDEAGLE.AI</p>
+<p style="margin: 0; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em; color: {{t.muted}}"><a href="Main.dc.html" style="text-decoration: none">CASE STUDIES</a> / 01 · CLOUDEAGLE.AI</p>
 <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
 <span style="padding: 6px 12px; border: 1.5px solid {{t.ink}}; border-radius: 999px; font-family: {{t.mono}}; font-size: 12px; letter-spacing: 0.06em">STATUS · CONCEPT</span>
 <span style="padding: 6px 10px; border: 1px solid {{t.rule}}; border-radius: 999px; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">Take-home concept · shared with written permission · not CloudEagle's product</span>
@@ -38,6 +38,7 @@ html{scroll-behavior:smooth}
 <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">BUILT WITH</span><span style="font-size: 15px">Figma · clickable prototype</span></div>
 <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">FOCUS</span><span style="font-size: 15px">Safeguards</span></div>
 <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">TIME SPENT</span><span style="font-family: {{t.mono}}; font-size: 15px; color: {{t.muted}}">[hours]</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: {{t.mono}}; font-size: 11px; letter-spacing: 0.06em; color: {{t.muted}}">LAST UPDATED</span><span style="font-family: {{t.mono}}; font-size: 15px; color: {{t.muted}}">[date]</span></div>
 </div>
 </header>
 
@@ -135,7 +136,7 @@ html{scroll-behavior:smooth}
 <h2 id="h-break" style="margin: 0; font-family: {{t.serif}}; font-weight: 400; font-size: 34px">Try to break it</h2>
 <p style="margin: 0; font-size: 16px; color: {{t.muted}}">The same attack types as Break my AI on the home page. Pick one or write your own.</p>
 </div>
-<div role="status" aria-live="polite" style="display: flex; align-items: baseline; gap: 8px; font-family: {{t.mono}}"><span style="font-size: 40px; color: {{t.accent}}">{{stopped}}</span><span style="font-size: 14px; color: {{t.muted}}">stopped or questioned, of {{attempts}}</span></div>
+<div role="status" aria-live="polite" style="display: flex; align-items: baseline; gap: 8px; font-family: {{t.mono}}"><sc-if value="{{noLog}}" hint-placeholder-val="{{ true }}"><span style="font-size: 14px; color: {{t.muted}}">No attempts yet</span></sc-if><sc-if value="{{hasLog}}" hint-placeholder-val="{{ false }}"><span style="font-size: 40px; color: {{t.accent}}">{{stopped}}</span><span style="font-size: 14px; color: {{t.muted}}">held up of {{attempts}}</span></sc-if></div>
 </div>
 <div style="display: flex; flex-direction: column; gap: 14px; padding: 20px; background: {{t.paper}}; border: 1px solid {{t.rule}}; border-radius: 14px">
 <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -259,7 +260,7 @@ html{scroll-behavior:smooth}
 <footer style="border-top: 1px solid {{t.rule}}; padding: 28px 24px">
 <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: {{t.mono}}; font-size: 12px; color: {{t.muted}}">
 <span>This site is an AI product. Turn on X-ray to see how it works.</span>
-<span>© 2026 Aswin · [domain]</span>
+<span>Updated [date, set on deploy] · © 2026 Aswin · [domain]</span>
 </div>
 </footer>
 
@@ -369,7 +370,7 @@ class Component extends DCLogic {
         this.addAttempt(txt, workClassify(txt));
       },
       log: all.map((l) => { var p = pillFor(l.verdict); return { text: l.text, verdict: l.verdict, reason: l.reason, guard: l.guard, pillBg: p.bg, pillInk: p.ink, pillBorder: p.border }; }),
-      noLog: all.length === 0, stopped: stopped, attempts: all.length,
+      noLog: all.length === 0, hasLog: all.length > 0, stopped: stopped, attempts: all.length,
       metrics: [
         { kind: 'NORTH STAR', hint: '[e.g. connectors live per week without engineering time]' },
         { kind: 'GUARDRAIL', hint: '[e.g. unsafe actions caught before review]' },
