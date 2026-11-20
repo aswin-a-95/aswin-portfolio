@@ -2,6 +2,8 @@
 
 A product manager's portfolio that is itself an AI product. Paste a job description and the site checks it against a knowledge base of real roles and projects, then says plainly where Aswin fits and where not. Turn on **X-ray** to see how each answer was built: the steps, the sources, the guardrails and the cost.
 
+Live at **[aswin-a.com](https://aswin-a.com)**.
+
 Built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, the Vercel AI SDK and Anthropic Claude.
 
 ## What's on the site
@@ -119,3 +121,7 @@ Still to come:
 - Launch checks
 
 Some content is still placeholder text, marked `TODO(aswin)` or `[bracketed]`. `pnpm check:content` lists it.
+
+## License
+
+The code is under the [MIT License](LICENSE). The site's written content, the résumé and the design files are Aswin's own and aren't covered by it.

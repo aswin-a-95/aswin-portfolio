@@ -6,7 +6,7 @@ export const siteMeta = {
   evalSetLink: todo("[link]"), // TODO(aswin): public eval set on GitHub
   github: todo("[link]"), // TODO(aswin): GitHub profile
   linkedin: "https://www.linkedin.com/in/aswin-a-pm", // From the public CV
-  domain: todo("[domain]"), // TODO(aswin): production domain
+  domain: "aswin-a.com", // Production domain (Aswin, 2026-11-20)
   responseTime: todo("[response time]"), // TODO(aswin): "usually within …" on the contact success state
   postingCadence: todo("[2–3]"), // TODO(aswin): build log cadence, in weeks
   whatBreaksFirstAtScale: todo("[what breaks first at scale]"), // TODO(aswin)

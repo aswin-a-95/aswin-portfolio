@@ -98,7 +98,7 @@ test("footer: build date on every page; the phone home footer is one line (updat
   await page.setViewportSize({ width: 1440, height: 900 });
   for (const path of ["/", "/work/integration-builder", "/log", "/about"]) {
     await page.goto(path);
-    await expect(page.getByRole("contentinfo")).toContainText(/Updated \d{1,2} [A-Z][a-z]{2} \d{4} · © 2026 Aswin · \[domain\]/);
+    await expect(page.getByRole("contentinfo")).toContainText(/Updated \d{1,2} [A-Z][a-z]{2} \d{4} · © 2026 Aswin · aswin-a\.com/);
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
