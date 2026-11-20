@@ -14,14 +14,9 @@ export function XrayPill() {
  * `className` carries the radius, padding and layout, which differ per panel. Server-safe: pages
  * decide whether it shows (`xray` from `useSite()`, or the `.xray-only` class).
  */
-export function XrayPanel({
-  paper = false,
-  className = "",
-  children,
-  ...rest
-}: ComponentProps<"div"> & { /** X-ray `paper` instead of `bg` (the Break my AI panel). */ paper?: boolean }) {
+export function XrayPanel({ className = "", children, ...rest }: ComponentProps<"div">) {
   return (
-    <div {...rest} className={`relative border border-xr-rule text-xr-ink ${paper ? "bg-xr-paper" : "bg-xr-bg"} ${className}`}>
+    <div {...rest} className={`relative border border-xr-rule bg-xr-bg text-xr-ink ${className}`}>
       <XrayPill />
       {children}
     </div>

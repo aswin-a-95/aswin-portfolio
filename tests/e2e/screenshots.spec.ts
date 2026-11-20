@@ -1,12 +1,12 @@
 import { FAKE, JD_LABEL, test, type Page } from "./fixtures";
 
 /** A state's own h2, not the fit-check panel's "Will I fit your role?" (Hero.dc.html update 2). */
-const stateHeading = (page: Page) => page.locator("section").first().getByRole("heading", { level: 2 }).filter({ hasNotText: /^(Will I fit your role\?|Try to make it overclaim\.)$/ });
+const stateHeading = (page: Page) => page.locator("section").first().getByRole("heading", { level: 2 }).filter({ hasNotText: /^Will I fit your role\?$/ });
 import { ASK_ATTACKS, ASK_QUESTIONS } from "@/lib/ask/copy";
 import { HERO_SAMPLES } from "@/lib/fit-check/copy";
 
 // Not assertions: full-page captures for the side-by-side check against /design/screenshots.
-const PAGES = ["/", "/work", "/work/cloudeagle", "/work/job-search-agent", "/log", "/log/integrations-experience-is-agent-experience", "/about"];
+const PAGES = ["/", "/work", "/work/cloudeagle", "/work/job-search-agent", "/work/fit-check", "/log", "/log/integrations-experience-is-agent-experience", "/about"];
 const SIZES = [
   ["1440", 1440, 900],
   ["390", 390, 844],
@@ -101,7 +101,7 @@ for (const [name, width, height] of SIZES) {
           if (state === "break") {
             await hero.getByText("FLAGGED", { exact: true }).waitFor();
             await hero.getByRole("button", { name: "prompt injection" }).click();
-            await hero.getByText("held up of 2").waitFor();
+            await hero.getByText("2 of 2", { exact: true }).waitFor();
           } else if (state === "running") {
             await hero.getByText("running…").waitFor();
             await hero.getByRole("status").getByText(/evidence\.map/).waitFor();

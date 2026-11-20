@@ -52,7 +52,7 @@ test("?xray=1 turns X-ray on before first paint and sticks", async ({ page }) =>
 test("current page link is marked, including case studies", async ({ page }) => {
   await page.goto("/work/cloudeagle");
   const main = page.getByRole("navigation", { name: "Main" });
-  await expect(main.getByRole("link", { name: "Work" })).toHaveAttribute("aria-current", "page");
+  await expect(main.getByRole("link", { name: "Case studies" })).toHaveAttribute("aria-current", "page");
   await expect(main.getByRole("link", { name: "About" })).not.toHaveAttribute("aria-current", "page");
 });
 
