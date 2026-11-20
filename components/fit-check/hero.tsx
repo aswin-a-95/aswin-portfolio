@@ -10,9 +10,11 @@ import { Result } from "@/components/fit-check/result";
 import { useSite } from "@/components/xray-provider";
 import { ASK_BUDGET, ASK_ERROR, ASK_LIMITED } from "@/lib/ask/copy";
 import { sessionMemory } from "@/lib/ask/session-memory";
+import { ASK_TOOLS } from "@/lib/ask/types";
 import { breakAttempt, runFitCheck } from "@/lib/fit-check/client";
 import {
   BREAK_LOG_MAX,
+  HERO_DRILLS,
   breakVerdict,
   HERO_SAMPLES,
   isLink,
@@ -48,7 +50,8 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
   const [result, setResult] = useState<ResultEvent | null>(null);
   const [fallback, setFallback] = useState<FallbackEvent | null>(null);
   const [log, setLog] = useState<BreakEntry[]>([]);
-  const [pending, setPending] = useState(0);
+  const [breakRunning, setBreakRunning] = useState(false);
+  const breakBusy = useRef(false);
   const [breakError, setBreakError] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -84,6 +87,12 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
     const setFallbackState = (ev: FallbackEvent) => {
       setFallback(ev);
       setPhase(ev.reason);
+      // A drill's real fallback adds a DRILL entry to Break my AI (design update 4). Never counted.
+      if (ev.drill) {
+        const chip = HERO_DRILLS.find((d) => d.id === ev.drill)?.chip ?? ev.drill;
+        const entry: BreakEntry = { id: ++entryId.current, kind: "drill", text: chip, drill: ev.drill, runId: ev.runId };
+        setLog((prev) => [entry, ...prev].slice(0, BREAK_LOG_MAX));
+      }
     };
     const fail = () => setFallbackState({ type: "fallback", reason: "error" });
     try {
@@ -131,27 +140,30 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
   };
 
   // Attempts run beside the fit check and never interrupt it (design update 3).
+  // One attempt at a time (design update 4). Its pending entry follows the run's real step events.
   const attack = async (text: string) => {
-    setPending((n) => n + 1);
+    if (breakBusy.current) return;
+    breakBusy.current = true;
+    setBreakRunning(true);
     setBreakError(null);
-    const r = await breakAttempt(text);
-    setPending((n) => n - 1);
+    const id = ++entryId.current;
+    const update = (fn: (e: BreakEntry) => BreakEntry) => setLog((prev) => prev.map((e) => (e.id === id ? fn(e) : e)));
+    setLog((prev) => [{ id, kind: "pending" as const, text, step: null, progress: 0 }, ...prev].slice(0, BREAK_LOG_MAX));
+    const r = await breakAttempt(text, (ev) => {
+      if (ev.status !== "running") return;
+      const i = ASK_TOOLS.indexOf(ev.tool);
+      update((e) => (e.kind === "pending" ? { ...e, step: ev.tool, progress: Math.round(((i + 1) / ASK_TOOLS.length) * 100) } : e));
+    });
+    breakBusy.current = false;
+    setBreakRunning(false);
     // A failed or rate-limited attempt isn't logged or counted; Ask's line says why (SPEC §8).
     if (r.status !== "ok") {
+      setLog((prev) => prev.filter((e) => e.id !== id));
       setBreakError(r.status === "limited" ? ASK_LIMITED : r.status === "budget" ? ASK_BUDGET : ASK_ERROR);
       return;
     }
     const [verdict, tone] = breakVerdict(r.reply.kind);
-    const entry: BreakEntry = {
-      id: ++entryId.current,
-      text,
-      verdict,
-      tone,
-      reply: r.reply.text,
-      guard: r.reply.guard,
-      trace: r.reply.trace,
-    };
-    setLog((prev) => [entry, ...prev].slice(0, BREAK_LOG_MAX));
+    update(() => ({ id, kind: "done", text, verdict, tone, reply: r.reply.text, guard: r.reply.guard, trace: r.reply.trace }));
   };
 
   useEffect(() => {
@@ -300,9 +312,8 @@ export function Hero({ meta, buildMeta }: { meta: HowIBuiltMeta; buildMeta: Buil
           {xray && (
             <BreakPanel
               log={log}
-              pending={pending > 0}
+              running={breakRunning}
               error={breakError}
-              evalSet={buildMeta.evalSet}
               onAttack={attack}
               onDrill={(d) => run(HERO_SAMPLES[0].jd, HERO_SAMPLES[0].role, d)}
             />

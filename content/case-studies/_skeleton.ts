@@ -3,12 +3,12 @@ import type { CaseStudy } from "@/lib/schemas/content";
 
 type CardFields = Pick<
   CaseStudy,
-  "slug" | "num" | "status" | "cardLabel" | "cardTitle" | "angle" | "built" | "tags" | "flow" | "onPhone"
+  "slug" | "num" | "status" | "cardTitle" | "built"
 >;
 
 /**
- * The PRD template fields SPEC §12 asks for, all TODO(aswin), for the three studies the design
- * doesn't spell out. Architecture, "Try to break it", Performance and Questions stay off until
+ * The PRD template fields SPEC §12 asks for, all TODO(aswin), for the studies the design doesn't
+ * spell out. Architecture, "Try to break it", Performance and Questions stay off until
  * Aswin adds them.
  */
 export function skeleton(card: CardFields): CaseStudy {
@@ -22,6 +22,7 @@ export function skeleton(card: CardFields): CaseStudy {
       { label: "BUILT WITH", value: todo("[tools]") }, // TODO(aswin)
       { label: "FOCUS", value: todo("[focus]") }, // TODO(aswin)
       { label: "TIME SPENT", value: todo("[hours]") }, // TODO(aswin)
+      { label: "LAST UPDATED", value: todo("[date]") }, // TODO(aswin)
     ],
     demo: todo("[walkthrough video or recorded run]"), // TODO(aswin)
     problem: {

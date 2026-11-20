@@ -1,20 +1,18 @@
 import { Footer } from "@/components/footer";
 import { Hero } from "@/components/fit-check/hero";
-import { BeforeAfter } from "@/components/home/before-after";
 import { Contact } from "@/components/home/contact";
 import { FromTheLog } from "@/components/home/from-the-log";
+import { ProductsSection } from "@/components/home/products";
 import { UnderTheHood } from "@/components/home/under-the-hood";
-import { WorkSection } from "@/components/home/work-section";
 import { IntroBanner } from "@/components/intro-banner";
 import { Nav } from "@/components/nav";
 import { siteMeta } from "@/content/site-meta";
 import { PROMPT_VERSION } from "@/lib/ai/prompts";
 import { hrefOf, isTodo } from "@/lib/content";
-import { caseStudies } from "@/lib/case-studies";
 import { posts } from "@/lib/posts";
 
 export default async function Home() {
-  const [studies, logPosts] = await Promise.all([caseStudies(), posts()]);
+  const logPosts = await posts();
   return (
     <div className="min-h-screen bg-bg font-sans text-ink">
       <Nav current="home" />
@@ -42,12 +40,11 @@ export default async function Home() {
           }}
         />
         <UnderTheHood />
-        <BeforeAfter />
-        {studies.length > 0 && <WorkSection studies={studies} />}
+        <ProductsSection />
         {logPosts.length > 0 && <FromTheLog posts={logPosts} />}
         <Contact />
       </main>
-      <Footer maxWidth={1040} />
+      <Footer maxWidth={1040} phone />
     </div>
   );
 }

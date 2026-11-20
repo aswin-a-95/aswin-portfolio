@@ -7,7 +7,7 @@ import { useShowIntro, useSite } from "@/components/xray-provider";
 export type NavCurrent = "home" | "work" | "log" | "about";
 
 const LINKS: { id: NavCurrent; label: string; href: string }[] = [
-  { id: "work", label: "Work", href: "/work" },
+  { id: "work", label: "Case studies", href: "/work" },
   { id: "log", label: "Build log", href: "/log" },
   { id: "about", label: "About", href: "/about" },
 ];

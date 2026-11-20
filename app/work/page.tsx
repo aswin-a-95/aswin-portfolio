@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/footer";
-import { WorkSection } from "@/components/home/work-section";
+import { ProductsSection } from "@/components/home/products";
 import { Nav } from "@/components/nav";
-import { caseStudies } from "@/lib/case-studies";
 
-export const metadata: Metadata = { title: "Work" };
+export const metadata: Metadata = { title: "Case studies" };
 
-// Design gap (SPEC §4): the home page's Work section as a standalone page.
-export default async function WorkIndex() {
-  const studies = await caseStudies();
+// Design gap (SPEC §4): the home page's "Products I've built" section as a standalone page.
+export default function WorkIndex() {
   return (
     <div className="min-h-screen bg-bg font-sans text-ink">
       <Nav current="work" />
       <main>
-        <WorkSection studies={studies} headingLevel={1} />
+        <ProductsSection headingLevel={1} anchorBase="/" />
       </main>
       <Footer maxWidth={1040} />
     </div>

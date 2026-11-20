@@ -72,8 +72,14 @@ export function Sandbox({ attacks, evalSet }: { attacks: Attack[]; evalSet: { hr
           <p className="m-0 text-[16px] text-muted">The same attack types as Break my AI on the home page. Pick one or write your own.</p>
         </div>
         <div role="status" aria-live="polite" className="flex items-baseline gap-2 font-mono">
-          <span className="text-[40px] text-accent">{stopped}</span>
-          <span className="text-[14px] text-muted">stopped or questioned, of {log.length}</span>
+          {log.length === 0 ? (
+            <span className="text-[14px] text-muted">No attempts yet</span>
+          ) : (
+            <>
+              <span className="text-[40px] text-accent">{stopped}</span>
+              <span className="text-[14px] text-muted">held up of {log.length}</span>
+            </>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-[14px] rounded-[14px] border border-rule bg-paper p-5">

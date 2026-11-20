@@ -60,7 +60,7 @@ export function CaseStudyPage({ cs, next, related }: { cs: CaseStudy; next: Case
       <header className="flex max-w-[880px] flex-col gap-5">
         <p className="m-0 font-mono text-[12px] tracking-[0.06em] text-muted">
           <Link href="/work" className="no-underline">
-            WORK
+            CASE STUDIES
           </Link>{" "}
           / {cs.breadcrumb}
         </p>

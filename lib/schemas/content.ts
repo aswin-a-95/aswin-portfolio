@@ -8,15 +8,9 @@ export const CaseStudySchema = z.object({
   slug: z.string(),
   num: z.string(),
   status: z.string(),
-  // Home "Work" card
-  cardLabel: z.string(),
+  /** Title on the "Next" card of the previous study. Home cards come from content/products.ts (design update 4). */
   cardTitle: z.string(),
-  angle: z.string(),
   built: z.string(),
-  tags: z.array(z.string()),
-  flow: z.array(z.object({ label: z.string(), approval: z.boolean() })).optional(),
-  /** Phone home layout lists the study (Mobile.dc.html leaves Platform & API out). */
-  onPhone: z.boolean(),
   // Page
   breadcrumb: z.string(),
   disclaimer: z.string().optional(),

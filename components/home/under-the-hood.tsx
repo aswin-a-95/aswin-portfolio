@@ -1,16 +1,22 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LiveLink } from "@/components/home/live-link";
-import { hood, type HoodCard } from "@/content/home";
-import { hrefOf, isTodo, published } from "@/lib/content";
+import { hood, type HoodItem } from "@/content/hood";
+import { hrefOf, published } from "@/lib/content";
 
-function pillClass(live: boolean | undefined) {
-  return live ? "border-accent bg-accent-tint text-accent" : "border-rule bg-transparent text-muted";
+/** Status pill colours (Main.dc.html, design update 4). The phone list never uses dashed borders. */
+function pillClass(u: HoodItem, phone = false) {
+  if (u.live) return "border-solid border-accent bg-accent-tint text-accent";
+  if (u.status === "shipped") return "border-solid border-ink bg-transparent text-ink";
+  if (!phone && (u.status === "planned" || u.status === "prototype")) return "border-dashed border-rule bg-transparent text-muted";
+  return "border-solid border-rule bg-transparent text-muted";
 }
 
-function CardLink({ card, className, children }: { card: HoodCard; className: string; children: ReactNode }) {
-  if (card.live) return <LiveLink className={className}>{children}</LiveLink>;
-  const href = hrefOf(card.href ?? "#");
+function CardLink({ card, className, children }: { card: HoodItem; className: string; children: ReactNode }) {
+  // "planned" has no link and isn't clickable.
+  if (!card.href) return <div className={className}>{children}</div>;
+  if (card.live) return <LiveLink href={card.href} className={className}>{children}</LiveLink>;
+  const href = hrefOf(card.href);
   if (href.startsWith("/")) return <Link href={href} className={className}>{children}</Link>;
   return <a href={href} className={className}>{children}</a>;
 }
@@ -31,7 +37,7 @@ export function UnderTheHood() {
               Each part links to where you can see it working: live on this site, in a case study, or on GitHub.
             </p>
           </div>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-[14px]">
             {cards.map((u) => (
               <CardLink
                 key={u.name}
@@ -40,15 +46,12 @@ export function UnderTheHood() {
               >
                 <span className="flex items-center justify-between gap-2">
                   <span className="font-mono text-[14px] font-medium">{u.name}</span>
-                  <span className={`whitespace-nowrap rounded-full border px-2 py-[2px] font-mono text-[11px] ${pillClass(u.live)}`}>
+                  <span className={`whitespace-nowrap rounded-full border px-2 py-[2px] font-mono text-[11px] ${pillClass(u)}`}>
                     {u.status}
                   </span>
                 </span>
                 <span className="text-[15px] leading-[1.5] text-muted">{u.proof}</span>
-                <span className="mt-auto font-mono text-[12px] text-accent">
-                  {u.cta}
-                  {u.href && isTodo(u.href) ? ` ${u.href}` : ""} →
-                </span>
+                <span className={`mt-auto font-mono text-[12px] ${u.status === "planned" ? "text-muted" : "text-accent"}`}>{u.cta}</span>
               </CardLink>
             ))}
           </div>
@@ -68,7 +71,7 @@ export function UnderTheHood() {
             className="flex min-h-[52px] items-center justify-between gap-3 rounded-[10px] border border-rule bg-paper px-[14px] py-[10px] text-ink no-underline"
           >
             <span className="font-mono text-[14px]">{u.name}</span>
-            <span className={`rounded-full border px-2 py-[2px] font-mono text-[11px] ${pillClass(u.live)}`}>{u.status}</span>
+            <span className={`rounded-full border px-2 py-[2px] font-mono text-[11px] ${pillClass(u, true)}`}>{u.status}</span>
           </CardLink>
         ))}
       </section>

@@ -138,6 +138,21 @@ export function breakVerdict(kind: BreakReply["kind"]): [BreakVerdict, BreakTone
 export const BREAK_LOG_MAX = 6;
 
 /**
+ * The DRILL entry each failure drill adds to the Break my AI log (Hero.dc.html, design update 4):
+ * its reply and the fallback path in the meta line. Shown once the drill's real fallback event arrives.
+ */
+export const DRILL_LOG: Record<Drill, { reply: string; path: string }> = {
+  kb: {
+    reply: "Knowledge base offline: the fit check retried once, then showed precomputed matches instead of answering without sources.",
+    path: "kb.search timeout → retry → fallback.precomputed",
+  },
+  rate: {
+    reply: "Rate limit hit: the AI was not called and nothing was billed; the fit check showed precomputed matches.",
+    path: "ratelimit 429 → fallback.precomputed",
+  },
+};
+
+/**
  * SPEC §7 `verdict.compose`: a strong fit when matches / requirements ≥ 0.5. The hero uses the
  * same rule to choose the result or bad-fit look, so the two can never disagree.
  */
